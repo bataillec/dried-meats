@@ -10,9 +10,10 @@ ktlint = "latest"         # used by the format-on-edit hook (Gradle runs its own
 
 [env]
 # Keep in sync with compileSdk / targetSdk in app/build.gradle.kts (Android 17 = API 37).
+# The sdkmanager package id is "platforms;android-37.0" (there is no plain android-37).
 # If `mise run doctor` says the platform is missing even after setup, check the exact package
 # id with `sdkmanager --list` (minor SDK releases can use ids like android-37.0).
-ANDROID_PLATFORM = "37"
+ANDROID_PLATFORM = "37.0"
 # AGP 9.3's default build-tools version.
 ANDROID_BUILD_TOOLS = "36.0.0"
 
