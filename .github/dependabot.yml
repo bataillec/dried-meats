@@ -1,0 +1,8 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  # Add the "gradle" ecosystem here once gradle/libs.versions.toml exists.
+  # mise tool versions are not covered by Dependabot: `mise outdated` shows them.

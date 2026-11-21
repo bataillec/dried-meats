@@ -1,0 +1,23 @@
+# Build
+.gradle/
+build/
+local.properties
+*.apk
+*.aab
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Secrets
+*.jks
+*.keystore
+.env
+.env.*
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# OS
+.DS_Store

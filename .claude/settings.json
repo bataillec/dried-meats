@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mise run:*)",
+      "Bash(mise exec:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)"
+    ],
+    "deny": [
+      "Read(./**/*.jks)",
+      "Read(./**/*.keystore)",
+      "Read(./.env*)",
+      "Edit(./app/schemas/**)",
+      "Write(./app/schemas/**)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mise exec -- scripts/hooks/format-kotlin.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mise exec -- scripts/hooks/commit-gate.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

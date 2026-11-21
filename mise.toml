@@ -1,0 +1,64 @@
+# Tooling for the project. `mise install` then `mise run setup` then `mise run check`.
+# ANDROID_HOME / ANDROID_SDK_ROOT are set by the android-sdk plugin (jdx/vfox-android-sdk):
+# do not redefine them here. `mise run doctor` verifies it.
+
+[tools]
+java = "temurin-25"       # LTS. Runs Gradle only; fallback temurin-21 if a plugin breaks on 25
+android-sdk = "latest"    # command-line tools; pin an exact version once `mise ls` shows it
+jq = "latest"             # used by Claude Code hooks to read their JSON input
+ktlint = "latest"         # used by the format-on-edit hook (Gradle runs its own copy in CI)
+
+[env]
+# Keep in sync with compileSdk / targetSdk in app/build.gradle.kts (Android 17 = API 37).
+# If `mise run doctor` says the platform is missing even after setup, check the exact package
+# id with `sdkmanager --list` (minor SDK releases can use ids like android-37.0).
+ANDROID_PLATFORM = "37"
+# AGP 9.3's default build-tools version.
+ANDROID_BUILD_TOOLS = "36.0.0"
+
+[tasks.doctor]
+description = "Check the toolchain is complete"
+run = '''
+set -e
+java -version 2>&1 | head -1
+echo "ANDROID_HOME=${ANDROID_HOME:-<unset>}"
+echo "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-<unset>}"
+command -v sdkmanager >/dev/null || { echo "FAIL: sdkmanager not on PATH"; exit 1; }
+[ -n "$ANDROID_HOME" ] || { echo "FAIL: ANDROID_HOME is not set"; exit 1; }
+[ -d "$ANDROID_HOME/platforms/android-$ANDROID_PLATFORM" ] || { echo "FAIL: platform $ANDROID_PLATFORM missing, run: mise run setup"; exit 1; }
+[ -d "$ANDROID_HOME/build-tools/$ANDROID_BUILD_TOOLS" ] || { echo "FAIL: build-tools $ANDROID_BUILD_TOOLS missing, run: mise run setup"; exit 1; }
+echo "OK"
+'''
+
+[tasks.setup]
+description = "Accept SDK licenses and install the pinned platform and build-tools"
+run = '''
+yes | sdkmanager --licenses > /dev/null || true
+sdkmanager "platform-tools" "platforms;android-$ANDROID_PLATFORM" "build-tools;$ANDROID_BUILD_TOOLS"
+'''
+
+[tasks.format]
+description = "Auto-format Kotlin sources"
+run = "./gradlew ktlintFormat"
+
+[tasks.lint]
+description = "ktlint, detekt and Android lint"
+run = "./gradlew ktlintCheck detekt lintDebug"
+
+[tasks.test]
+description = "JVM unit tests (domain, data, receivers)"
+run = "./gradlew testDebugUnitTest"
+
+[tasks.check]
+description = "Everything that must pass before a merge"
+depends = ["doctor", "lint", "test"]
+
+[tasks.build]
+description = "Debug APK"
+depends = ["doctor"]
+run = "./gradlew assembleDebug"
+
+[tasks.release]
+description = "Signed release APK (signing values come from the environment, see docs and release workflow)"
+depends = ["doctor"]
+run = "./gradlew assembleRelease"
