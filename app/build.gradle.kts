@@ -27,7 +27,8 @@ android {
             val storePath = System.getenv("RELEASE_KEYSTORE_PATH")
             // Unset (local builds, forks, no secrets): the release APK is simply left unsigned.
             if (storePath != null) {
-                storeFile = file(storePath).also { require(it.isFile) { "RELEASE_KEYSTORE_PATH does not point to a file: $storePath" } }
+                storeFile = file(storePath)
+                require(storeFile?.isFile == true) { "RELEASE_KEYSTORE_PATH does not point to a file: $storePath" }
                 storePassword = System.getenv("RELEASE_KEYSTORE_PASSWORD")
                 keyAlias = System.getenv("RELEASE_KEY_ALIAS")
                 keyPassword = System.getenv("RELEASE_KEY_PASSWORD")
