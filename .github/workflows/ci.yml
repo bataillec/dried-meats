@@ -31,8 +31,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
-      # Keep in sync with compileSdk / targetSdk in app/build.gradle.kts.
-      EMULATOR_API_LEVEL: "37"
+      # Newest level whose system image id the emulator runner resolves: "37" gives
+      # "Package path is not valid" (the SDK package is named android-37.0). Raise it when that works.
+      EMULATOR_API_LEVEL: "36"
     steps:
       - uses: actions/checkout@v7
       - name: Enable KVM

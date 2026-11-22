@@ -9,7 +9,7 @@ Decisions taken while building are in `docs/assumptions.md`; the manual release 
 
 - `mise run doctor` toolchain check · `mise run setup` install SDK pieces
 - `mise run check` lint + unit tests + Kover domain coverage >= 90 %, in one Gradle run (must pass before any commit)
-- `./gradlew connectedDebugAndroidTest` (via `mise exec --`) runs the emulator tests; needs a running emulator; CI runs it in the `emulator-tests` job (API 37)
+- `./gradlew connectedDebugAndroidTest` (via `mise exec --`) runs the emulator tests; needs a running emulator; CI runs it in the `emulator-tests` job (API 36)
 - `mise run format` · `mise run lint` · `mise run test` · `mise run build` · `mise run release`
 - Never call `java`, `gradle` or `sdkmanager` directly: use `mise run` or `mise exec --`.
   Hooks and agents run in non-interactive shells where mise is not activated.
