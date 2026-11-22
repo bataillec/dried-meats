@@ -1,4 +1,4 @@
-# requirements.md — Assistant Viandes Séchées
+# requirements.md — Meat Me Later
 
 Derived from intent.md v0.2. Each requirement has an ID used in tests and PRs.
 

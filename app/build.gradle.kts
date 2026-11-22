@@ -10,11 +10,11 @@ plugins {
 }
 
 android {
-    namespace = "fr.viandes.seches"
+    namespace = "me.bataillec.meatmelater"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "fr.viandes.seches"
+        applicationId = "me.bataillec.meatmelater"
         minSdk = 26
         targetSdk = 37
         versionCode = 1
@@ -86,7 +86,7 @@ kover {
     reports {
         filters {
             includes {
-                packages("fr.viandes.seches.domain")
+                packages("me.bataillec.meatmelater.domain")
             }
             excludes {
                 classes("*.Fake*")

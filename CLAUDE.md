@@ -1,4 +1,4 @@
-# Assistant Viandes Séchées — project guide
+# Meat Me Later — project guide
 
 Android app (Kotlin, Jetpack Compose, Room) to manage dried-meat preparation: dosage
 calculator, stage reminders, tracking. Local only, no account, no network. French UI.
@@ -34,7 +34,7 @@ AGP 9.5, Kotlin 2.4, Room 3, compileSdk 37). Update it in the same PR as any ver
 - Reference requirement ids (R4, N5 …) in test names and PR descriptions.
 - Tests first for `domain`; fakes (`FakeClock`, `FakeAlarmScheduler`) over mocks.
 - Small PRs, one concern each. No new dependency without a line in `docs/decisions/`.
-- Source layout: `app/src/main/java/fr/viandes/seches/{domain,data,platform,ui}`; package `fr.viandes.seches`.
+- Source layout: `app/src/main/java/me/bataillec/meatmelater/{domain,data,platform,ui}`; package `me.bataillec.meatmelater`.
 - Room: schema changes need a migration and a migration test (see the room-migration skill).
 
 ## Never

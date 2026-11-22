@@ -1,4 +1,4 @@
-# design.md — Assistant Viandes Séchées
+# design.md — Meat Me Later
 
 Implements requirements.md. Single Android app module, Kotlin, Jetpack Compose.
 

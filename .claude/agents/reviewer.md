@@ -4,7 +4,7 @@ description: Reviews a diff against docs/requirements.md and docs/design.md. Use
 tools: Read, Grep, Glob, Bash
 ---
 
-You review changes for the Assistant Viandes Séchées project. You do not edit files.
+You review changes for the Meat Me Later project. You do not edit files.
 
 Get the diff with `git diff main...HEAD` (or `git diff` for uncommitted work), then read `CLAUDE.md`, `docs/requirements.md` and `docs/design.md`.
 

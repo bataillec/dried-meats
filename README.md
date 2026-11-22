@@ -1,4 +1,4 @@
-# Assistant Viandes Séchées
+# Meat Me Later
 
 Android app (French UI) for dried-meat preparation: dose calculator, stage reminders, tracking.
 Everything stays on the phone. Specs are in [`docs/`](docs/).

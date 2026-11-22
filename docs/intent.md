@@ -1,4 +1,4 @@
-# intent.md — Assistant Viandes Séchées (Android)
+# intent.md — Meat Me Later (Android)
 
 Status: v0.3 — updated with the owner's answers (2026-11-14). No blocking open items (§9).
 

@@ -33,7 +33,7 @@ Versions come from web research on 2026-11-14 and are **starting points**: the f
 | detekt | 2.0.0-alpha.6 (`dev.detekt`) | `LongParameterList` has no threshold keys in 2.0: configured with `ignoreDefaultParameters` / `ignoreDataClasses` |
 | ktlint Gradle plugin | 14.2.0 | |
 | androidx.test core-ktx | 1.7.0 | older versions break the unit-test manifest merge (missing `android:exported`) |
-| Kover | 0.9.11 (`org.jetbrains.kotlinx.kover`) | N6: `mise run coverage` fails below 90 % line coverage of `fr.viandes.seches.domain`; part of `mise run check` |
+| Kover | 0.9.11 (`org.jetbrains.kotlinx.kover`) | N6: `mise run coverage` fails below 90 % line coverage of `me.bataillec.meatmelater.domain`; part of `mise run check` |
 | Test libraries | Compose `ui-test-junit4` (BOM), Espresso 3.7.0, androidx.test runner/rules 1.7.0, ext-junit 1.3.0 | Espresso below 3.7 crashes on API 37 (`InputManager.getInstance`); Robolectric is pinned to `sdk=35` in `src/test/resources/robolectric.properties` for the same reason |
 | Other libraries | activity-compose 1.13.0, navigation-compose 2.10.2, lifecycle 2.11.1, core-ktx 1.19.1, DataStore 1.3.0, coroutines 1.11.0, serialization 1.13.0, Turbine 1.2.1, JUnit 4.13.2, Robolectric 4.18.1 | all in `gradle/libs.versions.toml`; test libraries and DataStore/serialization are justified by design.md section 6 |
 
