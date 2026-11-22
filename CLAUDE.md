@@ -15,7 +15,7 @@ Decisions taken while building are in `docs/assumptions.md`; the manual release 
   Hooks and agents run in non-interactive shells where mise is not activated.
 
 Tool and library versions: `docs/decisions/0001-toolchain-versions.md` (JDK 25, Gradle 9.x,
-AGP 9.3, Kotlin 2.4, Room 3, compileSdk 37). Update it in the same PR as any version change.
+AGP 9.5, Kotlin 2.4, Room 3, compileSdk 37). Update it in the same PR as any version change.
 
 ## Architecture rules
 
