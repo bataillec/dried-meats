@@ -7,7 +7,7 @@ Versions come from web research on 2026-11-14 and are **starting points**: the f
 | Area | Choice | Why / caveat | Fallback |
 |---|---|---|---|
 | JDK | Temurin 25 (LTS, via mise) | Gradle 9.1+ runs on Java 25; Kotlin 2.3+ can target it. AGP's documented JDK minimum is 17; Java 25 is not explicitly listed by AGP, so the first build is the test. AGP 9.3 lint is reported to crash on JDK 17, which argues against 17. | Temurin 21 |
-| Gradle | 9.8.2 (wrapper) | AGP 9.3 needs Gradle 9.5.0 or later. | 9.5.x |
+| Gradle | 9.9.2 (wrapper; 9.8.2 was the research-time pick) | AGP 9.3 needs Gradle 9.5.0 or later. | 9.5.x |
 | AGP | 9.3.x | Max API level 37. Built-in Kotlin. | 9.2.x |
 | Kotlin | 2.4.x (2.4.10 seen) | AGP 9 bundles an older Kotlin Gradle plugin; override it to 2.4.x and check the build. | Version bundled with AGP |
 | compileSdk / targetSdk | 37 (Android 17) | Stable since 2026-06-16. Google Play's target-36 rule does not apply to sideloaded APKs, but becomes relevant if the app ever goes on Play. | 36 |
@@ -18,6 +18,22 @@ Versions come from web research on 2026-11-14 and are **starting points**: the f
 | ktlint | latest via mise + Gradle plugin `org.jlleitschuh.gradle.ktlint` | Gradle plugin version to confirm at the first build. | |
 | detekt | 2.0.0-alpha (latest alpha), plugin id `dev.detekt` | 1.23.8 targets Kotlin 2.0.21 and AGP 8.8. The 2.0 alphas are built on Kotlin 2.4, Gradle 9.5, AGP 9.2 and tested on JDK 25, but detekt says breaking changes can still happen. | Drop detekt, keep ktlint + Android lint |
 | GitHub Actions | checkout v7, mise-action v5, setup-gradle v6 (`cache-provider: basic`), wrapper-validation v6, upload-artifact v7, action-gh-release v3 | `mise generate github-action` uses checkout v7 and mise-action v5. setup-gradle v6's default cache is closed-source under Gradle's Terms of Use; `basic` is MIT. | |
+
+## Resolved by the first real build (2026-11-22)
+
+| Area | Version in use | Note |
+|---|---|---|
+| Gradle | 9.9.2 | wrapper |
+| AGP | 9.3.3 | built-in Kotlin; only the Compose and serialization compiler plugins are applied separately |
+| Kotlin | 2.4.21 | |
+| KSP | 2.3.14 | |
+| Room | 3.0.3 (`androidx.room3`, Gradle plugin id `androidx.room3`, DSL block `room3 { }`) | |
+| Compose BOM | 2026.09.00 | BOM 2026.11.01 (Compose 1.13) requires compileSdk 37.1, so we stay on 2026.09.00 until the platform is moved to `android-37.1` |
+| compileSdk / targetSdk | 37 (platform package `android-37.0`) | |
+| detekt | 2.0.0-alpha.6 (`dev.detekt`) | `LongParameterList` has no threshold keys in 2.0: configured with `ignoreDefaultParameters` / `ignoreDataClasses` |
+| ktlint Gradle plugin | 14.2.0 | |
+| androidx.test core-ktx | 1.7.0 | older versions break the unit-test manifest merge (missing `android:exported`) |
+| Other libraries | activity-compose 1.13.0, navigation-compose 2.10.2, lifecycle 2.11.1, core-ktx 1.19.1, DataStore 1.3.0, coroutines 1.11.0, serialization 1.13.0, Turbine 1.2.1, JUnit 4.13.2, Robolectric 4.18.1 | all in `gradle/libs.versions.toml`; test libraries and DataStore/serialization are justified by design.md section 6 |
 
 ## Keeping current
 

@@ -1,0 +1,17 @@
+# Starts from detekt defaults (buildUponDefaultConfig). Only deviations are listed here.
+style:
+  MagicNumber:
+    active: false
+  MaxLineLength:
+    active: false
+  ReturnCount:
+    max: 4
+complexity:
+  LongParameterList:
+    ignoreDefaultParameters: true
+    ignoreDataClasses: true
+  TooManyFunctions:
+    active: false
+naming:
+  FunctionNaming:
+    ignoreAnnotated: ['Composable']
