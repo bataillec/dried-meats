@@ -37,6 +37,11 @@ class FakeAlarmScheduler : AlarmScheduler {
     }
 
     override fun canScheduleExact(): Boolean = exactAllowed
+
+    override fun reset() {
+        alarms.clear()
+        fired.clear()
+    }
 }
 
 class FakeSettingsStore(
@@ -169,12 +174,21 @@ class FakePieceStore(
     override suspend fun applyTransition(
         pieceId: Long,
         transition: Transition,
-    ) {
+    ): Boolean {
+        if (runs.value.none { it.id == transition.closedRun.id && it.isOpen }) return false
         runs.value = runs.value.map { if (it.id == transition.closedRun.id) transition.closedRun else it }
         transition.nextRun?.let { runs.value = runs.value + it.copy(id = nextRun++, pieceId = pieceId) }
         val p = pieces.value.getValue(pieceId)
         pieces.value =
             pieces.value + (pieceId to p.copy(status = transition.status, fridgeSeasoning = transition.fridgeSeasoning))
+        return true
+    }
+
+    override suspend fun updateNote(
+        runId: Long,
+        note: String?,
+    ) {
+        runs.value = runs.value.map { if (it.id == runId) it.copy(note = note) else it }
     }
 
     override suspend fun updateRun(run: StageRun) {

@@ -174,6 +174,20 @@ interface StageRunDao {
     @Query("SELECT * FROM stage_run WHERE id = :id")
     suspend fun get(id: Long): StageRunEntity?
 
+    @Query("UPDATE stage_run SET note = :note WHERE id = :id")
+    suspend fun setNote(
+        id: Long,
+        note: String?,
+    )
+
+    /** Closes a run only if it is still open; returns the number of rows changed (0 or 1). */
+    @Query("UPDATE stage_run SET ended_at = :endedAt, note = :note WHERE id = :id AND ended_at IS NULL")
+    suspend fun closeIfOpen(
+        id: Long,
+        endedAt: Long,
+        note: String?,
+    ): Int
+
     @Query("DELETE FROM stage_run")
     suspend fun deleteAll()
 }

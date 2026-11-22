@@ -76,7 +76,11 @@ class BackupFormatException(
 class BackupService(
     private val db: AppDatabase,
 ) {
-    private val json = Json { prettyPrint = true }
+    private val json =
+        Json {
+            prettyPrint = true
+            encodeDefaults = true
+        }
 
     suspend fun export(): String {
         val file =
@@ -212,42 +216,88 @@ class BackupService(
     }
 
     private fun validate(file: BackupFile) {
+        try {
+            checkReferences(file)
+            checkRecipes(file)
+            checkPieces(file)
+            checkRuns(file)
+        } catch (e: IllegalArgumentException) {
+            throw BackupFormatException("Données incohérentes dans le fichier")
+        }
+    }
+
+    private fun checkReferences(file: BackupFile) {
+        require(
+            file.meatTypes
+                .map { it.id }
+                .toSet()
+                .size == file.meatTypes.size,
+        )
+        require(
+            file.recipes
+                .map { it.id }
+                .toSet()
+                .size == file.recipes.size,
+        )
+        require(
+            file.pieces
+                .map { it.id }
+                .toSet()
+                .size == file.pieces.size,
+        )
+        require(
+            file.stageRuns
+                .map { it.id }
+                .toSet()
+                .size == file.stageRuns.size,
+        )
         val meatIds = file.meatTypes.map { it.id }.toSet()
         val recipeIds = file.recipes.map { it.id }.toSet()
         val pieceIds = file.pieces.map { it.id }.toSet()
-        try {
-            require(file.recipes.all { it.meatTypeId in meatIds })
-            require(file.pieces.all { it.recipeId in recipeIds })
-            require(file.stageRuns.all { it.pieceId in pieceIds })
-            file.recipes.forEach {
-                java.math.BigDecimal(it.saltGPerKg)
-                java.math.BigDecimal(it.sugarGPerKg)
-                java.math.BigDecimal(it.pepperGPerKg)
-                java.math.BigDecimal(it.vacuumDivisor)
-                java.math.BigDecimal(it.vacuumOffsetDays)
+        require(file.recipes.all { it.meatTypeId in meatIds })
+        require(file.pieces.all { it.recipeId in recipeIds })
+        require(file.stageRuns.all { it.pieceId in pieceIds })
+    }
+
+    private fun checkRecipes(file: BackupFile) {
+        file.recipes.forEach {
+            require(java.math.BigDecimal(it.saltGPerKg).signum() >= 0)
+            require(java.math.BigDecimal(it.sugarGPerKg).signum() >= 0)
+            require(java.math.BigDecimal(it.pepperGPerKg).signum() >= 0)
+            require(java.math.BigDecimal(it.vacuumDivisor).signum() > 0)
+            java.math.BigDecimal(it.vacuumOffsetDays)
+            require(it.fridgeMinDays >= 1)
+        }
+    }
+
+    private fun checkPieces(file: BackupFile) {
+        file.pieces.forEach {
+            require(it.weightG > 0)
+            require(java.math.BigDecimal(it.diameterCm).signum() > 0)
+            require(java.math.BigDecimal(it.saltG).signum() >= 0)
+            require(java.math.BigDecimal(it.sugarG).signum() >= 0)
+            require(java.math.BigDecimal(it.pepperG).signum() >= 0)
+            fr.viandes.seches.domain.PieceStatus
+                .valueOf(it.status)
+        }
+    }
+
+    /** Open runs must match piece status: one open run (of the matching stage) iff the piece is running. */
+    private fun checkRuns(file: BackupFile) {
+        file.stageRuns.forEach {
+            fr.viandes.seches.domain.Stage
+                .valueOf(it.stage)
+            require(it.postponedDays >= 0)
+            require(it.endedAt == null || it.endedAt >= it.startedAt)
+        }
+        val openByPiece = file.stageRuns.filter { it.endedAt == null }.groupBy { it.pieceId }
+        require(openByPiece.values.all { it.size == 1 })
+        file.pieces.forEach { piece ->
+            val open = openByPiece[piece.id]?.single()
+            when (piece.status) {
+                "VACUUM", "FRIDGE" -> require(open != null && open.stage == piece.status)
+                else -> require(open == null)
             }
-            file.pieces.forEach {
-                java.math.BigDecimal(it.diameterCm)
-                java.math.BigDecimal(it.saltG)
-                java.math.BigDecimal(it.sugarG)
-                java.math.BigDecimal(it.pepperG)
-                fr.viandes.seches.domain.PieceStatus
-                    .valueOf(it.status)
-            }
-            file.stageRuns.forEach {
-                fr.viandes.seches.domain.Stage
-                    .valueOf(it.stage)
-            }
-            // At most one open run per piece (design.md section 3).
-            require(
-                file.stageRuns
-                    .filter { it.endedAt == null }
-                    .groupBy { it.pieceId }
-                    .values
-                    .all { it.size == 1 },
-            )
-        } catch (e: IllegalArgumentException) {
-            throw BackupFormatException("Données incohérentes dans le fichier")
         }
     }
 }

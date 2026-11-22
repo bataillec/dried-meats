@@ -70,13 +70,22 @@ interface PieceStore {
         firstRun: StageRun,
     ): Long
 
-    /** Applies a state-machine transition atomically (R8, R9, R11). */
+    /**
+     * Applies a state-machine transition atomically (R8, R9, R11). Returns false, changing nothing,
+     * when the run to close is no longer open (a concurrent action already handled it).
+     */
     suspend fun applyTransition(
         pieceId: Long,
         transition: Transition,
-    )
+    ): Boolean
 
     suspend fun updateRun(run: StageRun)
+
+    /** R23: touches only the note column, never a stale copy of the whole run. */
+    suspend fun updateNote(
+        runId: Long,
+        note: String?,
+    )
 
     suspend fun updateFridgeSeasoning(
         pieceId: Long,
@@ -102,7 +111,6 @@ data class AppSettings(
     val defaultVacuumDivisor: java.math.BigDecimal = Recipe.DEFAULT_VACUUM_DIVISOR,
     val defaultVacuumOffsetDays: java.math.BigDecimal = Recipe.DEFAULT_VACUUM_OFFSET_DAYS,
     val seeded: Boolean = false,
-    val batteryHintShown: Boolean = false,
 ) {
     val reminderTime: java.time.LocalTime get() = java.time.LocalTime.of(reminderHour, reminderMinute)
 }

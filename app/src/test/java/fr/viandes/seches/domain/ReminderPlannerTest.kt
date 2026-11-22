@@ -138,4 +138,41 @@ class ReminderPlannerTest {
                     .piece.doses.saltG,
             )
         }
+
+    @Test
+    fun `R23 saving a note does not revert a concurrent postponement`() =
+        runTest {
+            val id = newPiece()
+            val staleRun = store.getSummary(id)!!.openRun!!
+            actions.postponeOneDay(id)
+            actions.saveNote(staleRun.id, "  ferme  ")
+            val run = store.getSummary(id)!!.openRun!!
+            assertEquals("ferme", run.note)
+            assertEquals(1, run.postponedDays)
+            assertEquals(at(9, 18), run.plannedEndAt)
+            assertEquals(at(9, 18), scheduler.alarms[1L])
+        }
+
+    @Test
+    fun `R13 postponing an overdue run lands after now instead of refiring at once`() =
+        runTest {
+            val id = newPiece() // planned end day 8, 18:00
+            clock.millis = at(12, 9)
+            actions.postponeOneDay(id)
+            val planned = store.getSummary(id)!!.openRun!!.plannedEndAt
+            assertEquals(at(12, 18), planned)
+            assertEquals(planned, scheduler.alarms[1L])
+        }
+
+    @Test
+    fun `R8 R9 a second finish on the same stage is refused and creates no second run`() =
+        runTest {
+            val id = newPiece()
+            assertTrue(actions.finishStage(id, "a"))
+            // the piece is now in FRIDGE: finishing again moves it to DONE, never a second open run
+            assertTrue(actions.finishStage(id))
+            assertFalse(actions.finishStage(id))
+            assertEquals(0, store.runs.value.count { it.isOpen })
+            assertEquals(2, store.runs.value.size)
+        }
 }

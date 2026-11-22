@@ -111,9 +111,9 @@ class PieceDetailViewModel(
         }
 
     fun saveNote(
-        run: StageRun,
+        runId: Long,
         note: String,
-    ) = viewModelScope.launch { container.pieceActions.saveNote(run, note) }
+    ) = viewModelScope.launch { container.pieceActions.saveNote(runId, note) }
 }
 
 private enum class DetailDialog { FINISH, DURATION, CANCEL, DELETE }
@@ -244,7 +244,7 @@ fun PieceDetailScreen(
         DetailDialog.DURATION -> {
             val run = openRun
             if (run != null) {
-                DurationDialog(currentDays(run), onConfirm = {
+                DurationDialog(currentDays(run, container.clock.zone()), onConfirm = {
                     vm.changeDuration(it)
                     dialog = null
                 }, onDismiss = { dialog = null })
@@ -276,14 +276,16 @@ fun PieceDetailScreen(
     }
     noteRun?.let { run ->
         NoteDialog(run.note.orEmpty(), onConfirm = {
-            vm.saveNote(run, it)
+            vm.saveNote(run.id, it)
             noteRun = null
         }, onDismiss = { noteRun = null })
     }
 }
 
-private fun currentDays(run: StageRun): Int {
-    val zone = java.time.ZoneId.systemDefault()
+private fun currentDays(
+    run: StageRun,
+    zone: java.time.ZoneId,
+): Int {
     val start = Instant.ofEpochMilli(run.startedAt).atZone(zone).toLocalDate()
     val end = Instant.ofEpochMilli(run.plannedEndAt).atZone(zone).toLocalDate()
     return ChronoUnit.DAYS

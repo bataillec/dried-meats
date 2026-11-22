@@ -1,5 +1,6 @@
 package fr.viandes.seches.data
 
+import androidx.room3.withReadTransaction
 import androidx.room3.withWriteTransaction
 import fr.viandes.seches.domain.FinishedPiece
 import fr.viandes.seches.domain.MeatType
@@ -114,8 +115,10 @@ class RoomPieceStore(
     }
 
     override suspend fun openRuns(): List<Pair<StageRun, PieceSummary>> =
-        runs.openRuns().mapNotNull { run ->
-            pieces.getRow(run.pieceId)?.let { run.toDomain() to it.toSummary(run.toDomain()) }
+        db.withReadTransaction {
+            runs.openRuns().mapNotNull { run ->
+                pieces.getRow(run.pieceId)?.let { run.toDomain() to it.toSummary(run.toDomain()) }
+            }
         }
 
     override suspend fun create(
@@ -131,11 +134,23 @@ class RoomPieceStore(
     override suspend fun applyTransition(
         pieceId: Long,
         transition: Transition,
-    ) = db.withWriteTransaction {
-        runs.update(transition.closedRun.toEntity())
-        transition.nextRun?.let { runs.insert(it.copy(pieceId = pieceId).toEntity().copy(id = 0)) }
-        pieces.setStatus(pieceId, transition.status.name, transition.fridgeSeasoning)
-    }
+    ): Boolean =
+        db.withWriteTransaction {
+            val closed = transition.closedRun
+            val endedAt = checkNotNull(closed.endedAt) { "closed run must have an end" }
+            if (runs.closeIfOpen(closed.id, endedAt, closed.note) == 0) {
+                false
+            } else {
+                transition.nextRun?.let { runs.insert(it.copy(pieceId = pieceId).toEntity().copy(id = 0)) }
+                pieces.setStatus(pieceId, transition.status.name, transition.fridgeSeasoning)
+                true
+            }
+        }
+
+    override suspend fun updateNote(
+        runId: Long,
+        note: String?,
+    ) = runs.setNote(runId, note)
 
     override suspend fun updateRun(run: StageRun) = runs.update(run.toEntity())
 

@@ -100,9 +100,11 @@ class PieceStateMachine(
     /** R13, R23: "Reporter 1 jour" adds a day and counts the postponement. */
     fun postponeOneDay(run: StageRun): StageRun {
         require(run.isOpen) { "stage run is already closed" }
-        return run.copy(
-            plannedEndAt = plannedEnd.postponedByOneDay(run.plannedEndAt),
-            postponedDays = run.postponedDays + 1,
-        )
+        // An overdue run is moved to the first reminder time after now, otherwise the new alarm
+        // would already be in the past and fire again immediately.
+        val now = clock.nowMillis()
+        var next = plannedEnd.postponedByOneDay(run.plannedEndAt)
+        while (next <= now) next = plannedEnd.postponedByOneDay(next)
+        return run.copy(plannedEndAt = next, postponedDays = run.postponedDays + 1)
     }
 }

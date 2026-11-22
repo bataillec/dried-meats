@@ -43,9 +43,9 @@ class NotificationFactory(
     fun show(
         run: StageRun,
         summary: PieceSummary,
-    ) {
+    ): Boolean {
         ensureChannel()
-        if (!hasPermission()) return
+        if (!hasPermission()) return false
         val action =
             context.getString(
                 if (run.stage ==
@@ -92,10 +92,12 @@ class NotificationFactory(
                     context.getString(R.string.notification_postpone),
                     actionIntent(ReminderActionReceiver.ACTION_POSTPONE, run, summary),
                 ).build()
-        try {
+        return try {
             NotificationManagerCompat.from(context).notify(run.id.toInt(), notification)
+            true
         } catch (_: SecurityException) {
             // Permission revoked between the check and the call: the home list still pins the overdue stage (R15).
+            false
         }
     }
 

@@ -39,6 +39,7 @@ class RoomStoresTest {
             Room
                 .inMemoryDatabaseBuilder(context, AppDatabase::class.java)
                 .setDriver(AndroidSQLiteDriver())
+                .addCallback(OneOpenRunGuard)
                 .build()
         meats = RoomMeatTypeStore(db)
         recipes = RoomRecipeStore(db)
@@ -125,5 +126,36 @@ class RoomStoresTest {
             actions.delete(id)
             assertTrue(db.stageRunDao().all().isEmpty())
             assertEquals(0, pieces.countByRecipe(recipeId))
+        }
+
+    @Test
+    fun `R7 the database refuses a second open run for the same piece`() =
+        runBlocking {
+            val recipeId = seedRecipe()
+            val clock = FakeClock(1_000_000_000_000)
+            val planner = ReminderPlanner(pieces, FakeAlarmScheduler(), clock)
+            val actions = PieceActions(pieces, recipes, FakeSettingsStore(), planner, clock)
+            val id = actions.createPiece("Bœuf 1", recipeId, 1000, BigDecimal("10"))!!
+            val open = db.stageRunDao().openRuns().single()
+            val duplicate = open.copy(id = 0)
+            val failed = runCatching { db.stageRunDao().insert(duplicate) }.isFailure
+            assertTrue(failed)
+            assertEquals(1, db.stageRunDao().forPiece(id).size)
+        }
+
+    @Test
+    fun `R23 note update touches only the note`() =
+        runBlocking {
+            val recipeId = seedRecipe()
+            val clock = FakeClock(1_000_000_000_000)
+            val planner = ReminderPlanner(pieces, FakeAlarmScheduler(), clock)
+            val actions = PieceActions(pieces, recipes, FakeSettingsStore(), planner, clock)
+            val id = actions.createPiece("Bœuf 1", recipeId, 1000, BigDecimal("10"))!!
+            val run = pieces.getSummary(id)!!.openRun!!
+            actions.postponeOneDay(id)
+            actions.saveNote(run.id, "souple")
+            val after = pieces.getSummary(id)!!.openRun!!
+            assertEquals("souple", after.note)
+            assertEquals(1, after.postponedDays)
         }
 }

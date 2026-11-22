@@ -1,5 +1,7 @@
 package fr.viandes.seches.domain
 
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.math.BigDecimal
 
 /**
@@ -13,6 +15,9 @@ class PieceActions(
     private val planner: ReminderPlanner,
     private val clock: Clock,
 ) {
+    /** Serialises read-modify-write actions (UI taps racing with notification buttons). */
+    private val lock = Mutex()
+
     private suspend fun machine(): PieceStateMachine =
         PieceStateMachine(clock, PlannedEndCalculator(clock.zone(), settings.current().reminderTime))
 
@@ -50,22 +55,26 @@ class PieceActions(
         fridgeSeasoning: String? = null,
         fridgeDaysOverride: Int? = null,
     ): Boolean {
-        val summary = pieces.getSummary(pieceId) ?: return false
-        val run = summary.openRun ?: return false
-        val recipe = recipes.get(summary.piece.recipeId)
-        val fridgeDays = fridgeDaysOverride ?: recipe?.fridgeMinDays ?: Recipe.DEFAULT_FRIDGE_MIN_DAYS
-        val transition = machine().finish(summary.piece.status, run, fridgeSeasoning, fridgeDays)
-        pieces.applyTransition(pieceId, transition)
-        planner.reconcile()
-        return true
+        return lock.withLock {
+            val summary = pieces.getSummary(pieceId) ?: return@withLock false
+            val run = summary.openRun ?: return@withLock false
+            val recipe = recipes.get(summary.piece.recipeId)
+            val fridgeDays = fridgeDaysOverride ?: recipe?.fridgeMinDays ?: Recipe.DEFAULT_FRIDGE_MIN_DAYS
+            val transition = machine().finish(summary.piece.status, run, fridgeSeasoning, fridgeDays)
+            val applied = pieces.applyTransition(pieceId, transition)
+            planner.reconcile()
+            return@withLock applied
+        }
     }
 
     /** R13, R23: "Reporter 1 jour". */
     suspend fun postponeOneDay(pieceId: Long): Boolean {
-        val run = pieces.getSummary(pieceId)?.openRun ?: return false
-        pieces.updateRun(machine().postponeOneDay(run))
-        planner.reconcile()
-        return true
+        return lock.withLock {
+            val run = pieces.getSummary(pieceId)?.openRun ?: return@withLock false
+            pieces.updateRun(machine().postponeOneDay(run))
+            planner.reconcile()
+            return@withLock true
+        }
     }
 
     /** R10: new duration in days from the run start (>= 1). */
@@ -73,20 +82,24 @@ class PieceActions(
         pieceId: Long,
         days: Int,
     ): Boolean {
-        if (days < 1) return false
-        val run = pieces.getSummary(pieceId)?.openRun ?: return false
-        pieces.updateRun(machine().changeDuration(run, days))
-        planner.reconcile()
-        return true
+        return lock.withLock {
+            if (days < 1) return@withLock false
+            val run = pieces.getSummary(pieceId)?.openRun ?: return@withLock false
+            pieces.updateRun(machine().changeDuration(run, days))
+            planner.reconcile()
+            return@withLock true
+        }
     }
 
     /** R11 */
     suspend fun cancel(pieceId: Long): Boolean {
-        val summary = pieces.getSummary(pieceId) ?: return false
-        val transition = machine().cancel(summary.piece.status, summary.openRun)
-        pieces.applyTransition(pieceId, transition)
-        planner.reconcile()
-        return true
+        return lock.withLock {
+            val summary = pieces.getSummary(pieceId) ?: return@withLock false
+            val transition = machine().cancel(summary.piece.status, summary.openRun)
+            val applied = pieces.applyTransition(pieceId, transition)
+            planner.reconcile()
+            return@withLock applied
+        }
     }
 
     /** R11: removes the piece and its history; its reminder is cancelled by the reconcile. */
@@ -95,11 +108,12 @@ class PieceActions(
         planner.reconcile()
     }
 
-    /** R23 */
+    /** R23: updates only the note column; reconcile keeps the "every run change reconciles" rule uniform. */
     suspend fun saveNote(
-        run: StageRun,
+        runId: Long,
         note: String?,
     ) {
-        pieces.updateRun(run.copy(note = note?.trim()?.takeIf { it.isNotEmpty() }))
+        pieces.updateNote(runId, note?.trim()?.takeIf { it.isNotEmpty() })
+        planner.reconcile()
     }
 }

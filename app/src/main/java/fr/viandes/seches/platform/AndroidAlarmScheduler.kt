@@ -17,6 +17,7 @@ class AndroidAlarmScheduler(
 ) : AlarmScheduler {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
     private val prefs = context.getSharedPreferences("alarms", Context.MODE_PRIVATE)
+    private val lock = Any()
 
     private fun pending(runId: Long): PendingIntent =
         PendingIntent.getBroadcast(
@@ -39,12 +40,16 @@ class AndroidAlarmScheduler(
             // Without the exact-alarm permission fall back to an inexact but Doze-aware alarm.
             alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, intent)
         }
-        prefs.edit().putStringSet(KEY_IDS, scheduledIds().plus(runId).map { it.toString() }.toSet()).apply()
+        synchronized(lock) {
+            prefs.edit().putStringSet(KEY_IDS, scheduledIds().plus(runId).map { it.toString() }.toSet()).commit()
+        }
     }
 
     override fun cancel(runId: Long) {
         alarmManager.cancel(pending(runId))
-        prefs.edit().putStringSet(KEY_IDS, scheduledIds().minus(runId).map { it.toString() }.toSet()).apply()
+        synchronized(lock) {
+            prefs.edit().putStringSet(KEY_IDS, scheduledIds().minus(runId).map { it.toString() }.toSet()).commit()
+        }
     }
 
     override fun scheduledIds(): Set<Long> =
@@ -61,15 +66,22 @@ class AndroidAlarmScheduler(
         runId: Long,
         plannedEndAt: Long,
     ) {
-        prefs
-            .edit()
-            .putLong("fired_$runId", plannedEndAt)
-            .putStringSet(KEY_IDS, scheduledIds().minus(runId).map { it.toString() }.toSet())
-            .apply()
+        synchronized(lock) {
+            prefs
+                .edit()
+                .putLong("fired_$runId", plannedEndAt)
+                .putStringSet(KEY_IDS, scheduledIds().minus(runId).map { it.toString() }.toSet())
+                .commit()
+        }
     }
 
     override fun clearFired(runId: Long) {
         prefs.edit().remove("fired_$runId").apply()
+    }
+
+    override fun reset() {
+        scheduledIds().forEach { alarmManager.cancel(pending(it)) }
+        synchronized(lock) { prefs.edit().clear().commit() }
     }
 
     override fun canScheduleExact(): Boolean =

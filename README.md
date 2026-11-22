@@ -11,6 +11,13 @@ Everything stays on the phone. Specs are in [`docs/`](docs/).
 4. `mise run doctor` — must print `OK`. If it fails, the message says what is missing.
 5. `mise run check` — lint and unit tests.
 
+## Status
+
+v0.1: all of R1–R26 are implemented (see `docs/assumptions.md` for the choices made). `mise run check` passes
+(ktlint, detekt, Android lint, JVM unit and Robolectric tests); `mise run build` produces
+`app/build/outputs/apk/debug/app-debug.apk`. The reminder behaviour on a real device (Doze, reboot, N5)
+and the UI on small screens/large fonts (N4) still have to be verified with `docs/device-checklist.md`.
+
 ## Everyday commands
 
 `mise run format | lint | test | check | build | release`

@@ -21,3 +21,6 @@ local.properties
 
 # OS
 .DS_Store
+
+# Kotlin compiler session logs
+.kotlin/

@@ -21,8 +21,11 @@ class ReminderReceiver : BroadcastReceiver() {
                 val container = app.container
                 val open = container.pieces.openRuns().firstOrNull { it.first.id == runId }
                 if (open != null && open.first.plannedEndAt <= container.clock.nowMillis() + EARLY_TOLERANCE_MILLIS) {
-                    NotificationFactory(context).show(open.first, open.second)
-                    container.alarmScheduler.recordFired(runId, open.first.plannedEndAt)
+                    // Only mark as notified when the notification really went out, so that granting the
+                    // permission later lets the next reconcile re-post it.
+                    if (NotificationFactory(context).show(open.first, open.second)) {
+                        container.alarmScheduler.recordFired(runId, open.first.plannedEndAt)
+                    }
                 } else {
                     // Run closed or moved since the alarm was set: rebuild the alarm cache.
                     container.reminderPlanner.reconcile()

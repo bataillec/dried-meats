@@ -1,5 +1,8 @@
 package fr.viandes.seches.domain
 
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+
 /** Platform alarm facade. A fake is used in tests; the Android one is in `platform`. */
 interface AlarmScheduler {
     /** (Re)schedules the single exact alarm of a stage run (request code = run id). */
@@ -24,6 +27,9 @@ interface AlarmScheduler {
     fun clearFired(runId: Long)
 
     fun canScheduleExact(): Boolean
+
+    /** Cancels every alarm and forgets all "already notified" records (used after a data import). */
+    fun reset()
 }
 
 /**
@@ -35,7 +41,14 @@ class ReminderPlanner(
     private val scheduler: AlarmScheduler,
     private val clock: Clock,
 ) {
-    suspend fun reconcile() {
+    private val lock = Mutex()
+
+    suspend fun reconcile() =
+        lock.withLock {
+            doReconcile()
+        }
+
+    private suspend fun doReconcile() {
         val open = store.openRuns().map { it.first }
         val openIds = open.map { it.id }.toSet()
         (scheduler.scheduledIds() - openIds).forEach { scheduler.cancel(it) }

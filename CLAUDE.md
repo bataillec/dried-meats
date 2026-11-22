@@ -3,6 +3,7 @@
 Android app (Kotlin, Jetpack Compose, Room) to manage dried-meat preparation: dosage
 calculator, stage reminders, tracking. Local only, no account, no network. French UI.
 Specs live in `docs/`: read `intent.md`, then `requirements.md` (R-ids) and `design.md`.
+Decisions taken while building are in `docs/assumptions.md`; the manual release test is `docs/device-checklist.md`.
 
 ## Commands (always through mise)
 
@@ -22,6 +23,8 @@ AGP 9.3, Kotlin 2.4, Room 3, compileSdk 37). Update it in the same PR as any ver
 - Dose maths uses `BigDecimal`, `HALF_UP`, rounded to 0.1 g. Weights stored as integer grams.
 - Reminders: the database is the source of truth, alarms are a rebuildable cache.
   Anything that changes a stage run must end with `ReminderPlanner.reconcile()`.
+- Stage actions go through `PieceActions` (mutex + atomic `closeIfOpen`); never write stage runs from UI or receivers.
+  Notes use `updateNote` (never save a stale copy of a whole run). Exactly one open run per piece, also guarded by a DB trigger.
 - Pieces snapshot their doses and durations at creation; recipe edits never alter them.
 - All user-visible text is French and lives in string resources.
 
@@ -30,6 +33,7 @@ AGP 9.3, Kotlin 2.4, Room 3, compileSdk 37). Update it in the same PR as any ver
 - Reference requirement ids (R4, N5 …) in test names and PR descriptions.
 - Tests first for `domain`; fakes (`FakeClock`, `FakeAlarmScheduler`) over mocks.
 - Small PRs, one concern each. No new dependency without a line in `docs/decisions/`.
+- Source layout: `app/src/main/java/fr/viandes/seches/{domain,data,platform,ui}`; package `fr.viandes.seches`.
 - Room: schema changes need a migration and a migration test (see the room-migration skill).
 
 ## Never
