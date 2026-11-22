@@ -87,6 +87,8 @@ interface PieceStore {
     suspend fun delete(pieceId: Long)
 
     suspend fun countByRecipe(recipeId: Long): Int
+
+    suspend fun labels(): List<String>
 }
 
 enum class ThemeMode { LIGHT, DARK, OLED, SYSTEM }

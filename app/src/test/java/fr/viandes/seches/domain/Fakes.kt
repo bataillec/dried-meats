@@ -194,4 +194,6 @@ class FakePieceStore(
     }
 
     override suspend fun countByRecipe(recipeId: Long): Int = pieces.value.values.count { it.recipeId == recipeId }
+
+    override suspend fun labels(): List<String> = pieces.value.values.map { it.label }
 }

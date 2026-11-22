@@ -31,6 +31,9 @@ interface MeatTypeDao {
 
     @Query("SELECT * FROM meat_type")
     suspend fun all(): List<MeatTypeEntity>
+
+    @Query("DELETE FROM meat_type")
+    suspend fun deleteAll()
 }
 
 @Dao
@@ -61,6 +64,9 @@ interface RecipeDao {
 
     @Query("SELECT * FROM recipe")
     suspend fun all(): List<RecipeEntity>
+
+    @Query("DELETE FROM recipe")
+    suspend fun deleteAll()
 }
 
 /** Row of a piece joined with its recipe and meat names. */
@@ -119,6 +125,12 @@ interface PieceDao {
     @Query("SELECT * FROM piece")
     suspend fun all(): List<PieceEntity>
 
+    @Query("SELECT label FROM piece")
+    suspend fun labels(): List<String>
+
+    @Query("DELETE FROM piece")
+    suspend fun deleteAll()
+
     @Query("UPDATE piece SET status = :status, fridge_seasoning = :fridgeSeasoning WHERE id = :id")
     suspend fun setStatus(
         id: Long,
@@ -161,4 +173,7 @@ interface StageRunDao {
 
     @Query("SELECT * FROM stage_run WHERE id = :id")
     suspend fun get(id: Long): StageRunEntity?
+
+    @Query("DELETE FROM stage_run")
+    suspend fun deleteAll()
 }

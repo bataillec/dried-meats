@@ -147,4 +147,6 @@ class RoomPieceStore(
     override suspend fun delete(pieceId: Long) = pieces.delete(pieceId)
 
     override suspend fun countByRecipe(recipeId: Long): Int = pieces.countByRecipe(recipeId)
+
+    override suspend fun labels(): List<String> = pieces.labels()
 }
