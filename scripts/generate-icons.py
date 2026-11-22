@@ -1,144 +1,278 @@
 #!/usr/bin/env python3
-"""Builds the Android launcher assets from docs/assets/icon-sheet.jpeg (needs Pillow).
+"""Builds the Android launcher assets from docs/assets/image.svg (needs Pillow and a `chromium` binary).
 
-Source: the dark "maskable" square of the sheet (cleanest, artwork on a flat background), ~193 px.
-Steps: crop -> key the flat background out to get the artwork with soft alpha -> scale it so that
-every visible pixel lies inside the adaptive-icon safe circle (66 % of the 108 dp canvas) -> render
-adaptive layers, themed (monochrome) layer, legacy square/round PNGs, notification icon and the
-512 px Play Store icon. Run from the repo root:  python3 scripts/generate-icons.py
+The SVG is a 108x108 adaptive-icon drawing: group #adaptive-background and group #adaptive-foreground.
+Outputs (all regenerated, never edited by hand):
+  - res/drawable/ic_launcher_foreground.xml    vector drawable of the foreground, fitted into the safe zone
+  - res/drawable/ic_launcher_monochrome.xml    themed-icon layer (outlines opaque, light fills dropped)
+  - res/drawable/ic_notification.xml           status-bar silhouette (cropped to the artwork)
+  - res/values/ic_launcher_colors.xml          the background colour taken from the SVG
+  - res/mipmap-*dpi/ic_launcher(.round).png    legacy icons, rendered by Chromium from the SVG
+  - app/src/main/playstore/ic_launcher-playstore.png   512 px store icon
+Run from the repo root:  python3 scripts/generate-icons.py
 """
+import re
+import shutil
+import subprocess
+import tempfile
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image
 
 ROOT = Path(__file__).resolve().parent.parent
-SHEET = ROOT / "docs/assets/icon-sheet.jpeg"
+SVG = ROOT / "docs/assets/image.svg"
 RES = ROOT / "app/src/main/res"
 PLAYSTORE = ROOT / "app/src/main/playstore/ic_launcher-playstore.png"
-
-CROP = (864, 407, 864 + 193, 407 + 193)  # maskable square on the sheet
-BG = (0x2C, 0x35, 0x3F)  # sampled flat background of that square
-CANVAS = 432  # 108 dp at xxxhdpi
-SAFE_RADIUS = CANVAS * 0.33  # 66 % safe zone, as a radius
-LO, HI = 14, 70  # colour distance from BG mapped to alpha 0..1
+NS = "http://www.w3.org/2000/svg"
+ET.register_namespace("", NS)
+SAFE_TARGET_RADIUS = 34.0  # dp; the guaranteed-visible disc is 33 dp, a circular mask shows 36 dp
+VIEW = 108.0
 
 
-def key_out_background(img: Image.Image) -> Image.Image:
-    """Returns RGBA artwork: alpha from the distance to the flat background, colours un-premultiplied."""
-    px = img.load()
-    out = Image.new("RGBA", img.size)
-    po = out.load()
-    for y in range(img.height):
-        for x in range(img.width):
-            r, g, b = px[x, y]
-            d = max(abs(r - BG[0]), abs(g - BG[1]), abs(b - BG[2]))
-            a = max(0.0, min(1.0, (d - LO) / (HI - LO)))
-            if a <= 0:
-                po[x, y] = (0, 0, 0, 0)
-                continue
-            c = [max(0, min(255, round((v - (1 - a) * bg) / a))) for v, bg in zip((r, g, b), BG)]
-            po[x, y] = (c[0], c[1], c[2], round(a * 255))
+def q(tag):
+    return f"{{{NS}}}{tag}"
+
+
+# ---------------------------------------------------------------- SVG helpers
+def load():
+    root = ET.parse(SVG).getroot()
+    groups = {g.get("id"): g for g in root.iter(q("g")) if g.get("id")}
+    bg = groups["adaptive-background"]
+    fg = groups["adaptive-foreground"]
+    defs = root.find(q("defs"))
+    bg_rect = bg.find(q("rect"))
+    return defs, bg_rect.get("fill"), fg
+
+
+def svg_doc(size_px, inner, defs=None, view=VIEW):
+    d = ET.tostring(defs, encoding="unicode") if defs is not None else ""
+    return (
+        f'<svg xmlns="{NS}" viewBox="0 0 {view} {view}" width="{size_px}" height="{size_px}">{d}{inner}</svg>'
+    )
+
+
+def render(svg_text, px, out):
+    with tempfile.TemporaryDirectory() as tmp:
+        html = Path(tmp) / "i.html"
+        html.write_text(f'<!doctype html><html><body style="margin:0;background:transparent">{svg_text}</body></html>')
+        shot = Path(tmp) / "o.png"
+        subprocess.run(
+            ["chromium", "--headless=new", "--no-sandbox", "--disable-gpu", "--hide-scrollbars",
+             "--force-device-scale-factor=1", "--default-background-color=00000000",
+             f"--window-size={px},{px}", f"--screenshot={shot}", f"file://{html}"],
+            check=True, capture_output=True, timeout=120,
+        )
+        img = Image.open(shot).convert("RGBA").crop((0, 0, px, px))
+    out.parent.mkdir(parents=True, exist_ok=True)
+    img.save(out, optimize=True)
+    return img
+
+
+def measure(defs, fg):
+    """Renders the foreground alone and returns (bbox, centre, enclosing radius) in 108-unit space."""
+    px = 1080
+    img = render(svg_doc(px, ET.tostring(fg, encoding="unicode"), defs), px, Path(tempfile.gettempdir()) / "fg-measure.png")
+    alpha = img.getchannel("A").point(lambda v: 255 if v > 128 else 0)
+    x0, y0, x1, y1 = alpha.getbbox()
+    k = VIEW / px
+    pts = []
+    a = alpha.load()
+    for y in range(0, px, 4):
+        for x in range(0, px, 4):
+            if a[x, y]:
+                pts.append((x * k, y * k))
+    cx, cy = (x0 + x1) / 2 * k, (y0 + y1) / 2 * k
+    for i in range(1, 4000):  # Badoiu-Clarkson minimal enclosing circle
+        fx, fy = max(pts, key=lambda p: (p[0] - cx) ** 2 + (p[1] - cy) ** 2)
+        cx += (fx - cx) / (i + 1)
+        cy += (fy - cy) / (i + 1)
+    r = max(((x - cx) ** 2 + (y - cy) ** 2) ** 0.5 for x, y in pts)
+    return (x0 * k, y0 * k, x1 * k, y1 * k), (cx, cy), r
+
+
+# ---------------------------------------------------------------- SVG -> VectorDrawable
+def num(v):
+    return f"{float(v):g}"
+
+
+def lum(hexcolor):
+    r, g, b = (int(hexcolor[i:i + 2], 16) for i in (1, 3, 5))
+    return (0.3 * r + 0.59 * g + 0.11 * b) / 255, r, g, b
+
+
+def mono_alpha(color, is_stroke):
+    """Themed-icon rule: outlines/strokes opaque, dark fills opaque, reds half, light fills dropped."""
+    if is_stroke:
+        return 1.0
+    lm, r, g, _ = lum(color)
+    if lm < 0.2:
+        return 1.0
+    if r > g + 40:
+        return 0.6
+    return 0.0
+
+
+def shape_path_data(el):
+    t = el.tag.split("}")[1]
+    f = lambda k, d="0": float(el.get(k, d))  # noqa: E731
+    if t == "path":
+        return el.get("d")
+    if t == "circle":
+        cx, cy, r = f("cx"), f("cy"), f("r")
+        return f"M{num(cx - r)},{num(cy)} A{num(r)},{num(r)} 0 1,0 {num(cx + r)},{num(cy)} A{num(r)},{num(r)} 0 1,0 {num(cx - r)},{num(cy)} Z"
+    if t == "ellipse":
+        cx, cy, rx, ry = f("cx"), f("cy"), f("rx"), f("ry")
+        return f"M{num(cx - rx)},{num(cy)} A{num(rx)},{num(ry)} 0 1,0 {num(cx + rx)},{num(cy)} A{num(rx)},{num(ry)} 0 1,0 {num(cx - rx)},{num(cy)} Z"
+    if t == "rect":
+        x, y, w, h = f("x"), f("y"), f("width"), f("height")
+        rx = f("rx", el.get("ry", "0"))
+        if rx <= 0:
+            return f"M{num(x)},{num(y)} H{num(x + w)} V{num(y + h)} H{num(x)} Z"
+        return (f"M{num(x + rx)},{num(y)} H{num(x + w - rx)} A{num(rx)},{num(rx)} 0 0,1 {num(x + w)},{num(y + rx)} "
+                f"V{num(y + h - rx)} A{num(rx)},{num(rx)} 0 0,1 {num(x + w - rx)},{num(y + h)} H{num(x + rx)} "
+                f"A{num(rx)},{num(rx)} 0 0,1 {num(x)},{num(y + h - rx)} V{num(y + rx)} A{num(rx)},{num(rx)} 0 0,1 {num(x + rx)},{num(y)} Z")
+    if t == "polygon":
+        nums = re.findall(r"-?[\d.]+", el.get("points"))
+        pts = [f"{nums[i]},{nums[i + 1]}" for i in range(0, len(nums), 2)]
+        return "M" + " L".join(pts) + " Z"
+    if t == "line":
+        return f"M{num(f('x1'))},{num(f('y1'))} L{num(f('x2'))},{num(f('y2'))}"
+    return None
+
+
+def group_attrs(el):
+    tr = el.get("transform", "")
+    attrs = []
+    for name, args in re.findall(r"(\w+)\(([^)]*)\)", tr):
+        v = [float(x) for x in re.findall(r"-?[\d.]+", args)]
+        if name == "translate":
+            attrs += [f'android:translateX="{num(v[0])}"', f'android:translateY="{num(v[1] if len(v) > 1 else 0)}"']
+        elif name == "rotate":
+            attrs.append(f'android:rotation="{num(v[0])}"')
+            if len(v) == 3:
+                attrs += [f'android:pivotX="{num(v[1])}"', f'android:pivotY="{num(v[2])}"']
+        else:
+            raise ValueError(f"unsupported transform {name}")
+    return attrs
+
+
+def vd_elements(el, indent, mono, floor=0.0):
+    pad = "    " * indent
+    out = []
+    for child in el:
+        tag = child.tag.split("}")[1]
+        if tag == "g":
+            attrs = " ".join(group_attrs(child))
+            out.append(f"{pad}<group {attrs}>" if attrs else f"{pad}<group>")
+            out += vd_elements(child, indent + 1, mono, floor)
+            out.append(f"{pad}</group>")
+            continue
+        data = shape_path_data(child)
+        if data is None:
+            continue
+        opacity = float(child.get("opacity", "1"))
+        fill = child.get("fill")  # SVG would paint a missing fill black; here that only occurs on line-only paths
+        stroke = child.get("stroke")
+        a = [f'android:pathData="{" ".join(data.split())}"']
+        if fill and fill != "none":
+            if mono:
+                al = max(mono_alpha(fill, False), 0.0)
+                al = max(al, floor) if al > 0 else 0.0
+                if al > 0:
+                    a += ['android:fillColor="#FFFFFF"', f'android:fillAlpha="{num(al * opacity)}"']
+            else:
+                a.append(f'android:fillColor="{fill}"')
+                if opacity != 1:
+                    a.append(f'android:fillAlpha="{num(opacity)}"')
+        if stroke and stroke != "none":
+            a += [f'android:strokeColor="{"#FFFFFF" if mono else stroke}"',
+                  f'android:strokeWidth="{num(child.get("stroke-width", "1"))}"']
+            if child.get("stroke-linecap"):
+                a.append(f'android:strokeLineCap="{child.get("stroke-linecap")}"')
+            if child.get("stroke-linejoin"):
+                a.append(f'android:strokeLineJoin="{child.get("stroke-linejoin")}"')
+            if opacity != 1:
+                a.append(f'android:strokeAlpha="{num(opacity)}"')
+        if len(a) == 1:  # nothing visible
+            continue
+        out.append(f"{pad}<path " + ("\n" + pad + "    ").join(a) + " />")
     return out
 
 
-def clear_border(img: Image.Image, margin: int) -> None:
-    """The crop edge carries JPEG/shadow residue; the artwork itself sits well inside."""
-    alpha = img.getchannel("A")
-    d = ImageDraw.Draw(alpha)
-    w, h = img.size
-    d.rectangle((0, 0, w, margin - 1), fill=0)
-    d.rectangle((0, h - margin, w, h), fill=0)
-    d.rectangle((0, 0, margin - 1, h), fill=0)
-    d.rectangle((w - margin, 0, w, h), fill=0)
-    img.putalpha(alpha)
+def vector_drawable(fg, fit, mono=False, size_dp=108, viewport=None, floor=0.0):
+    """fit = (translateX, translateY, scale, pivotX, pivotY) applied as one wrapping group."""
+    tx, ty, s, px_, py_ = fit
+    vx0, vy0, vw, vh = viewport or (0, 0, VIEW, VIEW)
+    lines = [
+        '<?xml version="1.0" encoding="utf-8"?>',
+        "<!-- Generated by scripts/generate-icons.py from docs/assets/image.svg. Do not edit by hand. -->",
+        '<vector xmlns:android="http://schemas.android.com/apk/res/android"',
+        f'    android:width="{num(size_dp)}dp"',
+        f'    android:height="{num(size_dp * vh / vw)}dp"',
+        f'    android:viewportWidth="{num(vw)}"',
+        f'    android:viewportHeight="{num(vh)}">',
+    ]
+    if viewport:
+        lines.append(f'    <group android:translateX="{num(-vx0)}" android:translateY="{num(-vy0)}">')
+    lines.append(
+        f'    <group android:pivotX="{num(px_)}" android:pivotY="{num(py_)}" android:scaleX="{num(s)}" '
+        f'android:scaleY="{num(s)}" android:translateX="{num(tx)}" android:translateY="{num(ty)}">'
+    )
+    lines += vd_elements(fg, 2, mono, floor)
+    lines.append("    </group>")
+    if viewport:
+        lines.append("    </group>")
+    lines.append("</vector>")
+    return "\n".join(lines) + "\n"
 
 
-def alpha_bbox_and_radius(art: Image.Image):
-    alpha = art.getchannel("A").point(lambda v: 255 if v > 80 else 0)
-    x0, y0, x1, y1 = alpha.getbbox()
-    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
-    px = alpha.load()
-    max_r = 0.0
-    for y in range(art.height):
-        for x in range(art.width):
-            if px[x, y]:
-                max_r = max(max_r, ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5)
-    return (x0, y0, x1, y1), (cx, cy), max_r
-
-
-def place(art, center, scale, size):
-    """Resizes the artwork by [scale] and centres its bbox centre on a transparent [size] canvas."""
-    w, h = round(art.width * scale), round(art.height * scale)
-    big = art.convert("RGBa").resize((w, h), Image.LANCZOS).convert("RGBA")
-    canvas = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-    canvas.alpha_composite(big, (round(size / 2 - center[0] * scale), round(size / 2 - center[1] * scale)))
-    return canvas
-
-
-def save(img, path):
+def write(path, text):
     path.parent.mkdir(parents=True, exist_ok=True)
-    img.save(path, optimize=True)
-    print("wrote", path.relative_to(ROOT), img.size)
+    path.write_text(text, encoding="utf-8")
+    print("wrote", path.relative_to(ROOT))
 
 
 def main():
-    sheet = Image.open(SHEET).convert("RGB")
-    art = key_out_background(sheet.crop(CROP))
-    clear_border(art, 16)
-    bbox, center, max_r = alpha_bbox_and_radius(art)
-    scale = SAFE_RADIUS / max_r  # fills the safe circle exactly
-    print(f"art bbox {bbox}, farthest pixel {max_r:.1f}px, adaptive scale x{scale:.2f}")
+    if not shutil.which("chromium"):
+        raise SystemExit("chromium is required to render the PNGs")
+    defs, bg_color, fg = load()
+    bbox, (cx, cy), r = measure(defs, fg)
+    s = SAFE_TARGET_RADIUS / r
+    fit = (VIEW / 2 - cx, VIEW / 2 - cy, s, cx, cy)
+    print(f"artwork bbox {tuple(round(v, 1) for v in bbox)}, enclosing radius {r:.1f} dp, fit scale x{s:.2f}")
 
-    foreground = place(art, center, scale, CANVAS)
-    save(foreground, RES / "drawable-nodpi/ic_launcher_foreground.png")
+    write(RES / "values/ic_launcher_colors.xml",
+          '<?xml version="1.0" encoding="utf-8"?>\n<!-- Generated by scripts/generate-icons.py -->\n<resources>\n'
+          f'    <color name="ic_launcher_background">{bg_color.upper()}</color>\n</resources>\n')
+    write(RES / "drawable/ic_launcher_foreground.xml", vector_drawable(fg, fit))
+    write(RES / "drawable/ic_launcher_monochrome.xml", vector_drawable(fg, fit, mono=True))
+    # Status-bar icon: 24 dp, viewport cropped to the artwork, light fills kept at >= 60 % so it reads solid.
+    pad = 2.0
+    vp = (bbox[0] - pad, bbox[1] - pad, bbox[2] - bbox[0] + 2 * pad, bbox[3] - bbox[1] + 2 * pad)
+    side = max(vp[2], vp[3])
+    vp = (vp[0] - (side - vp[2]) / 2, vp[1] - (side - vp[3]) / 2, side, side)
+    write(RES / "drawable/ic_notification.xml",
+          vector_drawable(fg, (0, 0, 1, 0, 0), mono=True, size_dp=24, viewport=vp, floor=0.6))
 
-    # Themed icon: white artwork whose opacity follows brightness, so details survive tinting.
-    mono = Image.new("RGBA", foreground.size, (255, 255, 255, 0))
-    fp, mp = foreground.load(), mono.load()
-    for y in range(CANVAS):
-        for x in range(CANVAS):
-            r, g, b, a = fp[x, y]
-            if a:
-                lum = (0.3 * r + 0.59 * g + 0.11 * b) / 255
-                mp[x, y] = (255, 255, 255, round(a * min(1.0, 0.45 + 0.9 * lum)))
-    save(mono, RES / "drawable-nodpi/ic_launcher_monochrome.png")
+    fg_inner = ET.tostring(fg, encoding="unicode")
+    wrap = f'<g transform="translate({VIEW / 2 - cx:.3f} {VIEW / 2 - cy:.3f}) translate({cx:.3f} {cy:.3f}) scale({s:.4f}) translate({-cx:.3f} {-cy:.3f})">{fg_inner}</g>'
+    bg_full = f'<rect width="{VIEW}" height="{VIEW}" fill="{bg_color}"/>'
+    render(svg_doc(512, bg_full + wrap, defs), 512, PLAYSTORE)
+    print("wrote", PLAYSTORE.relative_to(ROOT))
 
-    bbox_w = bbox[2] - bbox[0]
-    bbox_h = bbox[3] - bbox[1]
+    bw, bh = bbox[2] - bbox[0], bbox[3] - bbox[1]
     for folder, px in {"mdpi": 48, "hdpi": 72, "xhdpi": 96, "xxhdpi": 144, "xxxhdpi": 192}.items():
-        ss = 4  # supersample the masks for smooth edges
         for round_icon in (False, True):
-            big = px * ss
-            base = Image.new("RGBA", (big, big), (0, 0, 0, 0))
-            mask = Image.new("L", (big, big), 0)
-            d = ImageDraw.Draw(mask)
-            if round_icon:
-                d.ellipse((0, 0, big - 1, big - 1), fill=255)
-            else:
-                d.rounded_rectangle((0, 0, big - 1, big - 1), radius=round(big * 0.22), fill=255)
-            base.paste(Image.new("RGBA", (big, big), BG + (255,)), (0, 0), mask)
-            fill = 0.62 if round_icon else 0.72
-            s = big * fill / max(bbox_w, bbox_h)
-            base.alpha_composite(place(art, center, s, big))
-            base.putalpha(Image.composite(base.getchannel("A"), Image.new("L", (big, big), 0), mask))
-            icon = base.resize((px, px), Image.LANCZOS)
+            fill = 0.60 if round_icon else 0.70  # share of the icon edge taken by the artwork
+            k = VIEW * fill / max(bw, bh)
+            shape = (f'<circle cx="54" cy="54" r="54" fill="{bg_color}"/>' if round_icon
+                     else f'<rect width="108" height="108" rx="24" fill="{bg_color}"/>')
+            art = (f'<g transform="translate(54 54) scale({k:.4f}) translate({-(bbox[0] + bbox[2]) / 2:.3f} '
+                   f'{-(bbox[1] + bbox[3]) / 2:.3f})">{fg_inner}</g>')
             name = "ic_launcher_round.png" if round_icon else "ic_launcher.png"
-            save(icon, RES / f"mipmap-{folder}" / name)
-
-    # Notification small icon: white silhouette of the artwork (Android only uses the alpha).
-    for folder, px in {"mdpi": 24, "hdpi": 36, "xhdpi": 48, "xxhdpi": 72, "xxxhdpi": 96}.items():
-        sil = art.copy()
-        sil.putalpha(art.getchannel("A").point(lambda v: 255 if v > 90 else 0))
-        s = px * 0.92 / max(bbox_w, bbox_h)
-        icon = place(sil, center, s, px)
-        white = Image.new("RGBA", icon.size, (255, 255, 255, 0))
-        white.putalpha(icon.getchannel("A"))
-        save(white, RES / f"drawable-{folder}" / "ic_notification.png")
-
-    # Play Store: full-bleed square (Play applies its own mask), same composition as the adaptive icon.
-    store = Image.new("RGBA", (CANVAS, CANVAS), BG + (255,))
-    store.alpha_composite(foreground)
-    save(store.resize((512, 512), Image.LANCZOS), PLAYSTORE)
+            render(svg_doc(px, shape + art, defs), px, RES / f"mipmap-{folder}" / name)
+            print("wrote", (RES / f"mipmap-{folder}" / name).relative_to(ROOT), (px, px))
 
 
 if __name__ == "__main__":

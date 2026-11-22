@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Flat dark of the launcher artwork (sampled from docs/assets/icon-sheet.jpeg). -->
-    <color name="ic_launcher_background">#2C353F</color>
-</resources>

@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" width="512" height="512">
+  <defs>
+    <!-- Rounded square icon mask / clip for standard launcher preview -->
+    <clipPath id="icon-clip">
+      <rect x="0" y="0" width="108" height="108" rx="22" ry="22"/>
+    </clipPath>
+    <!-- Subtle shadow for the vacuum bag -->
+    <filter id="soft-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#11181F" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <!-- Background Layer (Android Adaptive Icon Background) -->
+  <g id="adaptive-background" clip-path="url(#icon-clip)">
+    <rect x="0" y="0" width="108" height="108" fill="#232B34"/>
+  </g>
+
+  <!-- Foreground Layer (Android Adaptive Icon Foreground - Centered in 66x66 safe zone) -->
+  <g id="adaptive-foreground">
+    <!-- Vacuum Seal Bag -->
+    <g id="vacuum-bag" filter="url(#soft-shadow)">
+      <!-- Bag Main Body (pinched waist shape of vacuum-sealed pouch) -->
+      <path d="M 39 24 L 71 24 C 73 24 74 25 74 27 L 74 33 C 74 35 72 39 71 45 C 70 52 70 60 72 68 C 73 73 74 78 74 80 C 74 82 73 83 71 83 L 39 83 C 37 83 36 82 36 80 C 36 78 37 73 38 68 C 40 60 40 52 39 45 C 38 39 36 35 36 33 L 36 27 C 36 25 37 24 39 24 Z"
+            fill="#DCE2E8" stroke="#182026" stroke-width="1.8" stroke-linejoin="round"/>
+
+      <!-- Top Heat-Seal Header & Ribbed Texture -->
+      <path d="M 36.8 27.5 L 73.2 27.5 M 36.8 30.5 L 73.2 30.5 M 36.8 33.5 L 73.2 33.5"
+            stroke="#9BA7B4" stroke-width="1.1" stroke-linecap="round"/>
+      <!-- Tear notches on sides -->
+      <path d="M 36 29 L 38 29 M 72 29 L 74 29" stroke="#182026" stroke-width="1.4" stroke-linecap="round"/>
+
+      <!-- Inner Vacuum Chamber Shading -->
+      <path d="M 41 36 L 69 36 C 68 45 67 56 69.5 76 L 40.5 76 C 43 56 42 45 41 36 Z"
+            fill="#C5CFD9" opacity="0.55"/>
+
+      <!-- Vacuum Wrinkle / Crease Lines -->
+      <path d="M 41 42 Q 45 45 43 49" fill="none" stroke="#FFFFFF" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+      <path d="M 68 41 Q 64 46 66 51" fill="none" stroke="#8C99A6" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+      <path d="M 42 69 Q 46 72 44 76" fill="none" stroke="#FFFFFF" stroke-width="1.1" stroke-linecap="round" opacity="0.6"/>
+      <path d="M 67 66 Q 63 70 65 75" fill="none" stroke="#8C99A6" stroke-width="1.1" stroke-linecap="round" opacity="0.6"/>
+
+      <!-- Cut of Meat (Steak / Entrecôte / Dry-Aged Cut) -->
+      <g id="meat-cut" transform="rotate(-12 55 56)">
+        <!-- Outer Fat Cap & Rind -->
+        <path d="M 44 43 C 47 38 56 37 61 41 C 65 44 66 51 64 58 C 62 65 61 72 55 74 C 49 76 43 72 42 66 C 41 60 43 55 43 50 C 43 46 42 45 44 43 Z"
+              fill="#F3E5D8" stroke="#182026" stroke-width="1.8" stroke-linejoin="round"/>
+        <!-- Main Muscle (Deep Cured Red-Brown) -->
+        <path d="M 46 45 C 48.5 41 55.5 40.5 59 43.5 C 62.5 46.5 63 52 61.5 58 C 60 64 59 69.5 54.5 71 C 50 72.5 45.5 69.5 44.8 64.5 C 44 59.5 45.8 55 45.8 50.5 C 45.8 47.5 44.8 46.5 46 45 Z"
+              fill="#9E3B2B" stroke="#6E2217" stroke-width="0.9"/>
+        <!-- Secondary Inner Muscle Tone -->
+        <path d="M 48 48 C 50 45 55 45 57.5 47.5 C 60 50 59.5 56 58 61 C 56.5 66 54 68 51 67.5 C 48 67 47 62 47.5 57 C 48 52 47 50 48 48 Z"
+              fill="#B94B39"/>
+        <!-- Intramuscular Fat Marbling -->
+        <path d="M 49 49 C 52 48 54 50 56 48.5" fill="none" stroke="#F6ECE3" stroke-width="1.3" stroke-linecap="round"/>
+        <path d="M 48 54 C 51 53 55 55 58 53" fill="none" stroke="#F6ECE3" stroke-width="1.4" stroke-linecap="round"/>
+        <path d="M 47.5 60 C 51 59 53 61.5 57 60" fill="none" stroke="#F6ECE3" stroke-width="1.3" stroke-linecap="round"/>
+        <path d="M 49 65 C 52 64.5 54 66 56 64.5" fill="none" stroke="#F6ECE3" stroke-width="1.2" stroke-linecap="round"/>
+        <!-- Eye of Fat -->
+        <ellipse cx="53.5" cy="56.5" rx="2.2" ry="1.4" fill="#F6ECE3"/>
+      </g>
+
+      <!-- Seasoning inside the pouch (Peppercorns, Coarse Salt, Sugar crystals) -->
+      <g id="seasoning">
+        <!-- Black peppercorns -->
+        <circle cx="43.5" cy="48" r="1.2" fill="#22272B"/>
+        <circle cx="42" cy="54" r="1.0" fill="#22272B"/>
+        <circle cx="64.5" cy="64" r="1.2" fill="#22272B"/>
+        <circle cx="62" cy="72" r="1.1" fill="#22272B"/>
+        <circle cx="45" cy="73" r="1.0" fill="#22272B"/>
+        <!-- Coarse salt / sugar crystals -->
+        <polygon points="64,46 66,47.5 64.5,49 63,47.5" fill="#FFFFFF" stroke="#8C99A6" stroke-width="0.4"/>
+        <polygon points="43,63 44.8,64 43.8,65.5 42.2,64.2" fill="#FFFFFF" stroke="#8C99A6" stroke-width="0.4"/>
+        <polygon points="65,70 67.5,72 64.2,72.5" fill="#46525C"/>
+        <circle cx="66" cy="55" r="0.8" fill="#FFFFFF"/>
+        <circle cx="44" cy="41" r="0.8" fill="#FFFFFF"/>
+      </g>
+
+      <!-- Glossy Plastic Highlights -->
+      <path d="M 40 37 L 46 37 L 42 52 L 39.5 52 Z" fill="#FFFFFF" opacity="0.45"/>
+      <path d="M 66 38 L 68.5 38 L 67 62 L 65 62 Z" fill="#FFFFFF" opacity="0.35"/>
+    </g>
+
+    <!-- Stopwatch / Timer Badge (Top-Left of the Bag) -->
+    <g id="stopwatch" transform="translate(36, 36)">
+      <!-- Top Plunger Button -->
+      <rect x="-2" y="-12.5" width="4" height="3.5" rx="0.8" fill="#D95338" stroke="#182026" stroke-width="1.4"/>
+      <rect x="-3.2" y="-13.5" width="6.4" height="1.8" rx="0.8" fill="#E8ECEF" stroke="#182026" stroke-width="1.2"/>
+      <!-- Side Crown Button -->
+      <g transform="rotate(42)">
+        <rect x="-1.5" y="-11.8" width="3" height="3" rx="0.6" fill="#E8ECEF" stroke="#182026" stroke-width="1.2"/>
+      </g>
+      <!-- Outer Casing -->
+      <circle cx="0" cy="0" r="9.2" fill="#D95338" stroke="#182026" stroke-width="1.7"/>
+      <!-- Dial Face -->
+      <circle cx="0" cy="0" r="6.6" fill="#FAF6F0" stroke="#182026" stroke-width="1.1"/>
+      <!-- Elapsed Time Sector -->
+      <path d="M 0 0 L 0 -5.8 A 5.8 5.8 0 0 1 5.0 -2.9 Z" fill="#F2B8A2"/>
+      <!-- Dial Ticks -->
+      <line x1="0" y1="-5.6" x2="0" y2="-4.3" stroke="#182026" stroke-width="1.1" stroke-linecap="round"/>
+      <line x1="5.6" y1="0" x2="4.3" y2="0" stroke="#182026" stroke-width="1.1" stroke-linecap="round"/>
+      <line x1="0" y1="5.6" x2="0" y2="4.3" stroke="#182026" stroke-width="1.1" stroke-linecap="round"/>
+      <line x1="-5.6" y1="0" x2="-4.3" y2="0" stroke="#182026" stroke-width="1.1" stroke-linecap="round"/>
+      <!-- Hands -->
+      <line x1="0" y1="0" x2="0" y2="-4.2" stroke="#182026" stroke-width="1.3" stroke-linecap="round"/>
+      <line x1="0" y1="0" x2="3.5" y2="-2.0" stroke="#D95338" stroke-width="1.3" stroke-linecap="round"/>
+      <!-- Center Pin -->
+      <circle cx="0" cy="0" r="1.2" fill="#182026"/>
+    </g>
+  </g>
+</svg>
