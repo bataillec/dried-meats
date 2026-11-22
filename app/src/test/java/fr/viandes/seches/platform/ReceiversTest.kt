@@ -112,7 +112,8 @@ class ReceiversTest : AppTestBase() {
         awaitUntil { shadowOf(notifications).allNotifications.isNotEmpty() }
         val n = shadowOf(notifications).allNotifications.single()
         assertEquals(2, n.actions.size)
-        assertEquals(run.plannedEndAt, container.alarmScheduler.lastFiredPlannedEnd(run.id))
+        // the receiver records the notification right after posting it, on its background thread
+        awaitUntil { container.alarmScheduler.lastFiredPlannedEnd(run.id) == run.plannedEndAt }
     }
 
     @Test
@@ -158,7 +159,7 @@ class ReceiversTest : AppTestBase() {
         }
         val piece = runBlocking { container.pieces.getSummary(id)!!.piece }
         assertEquals("herbes", piece.fridgeSeasoning)
-        assertEquals(1, scheduledCount()) // the new fridge run is scheduled
+        awaitUntil { scheduledCount() == 1 } // the new fridge run is scheduled right after the transition
     }
 
     @Test
@@ -174,7 +175,7 @@ class ReceiversTest : AppTestBase() {
                     .piece.status
             } == PieceStatus.DONE
         }
-        assertEquals(0, scheduledCount())
+        awaitUntil { scheduledCount() == 0 }
     }
 
     @Test
@@ -184,7 +185,7 @@ class ReceiversTest : AppTestBase() {
         broadcast(ReminderActionReceiver::class.java, ReminderActionReceiver.ACTION_POSTPONE, run.id, id)
         awaitUntil { openRun(id).postponedDays == 1 }
         assertTrue(openRun(id).plannedEndAt > run.plannedEndAt)
-        assertEquals(openRun(id).plannedEndAt, shadowOf(alarms).scheduledAlarms.single().triggerAtTime)
+        awaitUntil { shadowOf(alarms).scheduledAlarms.singleOrNull()?.triggerAtTime == openRun(id).plannedEndAt }
     }
 
     @Test

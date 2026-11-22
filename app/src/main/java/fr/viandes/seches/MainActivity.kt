@@ -1,10 +1,13 @@
 package fr.viandes.seches
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -23,6 +26,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,7 +35,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Density
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -51,6 +58,7 @@ import fr.viandes.seches.ui.recipes.RecipesScreen
 import fr.viandes.seches.ui.settings.SettingsScreen
 import fr.viandes.seches.ui.stats.StatsScreen
 import fr.viandes.seches.ui.theme.AppTheme
+import fr.viandes.seches.ui.theme.usesDarkBars
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -63,7 +71,22 @@ class MainActivity : ComponentActivity() {
         val container = (application as ViandesApp).container
         setContent {
             val settings by container.settings.observe().collectAsState(initial = null)
-            AppTheme((settings ?: AppSettings()).theme) {
+            val mode = (settings ?: AppSettings()).theme
+            val darkBars = usesDarkBars(mode, isSystemInDarkTheme())
+            // Bar icon colours must follow the app theme, not the phone's: Clair on a dark phone needs dark icons.
+            DisposableEffect(darkBars) {
+                val bars =
+                    if (darkBars) {
+                        SystemBarStyle.dark(
+                            Color.TRANSPARENT,
+                        )
+                    } else {
+                        SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
+                    }
+                enableEdgeToEdge(statusBarStyle = bars, navigationBarStyle = bars)
+                onDispose {}
+            }
+            AppTheme(mode) {
                 Surface {
                     AppRoot(pendingPieceId) { pendingPieceId = null }
                     BatteryOnboardingDialog(
@@ -95,6 +118,8 @@ class MainActivity : ComponentActivity() {
         const val EXTRA_PIECE_ID = "piece_id"
     }
 }
+
+private const val NAV_MAX_FONT_SCALE = 1.2f
 
 private object Routes {
     const val PIECES = "pieces"
@@ -173,14 +198,20 @@ private fun AppRoot(
         },
         bottomBar = {
             if (topRoute != null) {
-                NavigationBar {
-                    TOP_LEVEL.forEach { item ->
-                        NavigationBarItem(
-                            selected = topRoute.route == item.route,
-                            onClick = { navigateTopLevel(nav, item.route) },
-                            icon = { Icon(item.icon, contentDescription = null) },
-                            label = { Text(stringResource(item.label)) },
-                        )
+                // Four labelled tabs cannot fit at 200 % text scale: cap the bar's scale so labels never split mid-word.
+                val density = LocalDensity.current
+                CompositionLocalProvider(
+                    LocalDensity provides Density(density.density, minOf(density.fontScale, NAV_MAX_FONT_SCALE)),
+                ) {
+                    NavigationBar {
+                        TOP_LEVEL.forEach { item ->
+                            NavigationBarItem(
+                                selected = topRoute.route == item.route,
+                                onClick = { navigateTopLevel(nav, item.route) },
+                                icon = { Icon(item.icon, contentDescription = null) },
+                                label = { Text(stringResource(item.label)) },
+                            )
+                        }
                     }
                 }
             }

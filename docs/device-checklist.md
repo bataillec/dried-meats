@@ -16,3 +16,22 @@ Run on a real phone with the release APK installed over the previous version (da
 - [ ] Export to JSON, uninstall/reinstall, import: all pieces and recipes are back and reminders are rescheduled.
 - [ ] Themes Clair, Sombre, Sombre OLED, Système; OLED background is pure black; check contrast of the alert orange and chips (N4).
 - [ ] Font scale 200 %: no clipped buttons.
+
+## Last run (2026-11-22, debug build, AGP 9.5.2)
+
+OnePlus 6T (Android 15, USB/Wi-Fi adb, app package only) and an API 37 emulator.
+
+| Item | Result |
+|---|---|
+| Real alarm posts the notification within 60 s | pass on phone and emulator (`ReminderOnDeviceTest`) |
+| Doze (`deviceidle force-idle`, screen off) | pass on emulator: arrived 1 s after due |
+| Reboot with a pending reminder | pass on emulator: arrived 2 s after due |
+| Time zone change (Europe/Paris -> Asia/Tokyo) | pass on emulator: same absolute instant, arrived 2 s after due |
+| Notification permission revoked then granted | pass on phone: banner appears/disappears |
+| "Fait" / "Reporter 1 jour" buttons on the notification | buttons shown on the phone; behaviour covered by `ReceiversTest` (not tapped by hand) |
+| Themes Clair / Sombre / OLED / Système | screenshots reviewed on phone; one bug fixed (status-bar icons in Clair on a dark phone) |
+| Font scale 200 % | emulator: bottom navigation labels split mid-word, fixed by capping the bar's text scale |
+| Battery wizard | pass on phone and emulator |
+| Exact-alarm denial | not testable: with `USE_EXACT_ALARM` (API 33+) the permission cannot be revoked |
+| Reboot / Doze on the real phone | not done (system-wide changes on Cam's phone were deliberately avoided) |
+| Vendor battery killer (OnePlus) after days idle | still needs a human: install and leave a reminder 2-3 days out |

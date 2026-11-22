@@ -85,6 +85,17 @@ fun resolveColorScheme(
         ThemeMode.SYSTEM -> if (systemDark) DarkColors else LightColors
     }
 
+/** Whether system bar icons must be light (true) because the app background is dark. */
+fun usesDarkBars(
+    mode: ThemeMode,
+    systemDark: Boolean,
+): Boolean =
+    when (mode) {
+        ThemeMode.LIGHT -> false
+        ThemeMode.DARK, ThemeMode.OLED -> true
+        ThemeMode.SYSTEM -> systemDark
+    }
+
 @Composable
 fun AppTheme(
     mode: ThemeMode,
