@@ -60,6 +60,8 @@ jobs:
         with:
           api-level: ${{ env.EMULATOR_API_LEVEL }}
           arch: x86_64
+          # The emulator wants a 12 GB userdata partition by default and the runner has ~11 GB free.
+          disk-size: 6000M
           target: google_apis
           force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
@@ -70,6 +72,8 @@ jobs:
         with:
           api-level: ${{ env.EMULATOR_API_LEVEL }}
           arch: x86_64
+          # The emulator wants a 12 GB userdata partition by default and the runner has ~11 GB free.
+          disk-size: 6000M
           target: google_apis
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
