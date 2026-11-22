@@ -1,0 +1,34 @@
+# Starts from detekt defaults (buildUponDefaultConfig). Only deviations are listed here.
+# Compose screens under ui/ are long declarative functions by nature: size/complexity rules skip them.
+style:
+  MagicNumber:
+    active: false
+  MaxLineLength:
+    active: false
+  ReturnCount:
+    max: 4
+  ThrowsCount:
+    max: 4
+complexity:
+  LongParameterList:
+    ignoreDefaultParameters: true
+    ignoreDataClasses: true
+  TooManyFunctions:
+    active: false
+  LongMethod:
+    excludes: ['**/ui/**', '**/MainActivity.kt']
+  CyclomaticComplexMethod:
+    excludes: ['**/ui/**', '**/MainActivity.kt']
+naming:
+  MatchingDeclarationName:
+    active: false
+  FunctionNaming:
+    ignoreAnnotated: ['Composable']
+exceptions:
+  SwallowedException:
+    ignoredExceptionTypes:
+      - 'ActivityNotFoundException'
+      - 'IllegalArgumentException'
+      - 'SerializationException'
+      - 'NumberFormatException'
+      - 'Exception'

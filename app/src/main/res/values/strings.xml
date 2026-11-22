@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Meat Me Later</string>
+
+    <!-- Navigation -->
+    <string name="nav_pieces">Pièces</string>
+    <string name="nav_calculator">Calculateur</string>
+    <string name="nav_recipes">Recettes</string>
+    <string name="nav_stats">Stats</string>
+    <string name="settings">Réglages</string>
+    <string name="back">Retour</string>
+    <string name="piece_detail">Détail de la pièce</string>
+    <string name="recipe_edit">Recette</string>
+
+    <!-- Generic -->
+    <string name="save">Enregistrer</string>
+    <string name="cancel">Annuler</string>
+    <string name="close">Fermer</string>
+    <string name="delete">Supprimer</string>
+    <string name="edit">Modifier</string>
+    <string name="add">Ajouter</string>
+    <string name="duplicate">Dupliquer</string>
+    <string name="archive">Archiver</string>
+    <string name="unarchive">Désarchiver</string>
+    <string name="increase">Augmenter</string>
+    <string name="decrease">Diminuer</string>
+    <string name="unit_g">g</string>
+    <string name="unit_kg">kg</string>
+    <string name="grams_format">%1$s g</string>
+    <string name="weight">Poids</string>
+    <string name="diameter">Diamètre</string>
+    <string name="salt">Sel</string>
+    <string name="sugar">Sucre</string>
+    <string name="pepper">Poivre</string>
+    <string name="dose_rates">Sel %1$s · Sucre %2$s · Poivre %3$s g/kg</string>
+    <string name="pick_recipe">Choisir une recette</string>
+    <string name="pick_meat">Choisir une viande</string>
+
+    <!-- Durations -->
+    <string name="span_days_hours">%1$d j %2$d h</string>
+    <string name="span_days">%1$d j</string>
+    <string name="span_hours">%1$d h</string>
+    <string name="span_minutes">%1$d min</string>
+    <string name="remaining_in">dans %1$s</string>
+    <string name="remaining_overdue">en retard de %1$s</string>
+    <plurals name="days">
+        <item quantity="one">%1$d jour</item>
+        <item quantity="other">%1$d jours</item>
+    </plurals>
+    <plurals name="postponements">
+        <item quantity="one">Reportée %1$d fois d\'un jour</item>
+        <item quantity="other">Reportée %1$d fois d\'un jour</item>
+    </plurals>
+    <plurals name="pieces_count">
+        <item quantity="one">%1$d pièce</item>
+        <item quantity="other">%1$d pièces</item>
+    </plurals>
+    <plurals name="finished_pieces">
+        <item quantity="one">%1$d pièce terminée</item>
+        <item quantity="other">%1$d pièces terminées</item>
+    </plurals>
+
+    <!-- Stages -->
+    <string name="stage_vacuum">Sous-vide</string>
+    <string name="stage_fridge">Frigo</string>
+    <string name="status_done">Terminée</string>
+    <string name="status_cancelled">Annulée</string>
+    <string name="action_leave_vacuum">Sortir du sous-vide</string>
+    <string name="action_leave_fridge">Sortir du frigo</string>
+
+    <!-- Home -->
+    <string name="pieces_empty">Aucune pièce en cours. Touchez + pour en démarrer une.</string>
+    <string name="overdue_section">En retard</string>
+    <string name="running_section">En cours</string>
+    <string name="new_piece">Nouvelle pièce</string>
+
+    <!-- Calculator -->
+    <string name="calculator_hint">Saisissez un poids pour obtenir les doses.</string>
+    <string name="calculator_no_recipe">Aucune recette. Créez-en une dans l\'onglet Recettes.</string>
+
+    <!-- New piece -->
+    <string name="piece_label">Nom de la pièce</string>
+    <string name="vacuum_planned">Durée du sous-vide prévue</string>
+    <string name="override_days">Durée personnalisée (jours, facultatif)</string>
+    <string name="start_piece">Démarrer le sous-vide</string>
+
+    <!-- Piece detail -->
+    <string name="piece_not_found">Pièce introuvable.</string>
+    <string name="weight_diameter">%1$s · Ø %2$s cm</string>
+    <string name="current_vacuum">Sous-vide en cours</string>
+    <string name="current_fridge">Séchage au frigo en cours</string>
+    <string name="planned_end">Fin prévue : %1$s</string>
+    <string name="fridge_check_hint">Au terme prévu, vérifiez la pièce au toucher ; reportez d\'un jour tant qu\'elle n\'est pas prête.</string>
+    <string name="leave_vacuum">Sortir du sous-vide</string>
+    <string name="leave_fridge">Sortir du frigo</string>
+    <string name="postpone_one_day">Reporter 1 jour</string>
+    <string name="edit_duration">Modifier la durée</string>
+    <string name="duration_days">Durée (jours)</string>
+    <string name="add_to_calendar">Ajouter au calendrier</string>
+    <string name="no_calendar_app">Aucune application de calendrier trouvée.</string>
+    <string name="calendar_seasoning">Assaisonnement : %1$s</string>
+    <string name="seasoning_stage1">Assaisonnement sous-vide</string>
+    <string name="seasoning_stage2">Assaisonnement frigo</string>
+    <string name="none_seasoning">aucun</string>
+    <string name="history">Historique</string>
+    <string name="started_at">Début : %1$s</string>
+    <string name="ended_at">Fin réelle : %1$s</string>
+    <string name="actual_days">Durée réelle : %1$s jours</string>
+    <string name="note_prefix">Note : %1$s</string>
+    <string name="add_note">Ajouter une note</string>
+    <string name="edit_note">Modifier la note</string>
+    <string name="note_hint">Ex. : ferme au toucher</string>
+    <string name="open_in_calculator">Ouvrir dans le calculateur</string>
+    <string name="cancel_piece">Annuler la pièce</string>
+    <string name="cancel_piece_text">La pièce est arrêtée et ses rappels sont supprimés. Son historique est conservé.</string>
+    <string name="delete_piece_title">Supprimer la pièce ?</string>
+    <string name="delete_piece_text">La pièce et son historique seront effacés définitivement.</string>
+    <string name="finish_vacuum_title">Sortir du sous-vide</string>
+    <string name="finish_vacuum_text">La pièce passe au frigo maintenant. Quel assaisonnement ajoutez-vous pour cette étape ?</string>
+    <string name="fridge_seasoning">Assaisonnement frigo</string>
+    <string name="fridge_seasoning_hint">Laissez vide pour aucun assaisonnement</string>
+    <string name="finish_fridge_title">Sortir du frigo</string>
+    <string name="finish_fridge_text">Marquer cette pièce comme terminée ?</string>
+    <string name="done_action">Terminée</string>
+
+    <!-- Recipes -->
+    <string name="recipes">Recettes</string>
+    <string name="recipes_empty">Aucune recette. Touchez + pour en créer une.</string>
+    <string name="new_recipe">Nouvelle recette</string>
+    <string name="recipe_name">Nom de la recette</string>
+    <string name="recipe_archived_title">%1$s (archivée)</string>
+    <string name="recipe_in_use">Utilisée par %1$s : elle ne peut pas être supprimée, mais vous pouvez l\'archiver.</string>
+    <string name="delete_recipe_title">Supprimer la recette ?</string>
+    <string name="delete_recipe_text">Cette recette sera effacée définitivement.</string>
+    <string name="vacuum_doses">Dosages au sous-vide</string>
+    <string name="vacuum_duration">Durée du sous-vide</string>
+    <string name="divisor">Diviseur</string>
+    <string name="added_days">Jours ajoutés</string>
+    <string name="fridge">Frigo</string>
+    <string name="fridge_min_days">Minimum au frigo (jours)</string>
+    <string name="fridge_seasoning_default">Assaisonnement frigo par défaut (facultatif)</string>
+    <string name="meat_types">Types de viande</string>
+    <string name="new_meat_type">Nouvelle viande</string>
+    <string name="meat_in_use">Cette viande est utilisée par des recettes.</string>
+
+    <!-- Stats -->
+    <string name="stats_empty">Aucune pièce terminée pour l\'instant.</string>
+    <string name="stats_averages">Durées moyennes réelles</string>
+    <string name="stats_finished">Pièces terminées</string>
+    <string name="stats_vacuum_avg">Sous-vide : %1$s jours en moyenne</string>
+    <string name="stats_fridge_avg">Frigo : %1$s jours en moyenne</string>
+    <string name="stats_planned_vs_actual">%1$s : prévu %2$s j, réel %3$s j</string>
+
+    <!-- Settings -->
+    <string name="appearance">Apparence</string>
+    <string name="theme_light">Clair</string>
+    <string name="theme_dark">Sombre</string>
+    <string name="theme_oled">Sombre OLED</string>
+    <string name="theme_system">Système</string>
+    <string name="theme_system_note">« Système » suit le réglage clair/sombre du téléphone ; le mode OLED se choisit manuellement.</string>
+    <string name="running_pieces_keep_doses">Les modifications ne s\'appliquent qu\'aux nouvelles pièces ; les pièces en cours gardent leurs doses.</string>
+    <string name="duration_example">Ø %1$s cm ÷ %2$s + %3$s = %4$s → %5$s</string>
+    <string name="fridge_and_reminders">Frigo et rappels</string>
+    <string name="fridge_min_days_default">Minimum au frigo par défaut (jours)</string>
+    <string name="reminder_hour">Heure du rappel</string>
+    <string name="reminder_minute">Minutes du rappel</string>
+    <string name="reminder_time_note">Les rappels sonnent à cette heure le jour prévu.</string>
+    <string name="permissions">Autorisations</string>
+    <string name="perm_notifications">Notifications</string>
+    <string name="perm_exact_alarms">Alarmes exactes</string>
+    <string name="perm_battery">Exemption d\'optimisation de batterie</string>
+    <string name="perm_ok">Accordée</string>
+    <string name="perm_missing">Manquante</string>
+    <string name="perm_fix">Corriger</string>
+    <string name="data">Données</string>
+    <string name="export_json">Exporter les données (JSON)</string>
+    <string name="import_json">Importer des données (JSON)</string>
+    <string name="import_confirm">L\'import remplace toutes les données actuelles (pièces, recettes, viandes). Continuer ?</string>
+    <string name="import_replace">Remplacer</string>
+    <string name="export_done">Export terminé.</string>
+    <string name="export_failed">L\'export a échoué.</string>
+    <string name="import_done">Import terminé.</string>
+    <string name="import_invalid">Fichier invalide : %1$s</string>
+    <string name="import_failed">L\'import a échoué ; vos données n\'ont pas été modifiées.</string>
+    <string name="about">À propos</string>
+    <string name="version_format">Version %1$s</string>
+    <string name="about_text">Application locale : aucune donnée ne quitte votre téléphone. Vous restez responsable des valeurs de vos recettes.</string>
+
+    <!-- Reminders -->
+    <string name="channel_name">Rappels d\'étapes</string>
+    <string name="channel_description">Prévient quand une pièce doit sortir du sous-vide ou du frigo.</string>
+    <string name="notification_done">Fait</string>
+    <string name="notification_postpone">Reporter 1 jour</string>
+    <string name="notification_fridge_body">Vérifier la pièce au toucher</string>
+    <string name="permissions_warning_title">Rappels non fiables</string>
+    <string name="permissions_warning_text">Des autorisations manquent : sans elles, un rappel peut arriver en retard ou pas du tout.</string>
+    <string name="allow_notifications">Autoriser les notifications</string>
+    <string name="allow_exact_alarms">Autoriser les alarmes exactes</string>
+    <string name="battery_wizard_title">Des rappels fiables</string>
+    <string name="battery_wizard_text">Pour que les rappels sonnent à l\'heure même après plusieurs jours, Android doit autoriser l\'application à fonctionner en arrière-plan. Sur l\'écran suivant, choisissez « Autoriser ».</string>
+    <string name="battery_wizard_open">Ouvrir les réglages</string>
+    <string name="battery_wizard_later">Plus tard</string>
+    <string name="allow_battery">Désactiver l\'optimisation de batterie</string>
+</resources>

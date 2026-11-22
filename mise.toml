@@ -14,7 +14,7 @@ ktlint = "latest"         # used by the format-on-edit hook (Gradle runs its own
 # If `mise run doctor` says the platform is missing even after setup, check the exact package
 # id with `sdkmanager --list` (minor SDK releases can use ids like android-37.0).
 ANDROID_PLATFORM = "37.0"
-# AGP 9.3's default build-tools version.
+# AGP 9.5's default (and minimum) build-tools version.
 ANDROID_BUILD_TOOLS = "36.0.0"
 
 [tasks.doctor]
@@ -50,9 +50,16 @@ run = "./gradlew ktlintCheck detekt lintDebug"
 description = "JVM unit tests (domain, data, receivers)"
 run = "./gradlew testDebugUnitTest"
 
+[tasks.coverage]
+description = "Run unit tests with Kover and enforce >= 90 % domain line coverage (N6)"
+run = "./gradlew koverVerifyDebug koverHtmlReportDebug"
+
 [tasks.check]
-description = "Everything that must pass before a merge"
-depends = ["doctor", "lint", "test"]
+description = "Everything that must pass before a merge: lint, unit tests and the 90 % domain coverage gate"
+depends = ["doctor"]
+# One Gradle invocation on purpose. mise runs `depends` tasks in parallel, and two Gradle builds writing the
+# same app/build directory at once made resource merging fail randomly ("No such file or directory").
+run = "./gradlew ktlintCheck detekt lintDebug koverVerifyDebug koverHtmlReportDebug"
 
 [tasks.build]
 description = "Debug APK"
