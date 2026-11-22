@@ -156,3 +156,40 @@ fun PermissionBanner(modifier: Modifier = Modifier) {
         }
     }
 }
+
+/**
+ * R16: first-launch explanation of why the app should be exempt from battery optimisation, with a
+ * deep link to the system dialog. Shown once (the flag is stored in settings), and never when the
+ * exemption is already granted.
+ */
+@Composable
+fun BatteryOnboardingDialog(
+    shouldShow: Boolean,
+    onFinished: () -> Unit,
+) {
+    val context = LocalContext.current
+    val permissions = rememberReminderPermissions()
+    if (!batteryWizardVisible(shouldShow, permissions.batteryExempt)) return
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onFinished,
+        title = { Text(stringResource(R.string.battery_wizard_title)) },
+        text = { Text(stringResource(R.string.battery_wizard_text)) },
+        confirmButton = {
+            androidx.compose.material3.TextButton(onClick = {
+                PermissionActions.batteryExemption(context)
+                onFinished()
+            }) { Text(stringResource(R.string.battery_wizard_open)) }
+        },
+        dismissButton = {
+            androidx.compose.material3.TextButton(
+                onClick = onFinished,
+            ) { Text(stringResource(R.string.battery_wizard_later)) }
+        },
+    )
+}
+
+/** Pure rule behind the first-launch wizard: only when not yet shown and not already exempt. */
+fun batteryWizardVisible(
+    notYetShown: Boolean,
+    alreadyExempt: Boolean,
+): Boolean = notYetShown && !alreadyExempt

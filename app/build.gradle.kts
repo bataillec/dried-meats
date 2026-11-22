@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
+    alias(libs.plugins.kover)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.detekt)
 }
@@ -80,6 +81,25 @@ ktlint {
     android.set(true)
 }
 
+// N6: the domain layer must stay at or above 90 % line coverage.
+kover {
+    reports {
+        filters {
+            includes {
+                packages("fr.viandes.seches.domain")
+            }
+            excludes {
+                classes("*.Fake*")
+            }
+        }
+        verify {
+            rule {
+                minBound(90)
+            }
+        }
+    }
+}
+
 detekt {
     config.setFrom(rootProject.file("config/detekt/detekt.yml"))
     buildUponDefaultConfig = true
@@ -103,12 +123,22 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     ksp(libs.androidx.room.compiler)
     debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.compose.ui.test)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.androidx.room.testing)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.rules)
+    androidTestImplementation(libs.androidx.test.espresso.core)
+    androidTestImplementation(libs.androidx.test.core)
     testImplementation(libs.androidx.sqlite.framework)
 }

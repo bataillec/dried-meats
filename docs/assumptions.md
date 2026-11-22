@@ -18,4 +18,5 @@ reversed; the requirement ids show what it touches.
 | 11 | Calendar | Offered on demand for the current stage end; the 30-minute event is a one-off copy. | R22 |
 | 12 | Language | French only for now; strings are in `values/strings.xml`, plurals via `plurals`. | N1 |
 | 13 | Battery exemption | Declared `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` (sideloaded APK; Google Play restricts it). The home banner and Réglages show and fix it; there is no separate first-launch wizard. | R16 |
+| 15 | Test split | AlertDialog flows cannot idle under Robolectric, so their two UI tests are `@Ignore`d there and run as instrumented tests (`LeaveVacuumDialogTest`). Receivers and alarms are tested under Robolectric with the real `AndroidAlarmScheduler` and an on-device alarm test. | N5, R8, R16 |
 | 14 | Compose size lint | detekt `LongMethod` and `CyclomaticComplexMethod` are not applied under `ui/` and `MainActivity.kt` (declarative Compose functions). | N7 |

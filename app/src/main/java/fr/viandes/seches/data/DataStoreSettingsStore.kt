@@ -37,6 +37,7 @@ class DataStoreSettingsStore(
             prefs[DIVISOR] = next.defaultVacuumDivisor.toPlainString()
             prefs[OFFSET] = next.defaultVacuumOffsetDays.toPlainString()
             prefs[SEEDED] = next.seeded
+            prefs[BATTERY_HINT] = next.batteryHintShown
         }
     }
 
@@ -50,6 +51,7 @@ class DataStoreSettingsStore(
             defaultVacuumDivisor = this[DIVISOR]?.toBigDecimalOrNull() ?: defaults.defaultVacuumDivisor,
             defaultVacuumOffsetDays = this[OFFSET]?.toBigDecimalOrNull() ?: defaults.defaultVacuumOffsetDays,
             seeded = this[SEEDED] ?: false,
+            batteryHintShown = this[BATTERY_HINT] ?: false,
         )
     }
 
@@ -61,5 +63,6 @@ class DataStoreSettingsStore(
         val DIVISOR = stringPreferencesKey("default_vacuum_divisor")
         val OFFSET = stringPreferencesKey("default_vacuum_offset_days")
         val SEEDED = booleanPreferencesKey("seeded")
+        val BATTERY_HINT = booleanPreferencesKey("battery_hint_shown")
     }
 }

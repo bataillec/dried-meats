@@ -15,8 +15,9 @@ Everything stays on the phone. Specs are in [`docs/`](docs/).
 
 v0.1: all of R1–R26 are implemented (see `docs/assumptions.md` for the choices made). `mise run check` passes
 (ktlint, detekt, Android lint, JVM unit and Robolectric tests); `mise run build` produces
-`app/build/outputs/apk/debug/app-debug.apk`. The reminder behaviour on a real device (Doze, reboot, N5)
-and the UI on small screens/large fonts (N4) still have to be verified with `docs/device-checklist.md`.
+`app/build/outputs/apk/debug/app-debug.apk`. Domain line coverage is enforced at 90 % (Kover, N6). UI flows, receivers and the reminder alarm are tested with
+Robolectric and, on an emulator, `./gradlew connectedDebugAndroidTest`. Doze/reboot on real hardware and
+large-font/contrast review (N4) still have to be verified with `docs/device-checklist.md`.
 
 ## Everyday commands
 

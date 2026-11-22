@@ -31,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -40,6 +41,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import fr.viandes.seches.domain.AppSettings
+import fr.viandes.seches.platform.BatteryOnboardingDialog
 import fr.viandes.seches.ui.calculator.CalculatorScreen
 import fr.viandes.seches.ui.pieces.NewPieceScreen
 import fr.viandes.seches.ui.pieces.PieceDetailScreen
@@ -49,6 +51,7 @@ import fr.viandes.seches.ui.recipes.RecipesScreen
 import fr.viandes.seches.ui.settings.SettingsScreen
 import fr.viandes.seches.ui.stats.StatsScreen
 import fr.viandes.seches.ui.theme.AppTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     private var pendingPieceId by mutableStateOf<Long?>(null)
@@ -59,9 +62,23 @@ class MainActivity : ComponentActivity() {
         pendingPieceId = pieceIdOf(intent)
         val container = (application as ViandesApp).container
         setContent {
-            val settings by container.settings.observe().collectAsState(initial = AppSettings())
-            AppTheme(settings.theme) {
-                Surface { AppRoot(pendingPieceId) { pendingPieceId = null } }
+            val settings by container.settings.observe().collectAsState(initial = null)
+            AppTheme((settings ?: AppSettings()).theme) {
+                Surface {
+                    AppRoot(pendingPieceId) { pendingPieceId = null }
+                    BatteryOnboardingDialog(
+                        shouldShow = settings?.batteryHintShown == false,
+                        onFinished = {
+                            lifecycleScope.launch {
+                                container.settings.update {
+                                    it.copy(
+                                        batteryHintShown = true,
+                                    )
+                                }
+                            }
+                        },
+                    )
+                }
             }
         }
     }

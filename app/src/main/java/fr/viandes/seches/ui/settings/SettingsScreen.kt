@@ -54,6 +54,7 @@ import fr.viandes.seches.ui.common.SectionTitle
 import fr.viandes.seches.ui.common.fr
 import fr.viandes.seches.ui.common.recipeOptions
 import fr.viandes.seches.ui.common.rememberContainer
+import fr.viandes.seches.ui.pieces.pluralDays
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -301,7 +302,7 @@ private fun RecipeSteppers(
                 r.vacuumDivisor.fr(),
                 r.vacuumOffsetDays.fr(),
                 rule.rawDays(example).fr(),
-                rule.days(example),
+                pluralDays(rule.days(example)),
             ),
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.padding(16.dp),

@@ -111,6 +111,7 @@ data class AppSettings(
     val defaultVacuumDivisor: java.math.BigDecimal = Recipe.DEFAULT_VACUUM_DIVISOR,
     val defaultVacuumOffsetDays: java.math.BigDecimal = Recipe.DEFAULT_VACUUM_OFFSET_DAYS,
     val seeded: Boolean = false,
+    val batteryHintShown: Boolean = false,
 ) {
     val reminderTime: java.time.LocalTime get() = java.time.LocalTime.of(reminderHour, reminderMinute)
 }

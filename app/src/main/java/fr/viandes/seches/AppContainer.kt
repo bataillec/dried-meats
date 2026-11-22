@@ -22,14 +22,16 @@ import fr.viandes.seches.platform.AndroidAlarmScheduler
 /** Manual dependency injection (design.md section 1). */
 class AppContainer(
     val context: Context,
+    databaseFactory: (Context) -> AppDatabase = AppDatabase::build,
+    val clock: Clock = SystemClock(),
+    alarmFactory: (Context) -> AlarmScheduler = ::AndroidAlarmScheduler,
 ) {
-    val database: AppDatabase by lazy { AppDatabase.build(context) }
-    val clock: Clock = SystemClock()
+    val database: AppDatabase by lazy { databaseFactory(context) }
     val settings: SettingsStore by lazy { DataStoreSettingsStore(context) }
     val meatTypes: MeatTypeStore by lazy { RoomMeatTypeStore(database) }
     val recipes: RecipeStore by lazy { RoomRecipeStore(database) }
     val pieces: PieceStore by lazy { RoomPieceStore(database) }
-    val alarmScheduler: AlarmScheduler by lazy { AndroidAlarmScheduler(context) }
+    val alarmScheduler: AlarmScheduler by lazy { alarmFactory(context) }
     val reminderPlanner: ReminderPlanner by lazy { ReminderPlanner(pieces, alarmScheduler, clock) }
     val pieceActions: PieceActions by lazy { PieceActions(pieces, recipes, settings, reminderPlanner, clock) }
     val seeder: Seeder by lazy { Seeder(settings, meatTypes) }

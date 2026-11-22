@@ -50,9 +50,13 @@ run = "./gradlew ktlintCheck detekt lintDebug"
 description = "JVM unit tests (domain, data, receivers)"
 run = "./gradlew testDebugUnitTest"
 
+[tasks.coverage]
+description = "Run unit tests with Kover and enforce >= 90 % domain line coverage (N6)"
+run = "./gradlew koverVerifyDebug koverHtmlReportDebug"
+
 [tasks.check]
-description = "Everything that must pass before a merge"
-depends = ["doctor", "lint", "test"]
+description = "Everything that must pass before a merge (tests run inside coverage)"
+depends = ["doctor", "lint", "coverage"]
 
 [tasks.build]
 description = "Debug APK"
