@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0 (unreleased)
+## 0.1.0 (2026-11-22)
 
 - Dose calculator, recipes and meat types, pieces with vacuum and fridge stages, reminders with
   "Fait" / "Reporter 1 jour", overdue pinning, statistics, JSON export/import, calendar hand-off,
