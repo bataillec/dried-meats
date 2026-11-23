@@ -94,6 +94,16 @@ Derived from intent.md v0.2. Each requirement has an ID used in tests and PRs.
   reminder time of day (default 18:00). The reminder time is applied when computing a stage's planned end
   timestamp. It is shown as one `HH:mm` row (24 h, any minute) that opens a time picker dialog; confirming
   saves hour and minute together and reconciles the reminders once, cancelling changes nothing. These are the global defaults used when creating recipes.
+- **R27** The Réglages screen offers a "Couleur principale" choice, under "Thème": six swatches
+  (Viande séchée, the default and today's red, plus vert, bleu, violet, ambre and brun-gris).
+  - The choice applies immediately to the whole UI in Clair, Sombre, Sombre OLED and Système, and is
+    kept after a restart. OLED keeps its pure black background (R24); only the accent roles change.
+  - The accent drives the primary and secondary roles (and the neutral tints); the tertiary roles are the
+    semantic alert orange (overdue cards) and never follow it. The sous-vide and frigo chips use the
+    secondary and primary containers and always carry their text label, so they never rely on colour alone.
+  - The selected swatch is shown by a check mark and a spoken label, not by colour alone; targets are
+    48 dp and swatches wrap onto a second line when they do not fit (N4).
+  - Stored in DataStore, not exported with the data; an unknown stored value falls back to the default.
 
 ## Non-functional requirements
 
