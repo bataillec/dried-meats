@@ -60,4 +60,4 @@ which also gets a link to the GitHub repository.
 2. Link look in the app? Default: two text-button rows with an icon-free label, full-width tap target.
 3. Message when no browser is available? Default: a short toast/snackbar "Aucun navigateur disponible".
 4. Show the full URL under each label? Default: no, label only.
-5. New requirement id or amend R24-R26? Default: a new requirement R27 under Réglages.
+5. New requirement id or amend R24-R26? Default: a new requirement under Réglages (R27 and R28 are now taken, so the next free id).
