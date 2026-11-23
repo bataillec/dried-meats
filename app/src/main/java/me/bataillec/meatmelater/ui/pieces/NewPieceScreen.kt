@@ -29,7 +29,6 @@ import me.bataillec.meatmelater.domain.LabelSuggester
 import me.bataillec.meatmelater.domain.PieceFactory
 import me.bataillec.meatmelater.domain.WeightParser
 import me.bataillec.meatmelater.domain.WeightUnit
-import me.bataillec.meatmelater.ui.calculator.DosesCard
 import me.bataillec.meatmelater.ui.common.DecimalField
 import me.bataillec.meatmelater.ui.common.MeatTypePicker
 import me.bataillec.meatmelater.ui.common.RecipePicker
@@ -81,7 +80,7 @@ fun NewPieceScreen(onCreated: (Long) -> Unit) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         if (options.isEmpty()) {
-            Text(stringResource(R.string.calculator_no_recipe), style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(R.string.no_recipe_hint), style = MaterialTheme.typography.bodyLarge)
         } else {
             RecipePicker(options, option?.recipe?.id, { recipeId = it }, Modifier.fillMaxWidth())
         }

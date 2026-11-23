@@ -4,7 +4,6 @@
 
     <!-- Navigation -->
     <string name="nav_pieces">Pièces</string>
-    <string name="nav_calculator">Calculateur</string>
     <string name="nav_recipes">Recettes</string>
     <string name="nav_stats">Stats</string>
     <string name="settings">Réglages</string>
@@ -76,9 +75,9 @@
     <string name="running_section">En cours</string>
     <string name="new_piece">Nouvelle pièce</string>
 
-    <!-- Calculator -->
-    <string name="calculator_hint">Saisissez un poids pour obtenir les doses.</string>
-    <string name="calculator_no_recipe">Aucune recette. Créez-en une dans l\'onglet Recettes.</string>
+    <!-- Doses -->
+    <string name="doses_hint">Saisissez un poids pour obtenir les doses.</string>
+    <string name="no_recipe_hint">Aucune recette. Créez-en une dans l\'onglet Recettes.</string>
 
     <!-- New piece -->
     <string name="piece_label">Nom de la pièce</string>

@@ -20,12 +20,12 @@ Derived from intent.md v0.2. Each requirement has an ID used in tests and PRs.
   A recipe has no meat type: the same recipe can be used for any meat.
 - **R3** A recipe cannot be deleted while pieces use it; it can be archived.
 
-### Dosage calculator
-- **R4** Given a weight (g or kg input) and a recipe, show grams of salt, sugar and pepper.
+### Doses
+- **R4** Given a weight (g or kg input) and a recipe, show grams of salt, sugar and pepper, live on the new-piece screen (R6).
   Formula: `grams = weight_kg × dose_g_per_kg`, rounded to 0.1 g.
   - *Acceptance:* 1.250 kg with salt 25 g/kg → 31.3 g (31.25 rounds half-up). 0 kg or empty → no result, no crash.
-- **R5** The calculator works standalone (no piece created). It is not opened from a piece: the piece detail screen shows the piece's own snapshotted doses (R6), without a shortcut to the calculator.
-  - *Acceptance:* the piece detail screen has no "Ouvrir dans le calculateur" button; the calculator is reached from the bottom bar only.
+- **R5** *(removed, issue #10)* There is no standalone calculator: no bottom-bar tab, no calculator screen or route. Doses are only seen when creating a piece (R4, R6) and on its detail screen (snapshot, R6). The id is not reused.
+  - *Acceptance:* the bottom bar shows Pièces, Recettes, Stats only; no screen or route named calculator exists.
 
 ### Pieces and stages
 - **R6** Creating a piece requires: meat type, recipe, label (auto-suggested from the chosen meat type), weight, diameter in cm.

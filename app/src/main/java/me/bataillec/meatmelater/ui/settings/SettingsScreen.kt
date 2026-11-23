@@ -152,7 +152,7 @@ fun SettingsScreen(linkOpener: ExternalLinkOpener = rememberExternalLinkOpener()
 
         SectionTitle(stringResource(R.string.vacuum_doses))
         if (option == null) {
-            Text(stringResource(R.string.calculator_no_recipe))
+            Text(stringResource(R.string.no_recipe_hint))
         } else {
             RecipePicker(options, option.recipe.id, { recipeId = it }, Modifier.fillMaxWidth())
             RecipeSteppers(option, scope) { updated -> container.recipes.save(updated) }
