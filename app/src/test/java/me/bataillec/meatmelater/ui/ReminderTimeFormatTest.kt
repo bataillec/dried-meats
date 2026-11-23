@@ -3,9 +3,11 @@ package me.bataillec.meatmelater.ui
 import kotlinx.coroutines.test.runTest
 import me.bataillec.meatmelater.domain.FakeAlarmScheduler
 import me.bataillec.meatmelater.domain.FakeClock
+import me.bataillec.meatmelater.domain.FakeMeatTypeStore
 import me.bataillec.meatmelater.domain.FakePieceStore
 import me.bataillec.meatmelater.domain.FakeRecipeStore
 import me.bataillec.meatmelater.domain.FakeSettingsStore
+import me.bataillec.meatmelater.domain.MeatType
 import me.bataillec.meatmelater.domain.PieceActions
 import me.bataillec.meatmelater.domain.Recipe
 import me.bataillec.meatmelater.domain.ReminderPlanner
@@ -42,8 +44,11 @@ class ReminderTimeFormatTest {
             val scheduler = FakeAlarmScheduler()
             val planner = ReminderPlanner(pieces, scheduler, clock)
             val settings = FakeSettingsStore()
-            val recipe = recipes.save(Recipe(0, 1, "Boeuf", BigDecimal("25"), BigDecimal("5"), BigDecimal("2")))
-            PieceActions(pieces, recipes, settings, planner, clock).createPiece("P", recipe, 1250, BigDecimal("12"))
+            val meats = FakeMeatTypeStore()
+            val meat = meats.save(MeatType(0, "Bœuf"))
+            val recipe = recipes.save(Recipe(0, "Classique", BigDecimal("25"), BigDecimal("5"), BigDecimal("2")))
+            PieceActions(pieces, recipes, meats, settings, planner, clock)
+                .createPiece("P", recipe, meat, 1250, BigDecimal("12"))
             scheduler.reset()
             assertEquals(emptySet<Long>(), scheduler.scheduledIds())
 
