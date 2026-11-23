@@ -47,7 +47,7 @@ class ReminderTimePickerTest {
     }
 
     @Test
-    fun `R26 the row shows HH-mm with a spoken label`() {
+    fun r26RowShowsHhMmWithSpokenLabel() {
         stored = 7 to 5
         show()
         compose.onNodeWithText("07:05").assertIsDisplayed()
@@ -60,7 +60,7 @@ class ReminderTimePickerTest {
     }
 
     @Test
-    fun `R26 cancel leaves the time untouched`() {
+    fun r26CancelLeavesTimeUntouched() {
         stored = 18 to 0
         show()
         compose.onNodeWithText("18:00").performClick()
@@ -71,7 +71,7 @@ class ReminderTimePickerTest {
     }
 
     @Test
-    fun `R26 confirm with a typed time that is not a multiple of 5 saves hour and minute once`() {
+    fun r26ConfirmWithTypedTimeNotMultipleOfFiveSavesHourAndMinuteOnce() {
         stored = 18 to 0
         confirmCount = 0
         show(fontScale = 2f) // large font: the dialog opens directly in keyboard mode
@@ -85,7 +85,7 @@ class ReminderTimePickerTest {
     }
 
     @Test
-    fun `R26 the dialog buttons stay reachable at 200 percent font`() {
+    fun r26DialogButtonsStayReachableAt200PercentFont() {
         show(fontScale = 2f)
         compose.onNodeWithText("18:00").performClick()
         compose.onNodeWithText(str(R.string.validate)).assertIsDisplayed()
@@ -93,7 +93,7 @@ class ReminderTimePickerTest {
     }
 
     @Test
-    fun `R26 at normal font the dial opens first and the toggle switches to keyboard`() {
+    fun r26AtNormalFontDialOpensFirstAndToggleSwitchesToKeyboard() {
         stored = 18 to 0
         confirmCount = 0
         show()
@@ -107,7 +107,7 @@ class ReminderTimePickerTest {
     }
 
     @Test
-    fun `R26 the row stays fully visible at 200 percent font`() {
+    fun r26RowStaysFullyVisibleAt200PercentFont() {
         stored = 18 to 0
         show(fontScale = 2f)
         compose.onNodeWithText(str(R.string.reminder_time)).assertIsDisplayed()
