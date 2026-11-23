@@ -1,6 +1,6 @@
 # intent — Formule et exemple sous « Durée du sous-vide » (issue #8)
 
-Status: draft, awaiting owner validation.
+Status: validated by the owner (2026-11-23). Answers to §6 are below; Réglages is aligned on 6 cm.
 
 ## 1. What I want
 
@@ -39,23 +39,19 @@ form, where the values are first chosen, does not.
 - Choosing the example diameter, changing the formula or its defaults, touching existing
   pieces (their durations stay snapshotted, R6).
 
+In scope by decision (§6.3): the Réglages example (R25) also moves from 9 cm to 6 cm, so
+both screens share one constant and show the same example.
+
 ## 5. Success looks like
 
 - « Nouvelle recette » shows « Ø 6 cm ÷ 2 + 1 = 4 → 4 jours » under « Jours ajoutés ».
 - Editing the fields updates it live; bad input never shows a wrong number.
 - Readable at 200 % font and with TalkBack; `mise run check` passes.
 
-## 6. Open questions (each with a default)
+## 6. Decisions on the open questions (owner, 2026-11-23)
 
-1. **Invalid empty field**: hide the label entirely, or show a neutral hint?
-   Default: hide the formula and example; only divisor ≤ 0 shows the invalid hint.
-2. **Requirement id**: new R-id, or extend R7/R25? Default: a new requirement (next R-id)
-   that references R7 and R25.
-3. **Example diameter**: the Réglages example uses 9 cm, this one 6 cm. Keep them different
-   or align? Default: keep them different (as the issue says) and record it in
-   `docs/assumptions.md`.
-4. **TalkBack announcements**: polite live region or not? Default: not live (read on
-   focus), to avoid chatter on each keystroke.
-5. **Formula in the label**: show the user's current values (« ÷ 1,5 + 0,5 ») only when
-   valid, or the generic « Ø ÷ diviseur + jours ajoutés » otherwise? Default: current
-   values only when valid, otherwise nothing (see question 1).
+1. **Invalid or empty field**: hide the formula and the example. Divisor ≤ 0 shows the invalid hint.
+2. **Requirement id**: a new requirement (R28), referencing R7 and R25.
+3. **Example diameter**: aligned, 6 cm in the recipe form and in Réglages.
+4. **TalkBack**: not a live region; read on focus.
+5. **Formula values**: the user's current values, shown only when valid.

@@ -88,7 +88,7 @@ Derived from intent.md v0.2. Each requirement has an ID used in tests and PRs.
   - The choice is stored in DataStore and applies immediately.
 - **R25** The Réglages screen exposes the vacuum-stage settings: for a chosen recipe, salt, sugar and
   pepper in g/kg (− / + steppers), and the duration rule (divisor, default 2; added days, default 1)
-  with a live example ("Ø 9 cm ÷ 2 + 1 = 5,5 → 6 jours"). Changes apply to new pieces only; running
+  with a live example ("Ø 6 cm ÷ 2 + 1 = 4 → 4 jours", same diameter as R28). Changes apply to new pieces only; running
   pieces keep their snapshotted doses (R6).
 - **R26** The Réglages screen also exposes the minimum fridge duration (default 14 days) and the
   reminder time of day (default 18:00). The reminder time is applied when computing a stage's planned end
@@ -115,3 +115,15 @@ Derived from intent.md v0.2. Each requirement has an ID used in tests and PRs.
 - **N6** Domain logic (dosage, durations, state machine) is pure Kotlin with ≥ 90 % unit-test coverage.
 - **N7** CI blocks merge on: build, lint (ktlint, detekt, Android lint), unit tests.
 - **N8** Release: pushing tag `vX.Y.Z` builds a signed APK and attaches it to a GitHub Release.
+- **R28** The recipe form, under "Durée du sous-vide", shows a label under "Diviseur" and "Jours ajoutés"
+  with the rule written with the typed values and a worked example for a fixed 6 cm diameter
+  (see R7, R25).
+  - Both fields valid: "Durée = ⌈ Ø ÷ 2 + 1 ⌉ jours, arrondie au jour supérieur" and
+    "Exemple : Ø 6 cm ÷ 2 + 1 = 4 → 4 jours", updated on every keystroke, French number format.
+  - A field empty or not a number: nothing is shown. Divisor ≤ 0: "Saisissez un diviseur supérieur à 0
+    pour voir l'exemple." No crash, no « 0 » or « NaN ».
+  - The example is computed by `StageDurationRule` (raw value, then days with the 1-day floor); the UI only formats.
+  - Informational only: it never blocks saving. Wraps at 200 % font, `bodyMedium` / `onSurfaceVariant` (N4),
+    and exposes one spoken sentence to TalkBack (not a live region).
+  - *Acceptance:* defaults → "Ø 6 cm ÷ 2 + 1 = 4 → 4 jours"; divisor 1,5 and added days 0,5 →
+    "Ø 6 cm ÷ 1,5 + 0,5 = 4,5 → 5 jours".
