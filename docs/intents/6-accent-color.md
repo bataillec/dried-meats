@@ -1,6 +1,6 @@
 # intent — Couleur principale de l'interface (issue #6)
 
-Status: draft v0.1 (2026-11-22), waiting for the owner's validation. Extends R24 (themes).
+Status: validated by the owner (2026-11-23), all defaults accepted. Extends R24 (themes).
 
 ## 1. What I want
 

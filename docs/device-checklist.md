@@ -15,6 +15,7 @@ Run on a real phone with the release APK installed over the previous version (da
 - [ ] Battery exemption banner clears after granting.
 - [ ] Export to JSON, uninstall/reinstall, import: all pieces and recipes are back and reminders are rescheduled.
 - [ ] Themes Clair, Sombre, Sombre OLED, Système; OLED background is pure black; check contrast of the alert orange and chips (N4).
+- [ ] Couleur principale (R27): each swatch applies at once in Clair, Sombre, Sombre OLED and Système, OLED stays pure black, the choice survives a restart, the check mark shows the selected swatch, alert orange and chips stay distinct (N4).
 - [ ] Font scale 200 %: no clipped buttons.
 
 ## Last run (2026-11-22, debug build, AGP 9.5.2)
