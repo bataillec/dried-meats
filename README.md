@@ -127,10 +127,11 @@ The complete rules live in [`CLAUDE.md`](CLAUDE.md).
 
 - `mise run check` is the gate before any commit and runs in CI: ktlint, detekt, Android lint, JVM unit and
   Robolectric tests, and a Kover coverage threshold of 90 % on `domain`.
-- Emulator tests (real alarm, battery wizard, dialogs) need a running emulator:
+- Emulator tests (real alarm, battery wizard, dialogs) need a running emulator or device. They are **not run in
+  CI**: run them locally before a release.
 
   ```bash
-  mise exec -- ./gradlew connectedDebugAndroidTest
+  mise run test:emulator
   ```
 
 - Before a release, run the manual [device checklist](docs/device-checklist.md) on a real phone (Doze, reboot,

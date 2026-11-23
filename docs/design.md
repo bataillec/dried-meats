@@ -99,7 +99,7 @@ Navigation: Navigation-Compose with bottom bar (Pièces, Calculateur, Recettes, 
 | Build | Gradle Kotlin DSL, version catalog, versions per `docs/decisions/0001-toolchain-versions.md`, R8 minify on release |
 | Tests | JUnit5 or JUnit4 + Turbine (Flow), Room in-memory tests, Compose UI tests, Robolectric for receivers |
 | Static checks | ktlint, detekt, Android lint |
-| CI/CD | GitHub Actions: PR checks; tag → signed APK → GitHub Release (keystore in repo secrets) |
+| CI/CD | GitHub Actions: PR checks (`check`, `wrapper-validation`; no emulator, instrumented tests run locally with `mise run test:emulator`); tag → signed APK → GitHub Release (keystore in repo secrets) |
 
 ## 7. Test plan (maps to requirements)
 
