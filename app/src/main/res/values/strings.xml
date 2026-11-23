@@ -160,6 +160,14 @@
     <string name="theme_oled">Sombre OLED</string>
     <string name="theme_system">Système</string>
     <string name="theme_system_note">« Système » suit le réglage clair/sombre du téléphone ; le mode OLED se choisit manuellement.</string>
+    <string name="accent_title">Couleur principale</string>
+    <string name="accent_viande_sechee">Viande séchée</string>
+    <string name="accent_vert">Vert</string>
+    <string name="accent_bleu">Bleu</string>
+    <string name="accent_violet">Violet</string>
+    <string name="accent_ambre">Ambre</string>
+    <string name="accent_brun_gris">Brun-gris</string>
+    <string name="accent_selected">%1$s, sélectionnée</string>
     <string name="running_pieces_keep_doses">Les modifications ne s\'appliquent qu\'aux nouvelles pièces ; les pièces en cours gardent leurs doses.</string>
     <string name="duration_example">Ø %1$s cm ÷ %2$s + %3$s = %4$s → %5$s</string>
     <string name="fridge_and_reminders">Frigo et rappels</string>
