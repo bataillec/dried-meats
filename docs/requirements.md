@@ -22,7 +22,8 @@ Derived from intent.md v0.2. Each requirement has an ID used in tests and PRs.
 - **R4** Given a weight (g or kg input) and a recipe, show grams of salt, sugar and pepper.
   Formula: `grams = weight_kg × dose_g_per_kg`, rounded to 0.1 g.
   - *Acceptance:* 1.250 kg with salt 25 g/kg → 31.3 g (31.25 rounds half-up). 0 kg or empty → no result, no crash.
-- **R5** The calculator works standalone (no piece created) and also from a piece.
+- **R5** The calculator works standalone (no piece created). It is not opened from a piece: the piece detail screen shows the piece's own snapshotted doses (R6), without a shortcut to the calculator.
+  - *Acceptance:* the piece detail screen has no "Ouvrir dans le calculateur" button; the calculator is reached from the bottom bar only.
 
 ### Pieces and stages
 - **R6** Creating a piece requires: label (auto-suggested), recipe, weight, diameter in cm.

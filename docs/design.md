@@ -73,7 +73,7 @@ VACUUM --finish--> FRIDGE --finish--> DONE
 1. **Pièces** (home): permission banner, "En retard" section, then running pieces sorted by next deadline; each row = label, meat/recipe, stage, remaining time. FAB "Nouvelle pièce".
 2. **Nouvelle pièce**: recipe picker, weight, diameter → live doses and planned vacuum duration → confirm.
 3. **Détail pièce**: stage-1 doses, stage-2 seasoning (or "aucun"), stage timeline planned vs. actual with postponements and notes, buttons "Sortir du sous-vide / du frigo", "Reporter 1 jour", "Ajouter au calendrier", edit duration, cancel. Leaving the vacuum stage opens a dialog asking for the stage-2 seasoning (prefilled, may be empty).
-4. **Calculateur**: weight + recipe → doses, no piece created.
+4. **Calculateur**: weight + recipe → doses, no piece created. Reached from the bottom bar only: it takes no piece argument (route `calculator`, no `pieceId`) and the piece detail screen has no link to it.
 5. **Recettes**: list by meat type; edit form with doses, rule, fridge days.
 6. **Statistiques**: averages per recipe/stage, finished pieces.
 7. **Réglages** (R24–R26): four blocks: *Apparence* (Clair / Sombre / OLED / Système), *Dosages au sous-vide* (recipe picker, salt/sugar/pepper g/kg with − / + steppers, note that running pieces keep their doses), *Durée du sous-vide* (divisor, added days, live example with round-up), *Frigo et rappels* (minimum fridge days, reminder hour). Also permissions status, export/import JSON, about/version.
