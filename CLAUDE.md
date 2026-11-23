@@ -32,6 +32,8 @@ AGP 9.5, Kotlin 2.4, Room 3, compileSdk 37). Update it in the same PR as any ver
 ## Conventions
 
 - Reference requirement ids (R4, N5 …) in test names and PR descriptions.
+- No spaces in `androidTest` method names (dex limit at minSdk 26): use camelCase with a lowercase id prefix, e.g.
+  `r26RowShowsHhMm…`. Backtick names stay fine in `app/src/test`. `mise run check` enforces it.
 - Tests first for `domain`; fakes (`FakeClock`, `FakeAlarmScheduler`) over mocks.
 - Small PRs, one concern each. No new dependency without a line in `docs/decisions/`.
 - Source layout: `app/src/main/java/me/bataillec/meatmelater/{domain,data,platform,ui}`; package `me.bataillec.meatmelater`.
