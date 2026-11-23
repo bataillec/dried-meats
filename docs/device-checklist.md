@@ -13,7 +13,7 @@ Run on a real phone with the release APK installed over the previous version (da
 - [ ] "Fait" and "Reporter 1 jour" buttons on the notification update the piece and reschedule.
 - [ ] Deny exact alarms: the home banner shows and links to the system screen.
 - [ ] Battery exemption banner clears after granting.
-- [ ] Export to JSON, uninstall/reinstall, import: all pieces and recipes are back and reminders are rescheduled.
+- [ ] Export to JSON, uninstall/reinstall, import: all pieces (with their meat type) and recipes are back and reminders are rescheduled.
 - [ ] Themes Clair, Sombre, Sombre OLED, Système; OLED background is pure black; check contrast of the alert orange and chips (N4).
 - [ ] Font scale 200 %: no clipped buttons.
 

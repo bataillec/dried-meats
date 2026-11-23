@@ -36,8 +36,8 @@ _Sample data on an emulator. Left to right: piece list (overdue first), piece de
 
 - **Dosage calculator**: enter a weight (g or kg) and pick a recipe to get the grams of salt, sugar and pepper
   (recipes are expressed in g/kg). Works standalone or from a piece.
-- **Recipes and meat types**: beef, pork and duck are pre-seeded; add your own meats and recipes, duplicate or
-  archive them. Fridge seasoning is free text.
+- **Recipes and meat types**: beef, pork and duck are pre-seeded; add your own meats (in Settings) and recipes,
+  duplicate or archive the recipes. A recipe is independent of the meat: pick both when you start a piece. Fridge seasoning is free text.
 - **Pieces in parallel**: each piece has a label, recipe, weight and diameter. The vacuum duration is computed from
   the diameter (diameter in cm / 2 + 1 days, adjustable per piece). Doses and durations are snapshotted at
   creation, so later recipe edits never change a running piece.

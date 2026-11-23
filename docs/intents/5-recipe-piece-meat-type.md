@@ -1,7 +1,7 @@
 # intent — Decouple the meat type from the recipe (issue #5)
 
-Status: draft v0.1 for the owner's validation (2026-11-22). Extends `docs/intent.md` (v0.3); where the two
-differ, this file wins for the points below once validated. No design or code is written yet.
+Status: v0.2, validated by the owner (2026-11-23). Extends `docs/intent.md` (v0.3); where the two
+differ, this file wins for the points below once validated. Design and requirements updates follow in the next step.
 
 ## 1. What I want
 
@@ -36,7 +36,7 @@ on my phone, so **existing data must survive** the change.
    The suggested label ("Bœuf 1", "Bœuf 2"…) follows the **meat chosen for the piece**.
 3. **Both are shown everywhere a piece is shown**: pieces list, piece detail, statistics (per meat type and
    recipe), and the reminder notification, taken from the piece.
-4. **Meat types stay manageable** (add, rename, delete; beef, pork, duck seeded). A meat type used by at
+4. **Meat types stay manageable** (add, rename, delete; beef, pork, duck seeded), from **Réglages** (moved from the Recettes screen). A meat type used by at
    least one piece cannot be deleted (it used to be "used by a recipe"). The message says "pièces".
 5. **Pickers for recipes no longer show a meat name** (calculator, settings): a recipe is just its name.
 6. **Nothing is lost on update.** Every existing piece keeps the meat type it had through its recipe.
@@ -54,7 +54,6 @@ on my phone, so **existing data must survive** the change.
 
 - Restricting which recipes are offered for which meat (no compatibility rules).
 - Any change to dose maths, stage durations, reminder logic.
-- Moving meat-type management to another screen (unless I ask; see question 1).
 
 ## 7. Success looks like
 
@@ -64,10 +63,8 @@ on my phone, so **existing data must survive** the change.
 - I cannot delete a meat type that a piece uses.
 - `mise run check` passes.
 
-## 8. Questions for the owner
+## 8. Decisions on the open questions (owner, 2026-11-23)
 
-1. Meat-type management currently lives behind a "Types de viande" button on the Recettes screen. Keep it
-   there (default), or move it to Réglages now that meats are no longer tied to recipes?
-2. The notification text currently reads "meat · recipe". Keep that wording (now from the piece)? Default: yes.
-3. Archived meat types: the schema has an `archived` flag but no screen uses it. Default: hide archived
-   meats in the new-piece picker, add no new UI for archiving.
+1. Meat-type management moves from Recettes to **Réglages**.
+2. Notification text keeps "meat · recipe", now taken from the piece.
+3. Archived meat types are hidden in the new-piece picker; no new archiving UI.

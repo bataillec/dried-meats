@@ -5,17 +5,19 @@ Derived from intent.md v0.2. Each requirement has an ID used in tests and PRs.
 ## Glossary
 
 - **Meat type**: beef, pork, duck, user-defined others.
-- **Recipe**: a meat type + dosage (g/kg of salt, sugar, pepper) + stage rules + notes.
-- **Piece**: one physical piece of meat being processed (weight, diameter, recipe).
+- **Recipe**: a method, independent of any meat type: dosage (g/kg of salt, sugar, pepper) + stage rules + notes.
+- **Piece**: one physical piece of meat being processed (meat type, recipe, weight, diameter).
 - **Stage run**: one piece's time in one stage (VACUUM or FRIDGE).
 
 ## Functional requirements
 
 ### Recipes and meat types
-- **R1** The user can create, edit and delete meat types. Beef, pork and duck are pre-seeded.
+- **R1** The user can create, edit and delete meat types, from the settings screen. Beef, pork and duck are pre-seeded.
+  A meat type used by at least one piece cannot be deleted. Archived meat types are not offered for new pieces.
 - **R2** The user can create, edit, duplicate and archive recipes. A recipe holds: name,
-  meat type, salt/sugar/pepper in g/kg (decimals allowed), optional default fridge-seasoning note (free text),
+  salt/sugar/pepper in g/kg (decimals allowed), optional default fridge-seasoning note (free text),
   vacuum rule (divisor, default 2; offset days, default 1), minimum fridge duration in days (default 14; afterwards the piece is judged by touch).
+  A recipe has no meat type: the same recipe can be used for any meat.
 - **R3** A recipe cannot be deleted while pieces use it; it can be archived.
 
 ### Dosage calculator
@@ -25,7 +27,7 @@ Derived from intent.md v0.2. Each requirement has an ID used in tests and PRs.
 - **R5** The calculator works standalone (no piece created) and also from a piece.
 
 ### Pieces and stages
-- **R6** Creating a piece requires: label (auto-suggested), recipe, weight, diameter in cm.
+- **R6** Creating a piece requires: meat type, recipe, label (auto-suggested from the chosen meat type), weight, diameter in cm.
   The doses are shown and snapshotted on the piece at creation, so later recipe edits don't alter them.
 - **R7** On creation, the piece enters VACUUM. Planned duration =
   `ceil(diameter_cm / divisor + offset)` days (always rounded up to the next whole day,
@@ -54,19 +56,20 @@ Derived from intent.md v0.2. Each requirement has an ID used in tests and PRs.
   to exempt the app from battery optimisation if needed, and shows a warning on the home screen when any is missing.
 
 ### Seasoning memo
-- **R17** The piece detail screen shows its recipe, the snapshotted stage-1 doses (salt, sugar,
+- **R17** The piece detail screen shows its meat type, its recipe, the snapshotted stage-1 doses (salt, sugar,
   pepper) and the stage-2 seasoning chosen for this piece (or "aucun").
   The piece list shows meat type and recipe name on each row.
 
 ### Tracking
 - **R18** Every stage run stores start, planned end and actual end. The piece detail shows
   planned vs. actual per stage.
-- **R19** A statistics screen shows, per meat type and recipe, the average actual duration
+- **R19** A statistics screen shows, per meat type and recipe (the meat type being the piece's own), the average actual duration
   per stage, and the list of finished pieces.
 
 ### Data
 - **R20** All data stays on the device (Room database). No network permission is requested.
 - **R21** The user can export all data to a JSON file and import it back (backup / new phone).
+  Files exported by earlier versions (where the meat type belonged to the recipe) still import: each piece takes its recipe's former meat type.
 
 ### Calendar and notes
 - **R22** (optional) From a piece, "Ajouter au calendrier" opens the phone's calendar app with
