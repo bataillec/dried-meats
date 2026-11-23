@@ -1,8 +1,8 @@
 # intent — Emulator test names must dex: camelCase in androidTest (issue #19)
 
-Status: v0.1, draft for the owner's validation. Extends `docs/intent.md` (v0.3); where the two
+Status: v0.2, open questions answered by the owner (2026-11-23). Extends `docs/intent.md` (v0.3); where the two
 differ, this file wins for the points below once validated. Requirements and design updates follow in the next step
-(none is expected: this is a test and docs fix).
+(only the tooling guard of §4.4-4.5 may touch `design.md`).
 
 ## 1. What I want
 
@@ -30,7 +30,12 @@ Me, before a release, running `mise run test:emulator`. Contributors later: they
    What each test checks does not change.
 2. **`mise run test:emulator` builds and runs** the instrumented tests on a device or emulator, with no dexing error.
 3. **`CLAUDE.md` (Conventions) states the rule**: no spaces in `androidTest` method names (dex limit at minSdk 26);
-   backtick names stay allowed in `app/src/test`; keep the R-id prefix in camelCase.
+   backtick names stay allowed in `app/src/test`; keep the R-id prefix in camelCase, lowercase `r` (`r26RowShows…`).
+4. **`mise run check` also compiles and dexes the instrumented tests** (`assembleDebugAndroidTest`), with no
+   device needed, so any dexing or compile error in `androidTest` fails before commit and in CI.
+5. **A static guard rejects spaces in `androidTest` method names** (a detekt `FunctionNaming` override scoped to
+   that source set, or an equivalent grep step in `mise run lint`), so the failure message names the rule and
+   the offending test directly instead of a dexer error.
 
 ## 5. Constraints
 
@@ -42,6 +47,7 @@ Me, before a release, running `mise run test:emulator`. Contributors later: they
 
 - Raising minSdk to 30+ (dex 040) just to allow spaces.
 - Adding, removing or rewriting instrumented tests beyond renaming these six.
+- Running the instrumented tests in CI: only compiling them is added.
 - Bringing the emulator job back in CI (decided in #13).
 
 ## 7. Success looks like
@@ -49,20 +55,12 @@ Me, before a release, running `mise run test:emulator`. Contributors later: they
 - `mise run test:emulator` with an emulator running compiles and executes all four instrumented test classes.
 - `grep -rnE 'fun `[^`]* [^`]*`' app/src/androidTest` finds nothing.
 - `CLAUDE.md` contains the rule.
+- Reintroducing a spaced backtick name in `androidTest` makes `mise run check` fail, both at the guard and at dexing.
+- `mise run check` stays acceptably fast (owner to judge; the extra step is reported in the PR).
 - `mise run check` passes.
 
-## 8. Open questions
+## 8. Decisions on the open questions (owner, 2026-11-23)
 
-1. **Should something prevent recurrence automatically, beyond the CLAUDE.md note?** The note alone relies on
-   remembering, and CI no longer compiles `androidTest`. Options:
-   a. CLAUDE.md note only (the issue's ask). Cheapest, but a miss is only found on my next local emulator run.
-   b. Add `assembleDebugAndroidTest` to `mise run check`. Catches this and any other dexing or compile error in
-      `androidTest` with no device, but makes `check` and CI slower.
-   c. A cheap static guard on `app/src/androidTest` (a detekt `FunctionNaming` override scoped to that source set,
-      or a grep step in `mise run lint`). Fast, targeted to this rule only.
-
-   **Recommendation: (a) in this change, plus (b) in a separate small PR**, because (b) also protects `androidTest`
-   from compile errors that today go unnoticed in CI; if its cost on `check` is too high, fall back to (c).
-   This keeps issue #19 a one-concern fix.
-2. **Naming of the id prefix**: `r26RowShows…` (lowercase r) is proposed. Confirm, or prefer `R26_rowShows…`
-   (underscore, which dex accepts but ktlint/detekt naming rules may flag).
+1. **Prevention: all three** layers are in scope: (a) the CLAUDE.md note, (b) `assembleDebugAndroidTest` in
+   `mise run check`, (c) a static guard on `androidTest` method names. Done in this issue, not split.
+2. **Id prefix: lowercase**, `r26RowShows…`.
