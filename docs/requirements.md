@@ -105,6 +105,18 @@ Derived from intent.md v0.2. Each requirement has an ID used in tests and PRs.
   - The selected swatch is shown by a check mark and a spoken label, not by colour alone; targets are
     48 dp and swatches wrap onto a second line when they do not fit (N4).
   - Stored in DataStore, not exported with the data; an unknown stored value falls back to the default.
+- **R29** The "À propos" block of Réglages (last block, after the version and the "application locale" text)
+  shows two links: "Soutenir sur Ko-fi" (https://ko-fi.com/O0P52B4FJ1) and "Code source sur GitHub"
+  (https://github.com/bataillec/dried-meats).
+  - Tapping a link hands the URL to the phone's browser (`ACTION_VIEW`); the app itself makes no network
+    request and adds no network permission or WebView (R20). If no app can open it, a short message
+    "Aucun navigateur disponible" is shown and the app does not crash.
+  - Each link is a single touch target of at least 48 dp, announced by TalkBack as a link, with a label that
+    wraps (never truncates) at 200 % font scale (N4). URLs are constants, labels are string resources.
+  - Outside the app: the README has a "Support" section with the Ko-fi button, and `.github/FUNDING.yml`
+    holds `ko_fi: O0P52B4FJ1` for the repository's Sponsor button.
+  - *Acceptance:* both links are visible in Réglages > À propos; tapping each fires an `ACTION_VIEW` intent on
+    the right URL; with no handler, the message appears and nothing crashes.
 
 ## Non-functional requirements
 

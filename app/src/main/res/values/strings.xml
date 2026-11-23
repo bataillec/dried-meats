@@ -201,6 +201,10 @@
     <string name="about">À propos</string>
     <string name="version_format">Version %1$s</string>
     <string name="about_text">Application locale : aucune donnée ne quitte votre téléphone. Vous restez responsable des valeurs de vos recettes.</string>
+    <string name="about_kofi">Soutenir sur Ko-fi</string>
+    <string name="about_github">Code source sur GitHub</string>
+    <string name="about_link_desc">%1$s, lien externe</string>
+    <string name="about_no_browser">Aucun navigateur disponible</string>
 
     <!-- Reminders -->
     <string name="channel_name">Rappels d\'étapes</string>

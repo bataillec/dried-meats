@@ -34,6 +34,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -63,7 +64,10 @@ import me.bataillec.meatmelater.domain.AppSettings
 import me.bataillec.meatmelater.domain.Recipe
 import me.bataillec.meatmelater.domain.StageDurationRule
 import me.bataillec.meatmelater.domain.ThemeMode
+import me.bataillec.meatmelater.platform.ExternalLinkOpener
 import me.bataillec.meatmelater.platform.PermissionActions
+import me.bataillec.meatmelater.platform.SupportLinks
+import me.bataillec.meatmelater.platform.rememberExternalLinkOpener
 import me.bataillec.meatmelater.platform.rememberReminderPermissions
 import me.bataillec.meatmelater.ui.common.ConfirmDialog
 import me.bataillec.meatmelater.ui.common.RecipeOption
@@ -79,7 +83,7 @@ import java.math.BigDecimal
 private val HALF = BigDecimal("0.5")
 
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(linkOpener: ExternalLinkOpener = rememberExternalLinkOpener()) {
     val container = rememberContainer()
     val context = androidx.compose.ui.platform.LocalContext.current
     val resources = androidx.compose.ui.platform.LocalResources.current
@@ -209,6 +213,32 @@ fun SettingsScreen() {
             style = MaterialTheme.typography.bodyMedium,
         )
         Text(stringResource(R.string.about_text), style = MaterialTheme.typography.bodySmall)
+        val noBrowser = stringResource(R.string.about_no_browser)
+        val links =
+            listOf(
+                Triple(
+                    stringResource(R.string.about_kofi),
+                    stringResource(R.string.about_link_desc, stringResource(R.string.about_kofi)),
+                    SupportLinks.KOFI_URL,
+                ),
+                Triple(
+                    stringResource(R.string.about_github),
+                    stringResource(R.string.about_link_desc, stringResource(R.string.about_github)),
+                    SupportLinks.GITHUB_URL,
+                ),
+            )
+        for ((label, spoken, url) in links) {
+            TextButton(
+                onClick = { if (!linkOpener.open(url)) message = noBrowser },
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 48.dp)
+                        .semantics { contentDescription = spoken },
+            ) {
+                Text(label, modifier = Modifier.fillMaxWidth())
+            }
+        }
     }
 
     if (showMeats) {
