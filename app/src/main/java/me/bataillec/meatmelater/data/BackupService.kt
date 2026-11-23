@@ -3,6 +3,9 @@ package me.bataillec.meatmelater.data
 import androidx.room3.withWriteTransaction
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 @Serializable
 data class BackupFile(
@@ -18,7 +21,10 @@ data class BackupFile(
 
         /** Marker written before the app was renamed; still accepted on import. */
         const val LEGACY_FORMAT = "viandes-seches-backup"
-        const val VERSION = 1
+
+        /** Version 2: the meat type moved from the recipe to the piece. Version 1 files are still imported. */
+        const val VERSION = 2
+        const val VERSION_1 = 1
     }
 }
 
@@ -31,6 +37,47 @@ data class BackupMeatType(
 
 @Serializable
 data class BackupRecipe(
+    val id: Long,
+    val name: String,
+    val saltGPerKg: String,
+    val sugarGPerKg: String,
+    val pepperGPerKg: String,
+    val fridgeSeasoningDefault: String?,
+    val vacuumDivisor: String,
+    val vacuumOffsetDays: String,
+    val fridgeMinDays: Int,
+    val archived: Boolean,
+)
+
+@Serializable
+data class BackupPiece(
+    val id: Long,
+    val label: String,
+    val recipeId: Long,
+    val meatTypeId: Long,
+    val weightG: Int,
+    val diameterCm: String,
+    val saltG: String,
+    val sugarG: String,
+    val pepperG: String,
+    val fridgeSeasoning: String?,
+    val status: String,
+    val createdAt: Long,
+)
+
+/** Version 1 layout, read only: the meat type lived on the recipe and pieces had none. */
+@Serializable
+private data class BackupFileV1(
+    val format: String,
+    val version: Int,
+    val meatTypes: List<BackupMeatType>,
+    val recipes: List<BackupRecipeV1>,
+    val pieces: List<BackupPieceV1>,
+    val stageRuns: List<BackupRun>,
+)
+
+@Serializable
+private data class BackupRecipeV1(
     val id: Long,
     val meatTypeId: Long,
     val name: String,
@@ -45,7 +92,7 @@ data class BackupRecipe(
 )
 
 @Serializable
-data class BackupPiece(
+private data class BackupPieceV1(
     val id: Long,
     val label: String,
     val recipeId: Long,
@@ -94,7 +141,6 @@ class BackupService(
                         db.recipeDao().all().map {
                             BackupRecipe(
                                 it.id,
-                                it.meatTypeId,
                                 it.name,
                                 it.saltGPerKg,
                                 it.sugarGPerKg,
@@ -112,6 +158,7 @@ class BackupService(
                                 it.id,
                                 it.label,
                                 it.recipeId,
+                                it.meatTypeId,
                                 it.weightG,
                                 it.diameterCm,
                                 it.saltG,
@@ -145,17 +192,8 @@ class BackupService(
      * @throws BackupFormatException for files that are not a valid backup of this app.
      */
     suspend fun import(text: String) {
-        val file =
-            try {
-                json.decodeFromString(BackupFile.serializer(), text)
-            } catch (e: kotlinx.serialization.SerializationException) {
-                throw BackupFormatException("Fichier illisible: ${e.message}")
-            } catch (e: IllegalArgumentException) {
-                throw BackupFormatException("Fichier illisible: ${e.message}")
-            }
-        if ((file.format != BackupFile.FORMAT && file.format != BackupFile.LEGACY_FORMAT) ||
-            file.version != BackupFile.VERSION
-        ) {
+        val file = decode(text)
+        if (file.format != BackupFile.FORMAT && file.format != BackupFile.LEGACY_FORMAT) {
             throw BackupFormatException("Format ou version non pris en charge")
         }
         validate(file)
@@ -168,13 +206,75 @@ class BackupService(
         }
     }
 
+    /** Reads the current version, or upgrades a version 1 file (meat type taken from each piece's recipe). */
+    private fun decode(text: String): BackupFile =
+        try {
+            when (
+                json
+                    .parseToJsonElement(text)
+                    .jsonObject["version"]
+                    ?.jsonPrimitive
+                    ?.intOrNull
+            ) {
+                BackupFile.VERSION -> json.decodeFromString(BackupFile.serializer(), text)
+                BackupFile.VERSION_1 -> json.decodeFromString(BackupFileV1.serializer(), text).upgrade()
+                else -> throw BackupFormatException("Format ou version non pris en charge")
+            }
+        } catch (e: kotlinx.serialization.SerializationException) {
+            throw BackupFormatException("Fichier illisible: ${e.message}")
+        } catch (e: IllegalArgumentException) {
+            throw BackupFormatException("Fichier illisible: ${e.message}")
+        }
+
+    private fun BackupFileV1.upgrade(): BackupFile {
+        val meatByRecipe = recipes.associate { it.id to it.meatTypeId }
+        return BackupFile(
+            format = format,
+            version = BackupFile.VERSION,
+            meatTypes = meatTypes,
+            recipes =
+                recipes.map {
+                    BackupRecipe(
+                        it.id,
+                        it.name,
+                        it.saltGPerKg,
+                        it.sugarGPerKg,
+                        it.pepperGPerKg,
+                        it.fridgeSeasoningDefault,
+                        it.vacuumDivisor,
+                        it.vacuumOffsetDays,
+                        it.fridgeMinDays,
+                        it.archived,
+                    )
+                },
+            pieces =
+                pieces.map {
+                    // A piece whose recipe is unknown keeps an impossible id so validation rejects the file.
+                    BackupPiece(
+                        it.id,
+                        it.label,
+                        it.recipeId,
+                        meatByRecipe[it.recipeId] ?: -1L,
+                        it.weightG,
+                        it.diameterCm,
+                        it.saltG,
+                        it.sugarG,
+                        it.pepperG,
+                        it.fridgeSeasoning,
+                        it.status,
+                        it.createdAt,
+                    )
+                },
+            stageRuns = stageRuns,
+        )
+    }
+
     private suspend fun insertAll(file: BackupFile) {
         file.meatTypes.forEach { db.meatTypeDao().insert(MeatTypeEntity(it.id, it.name, it.archived)) }
         file.recipes.forEach {
             db.recipeDao().insert(
                 RecipeEntity(
                     it.id,
-                    it.meatTypeId,
                     it.name,
                     it.saltGPerKg,
                     it.sugarGPerKg,
@@ -193,6 +293,7 @@ class BackupService(
                     it.id,
                     it.label,
                     it.recipeId,
+                    it.meatTypeId,
                     it.weightG,
                     it.diameterCm,
                     it.saltG,
@@ -259,7 +360,7 @@ class BackupService(
         val meatIds = file.meatTypes.map { it.id }.toSet()
         val recipeIds = file.recipes.map { it.id }.toSet()
         val pieceIds = file.pieces.map { it.id }.toSet()
-        require(file.recipes.all { it.meatTypeId in meatIds })
+        require(file.pieces.all { it.meatTypeId in meatIds })
         require(file.pieces.all { it.recipeId in recipeIds })
         require(file.stageRuns.all { it.pieceId in pieceIds })
     }

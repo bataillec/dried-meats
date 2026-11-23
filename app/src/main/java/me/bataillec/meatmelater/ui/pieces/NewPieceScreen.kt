@@ -31,6 +31,7 @@ import me.bataillec.meatmelater.domain.WeightParser
 import me.bataillec.meatmelater.domain.WeightUnit
 import me.bataillec.meatmelater.ui.calculator.DosesCard
 import me.bataillec.meatmelater.ui.common.DecimalField
+import me.bataillec.meatmelater.ui.common.MeatTypePicker
 import me.bataillec.meatmelater.ui.common.RecipePicker
 import me.bataillec.meatmelater.ui.common.SectionTitle
 import me.bataillec.meatmelater.ui.common.WeightUnitToggle
@@ -43,7 +44,9 @@ fun NewPieceScreen(onCreated: (Long) -> Unit) {
     val container = rememberContainer()
     val scope = rememberCoroutineScope()
     val options by remember { container.recipeOptions() }.collectAsState(initial = emptyList())
+    val meatTypes by remember { container.meatTypes.observeAll() }.collectAsState(initial = emptyList())
     var recipeId by remember { mutableStateOf<Long?>(null) }
+    var meatTypeId by remember { mutableStateOf<Long?>(null) }
     var weightText by remember { mutableStateOf("") }
     var unit by remember { mutableStateOf(WeightUnit.KILOGRAMS) }
     var diameterText by remember { mutableStateOf("") }
@@ -54,8 +57,10 @@ fun NewPieceScreen(onCreated: (Long) -> Unit) {
 
     LaunchedEffect(Unit) { existingLabels = container.pieces.labels() }
     val option = options.firstOrNull { it.recipe.id == recipeId } ?: options.firstOrNull()
-    LaunchedEffect(option?.recipe?.id, existingLabels) {
-        if (!labelEdited && option != null) label = LabelSuggester.suggest(option.meatName, existingLabels)
+    val availableMeats = meatTypes.filterNot { it.archived }
+    val meat = availableMeats.firstOrNull { it.id == meatTypeId } ?: availableMeats.firstOrNull()
+    LaunchedEffect(meat?.id, existingLabels) {
+        if (!labelEdited && meat != null) label = LabelSuggester.suggest(meat.name, existingLabels)
     }
 
     val grams = WeightParser.parseGrams(weightText, unit)
@@ -79,6 +84,11 @@ fun NewPieceScreen(onCreated: (Long) -> Unit) {
             Text(stringResource(R.string.calculator_no_recipe), style = MaterialTheme.typography.bodyLarge)
         } else {
             RecipePicker(options, option?.recipe?.id, { recipeId = it }, Modifier.fillMaxWidth())
+        }
+        if (availableMeats.isEmpty()) {
+            Text(stringResource(R.string.no_meat_type), style = MaterialTheme.typography.bodyLarge)
+        } else {
+            MeatTypePicker(availableMeats, meat?.id, { meatTypeId = it }, Modifier.fillMaxWidth())
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             DecimalField(
@@ -124,11 +134,11 @@ fun NewPieceScreen(onCreated: (Long) -> Unit) {
             modifier = Modifier.fillMaxWidth(),
         )
         Button(
-            enabled = plan != null && label.isNotBlank(),
+            enabled = plan != null && meat != null && label.isNotBlank(),
             onClick = {
                 scope.launch {
                     container.pieceActions
-                        .createPiece(label, option!!.recipe.id, grams!!, diameter!!, daysOverride)
+                        .createPiece(label, option!!.recipe.id, meat!!.id, grams!!, diameter!!, daysOverride)
                         ?.let(onCreated)
                 }
             },

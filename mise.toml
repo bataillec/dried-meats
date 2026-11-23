@@ -50,6 +50,15 @@ run = "./gradlew ktlintCheck detekt lintDebug"
 description = "JVM unit tests (domain, data, receivers)"
 run = "./gradlew testDebugUnitTest"
 
+[tasks."test:emulator"]
+description = "Instrumented tests (app/src/androidTest); needs a running emulator or device, not run in CI"
+depends = ["doctor"]
+run = '''
+set -e
+adb devices | awk 'NR>1 && $2=="device"' | grep -q . || { echo "FAIL: no emulator or device connected (start one, then check: adb devices)"; exit 1; }
+./gradlew connectedDebugAndroidTest
+'''
+
 [tasks.coverage]
 description = "Run unit tests with Kover and enforce >= 90 % domain line coverage (N6)"
 run = "./gradlew koverVerifyDebug koverHtmlReportDebug"

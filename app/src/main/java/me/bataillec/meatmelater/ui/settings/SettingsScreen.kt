@@ -3,20 +3,28 @@ package me.bataillec.meatmelater.ui.settings
 import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -35,15 +43,22 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.bataillec.meatmelater.BuildConfig
 import me.bataillec.meatmelater.R
 import me.bataillec.meatmelater.data.BackupFormatException
+import me.bataillec.meatmelater.domain.AccentColor
 import me.bataillec.meatmelater.domain.AppSettings
 import me.bataillec.meatmelater.domain.Recipe
 import me.bataillec.meatmelater.domain.StageDurationRule
@@ -54,10 +69,11 @@ import me.bataillec.meatmelater.ui.common.ConfirmDialog
 import me.bataillec.meatmelater.ui.common.RecipeOption
 import me.bataillec.meatmelater.ui.common.RecipePicker
 import me.bataillec.meatmelater.ui.common.SectionTitle
+import me.bataillec.meatmelater.ui.common.durationExampleText
 import me.bataillec.meatmelater.ui.common.fr
 import me.bataillec.meatmelater.ui.common.recipeOptions
 import me.bataillec.meatmelater.ui.common.rememberContainer
-import me.bataillec.meatmelater.ui.pieces.pluralDays
+import me.bataillec.meatmelater.ui.theme.accentSwatch
 import java.math.BigDecimal
 
 private val HALF = BigDecimal("0.5")
@@ -72,6 +88,7 @@ fun SettingsScreen() {
     val options by remember { container.recipeOptions() }.collectAsState(initial = emptyList())
     val permissions = rememberReminderPermissions()
     var recipeId by remember { mutableStateOf<Long?>(null) }
+    var showMeats by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf<String?>(null) }
     var pendingImport by remember { mutableStateOf<android.net.Uri?>(null) }
     val option = options.firstOrNull { it.recipe.id == recipeId } ?: options.firstOrNull()
@@ -124,6 +141,10 @@ fun SettingsScreen() {
             }
         }
         Text(stringResource(R.string.theme_system_note), style = MaterialTheme.typography.bodySmall)
+        Text(stringResource(R.string.accent_title), style = MaterialTheme.typography.titleSmall)
+        AccentSwatches(
+            settings.accent,
+        ) { accent -> scope.launch { container.settings.update { it.copy(accent = accent) } } }
 
         SectionTitle(stringResource(R.string.vacuum_doses))
         if (option == null) {
@@ -146,22 +167,9 @@ fun SettingsScreen() {
         }, {
             scope.launch { container.settings.update { it.copy(defaultFridgeMinDays = it.defaultFridgeMinDays + 1) } }
         })
-        Stepper(stringResource(R.string.reminder_hour), "%02d".format(settings.reminderHour), {
-            scope.launch {
-                container.settings.update { it.copy(reminderHour = (it.reminderHour + 23) % 24) }
-                container.reminderPlanner.reconcile()
-            }
-        }, {
-            scope.launch {
-                container.settings.update { it.copy(reminderHour = (it.reminderHour + 1) % 24) }
-                container.reminderPlanner.reconcile()
-            }
-        })
-        Stepper(stringResource(R.string.reminder_minute), "%02d".format(settings.reminderMinute), {
-            scope.launch { container.settings.update { it.copy(reminderMinute = (it.reminderMinute + 55) % 60) } }
-        }, {
-            scope.launch { container.settings.update { it.copy(reminderMinute = (it.reminderMinute + 5) % 60) } }
-        })
+        ReminderTimeRow(settings.reminderHour, settings.reminderMinute) { hour, minute ->
+            scope.launch { saveReminderTime(container.settings, container.reminderPlanner, hour, minute) }
+        }
         Text(stringResource(R.string.reminder_time_note), style = MaterialTheme.typography.bodySmall)
 
         SectionTitle(stringResource(R.string.permissions))
@@ -171,6 +179,11 @@ fun SettingsScreen() {
         }
         PermissionRow(stringResource(R.string.perm_battery), permissions.batteryExempt) {
             PermissionActions.batteryExemption(context)
+        }
+
+        SectionTitle(stringResource(R.string.meat_types))
+        OutlinedButton(onClick = { showMeats = true }, modifier = Modifier.fillMaxWidth()) {
+            Text(stringResource(R.string.manage_meat_types))
         }
 
         SectionTitle(stringResource(R.string.data))
@@ -198,6 +211,11 @@ fun SettingsScreen() {
         Text(stringResource(R.string.about_text), style = MaterialTheme.typography.bodySmall)
     }
 
+    if (showMeats) {
+        val meatVm: MeatTypesViewModel = viewModel { MeatTypesViewModel(container) }
+        val meats by meatVm.meatTypes.collectAsState()
+        MeatTypesDialog(meats, meatVm) { showMeats = false }
+    }
     pendingImport?.let { uri ->
         ConfirmDialog(
             title = stringResource(R.string.import_json),
@@ -292,18 +310,9 @@ private fun RecipeSteppers(
         { change { it.copy(vacuumOffsetDays = step(it.vacuumOffsetDays, -HALF)) } },
         { change { it.copy(vacuumOffsetDays = step(it.vacuumOffsetDays, HALF)) } },
     )
-    val example = BigDecimal(9)
-    val rule = StageDurationRule(r.vacuumDivisor, r.vacuumOffsetDays)
     Card(Modifier.fillMaxWidth()) {
         Text(
-            stringResource(
-                R.string.duration_example,
-                example.fr(),
-                r.vacuumDivisor.fr(),
-                r.vacuumOffsetDays.fr(),
-                rule.rawDays(example).fr(),
-                pluralDays(rule.days(example)),
-            ),
+            durationExampleText(StageDurationRule(r.vacuumDivisor, r.vacuumOffsetDays)),
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.padding(16.dp),
         )
@@ -350,3 +359,58 @@ private fun PermissionRow(
         }
     }
 }
+
+/** R27: one 48 dp swatch per accent, wrapping onto several lines; the selection shows a check mark and a spoken label. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun AccentSwatches(
+    selected: AccentColor,
+    onSelect: (AccentColor) -> Unit,
+) {
+    FlowRow(
+        Modifier.fillMaxWidth().selectableGroup(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        AccentColor.entries.forEach { accent ->
+            val name = stringResource(accentLabel(accent))
+            val isSelected = accent == selected
+            val description = if (isSelected) stringResource(R.string.accent_selected, name) else name
+            val swatch = accentSwatch(accent)
+            Box(
+                Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .selectable(selected = isSelected, role = Role.RadioButton, onClick = { onSelect(accent) })
+                    .semantics { contentDescription = description },
+                contentAlignment = Alignment.Center,
+            ) {
+                Box(
+                    Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(swatch)
+                        .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (isSelected) {
+                        Icon(
+                            Icons.Filled.Check,
+                            contentDescription = null,
+                            tint = if (swatch.luminance() > 0.5f) Color.Black else Color.White,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun accentLabel(accent: AccentColor): Int =
+    when (accent) {
+        AccentColor.VIANDE_SECHEE -> R.string.accent_viande_sechee
+        AccentColor.VERT -> R.string.accent_vert
+        AccentColor.BLEU -> R.string.accent_bleu
+        AccentColor.VIOLET -> R.string.accent_violet
+        AccentColor.AMBRE -> R.string.accent_ambre
+        AccentColor.BRUN_GRIS -> R.string.accent_brun_gris
+    }

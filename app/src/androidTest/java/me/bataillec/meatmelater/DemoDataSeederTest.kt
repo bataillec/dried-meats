@@ -30,7 +30,6 @@ class DemoDataSeederTest {
                 container.recipes.save(
                     Recipe(
                         0,
-                        meat,
                         "Classique",
                         BigDecimal("25"),
                         BigDecimal("5"),
@@ -38,15 +37,22 @@ class DemoDataSeederTest {
                         fridgeSeasoningDefault = "herbes",
                     ),
                 )
-            val overdue = container.pieceActions.createPiece("Bœuf démo 1", recipe, 1250, BigDecimal("12"))!!
-            container.pieceActions.createPiece("Bœuf démo 2", recipe, 900, BigDecimal("9"))
-            val fridge = container.pieceActions.createPiece("Bœuf démo 3", recipe, 2000, BigDecimal("15"))!!
+            val overdue = container.pieceActions.createPiece("Bœuf démo 1", recipe, meat, 1250, BigDecimal("12"))!!
+            container.pieceActions.createPiece("Bœuf démo 2", recipe, meat, 900, BigDecimal("9"))
+            val fridge = container.pieceActions.createPiece("Bœuf démo 3", recipe, meat, 2000, BigDecimal("15"))!!
             container.pieceActions.finishStage(fridge, "poivre concassé")
             val run = container.pieces.getSummary(overdue)!!.openRun!!
             container.pieces.updateRun(run.copy(plannedEndAt = container.clock.nowMillis() - 2 * 86_400_000L))
             // Optional: a piece whose reminder is due in N seconds (Doze, reboot and time-zone checks).
             InstrumentationRegistry.getArguments().getString("dueInSeconds")?.toLongOrNull()?.let { seconds ->
-                val due = container.pieceActions.createPiece("Rappel dans $seconds s", recipe, 1000, BigDecimal("10"))!!
+                val due =
+                    container.pieceActions.createPiece(
+                        "Rappel dans $seconds s",
+                        recipe,
+                        meat,
+                        1000,
+                        BigDecimal("10"),
+                    )!!
                 val dueRun = container.pieces.getSummary(due)!!.openRun!!
                 container.pieces.updateRun(dueRun.copy(plannedEndAt = container.clock.nowMillis() + seconds * 1000))
             }

@@ -22,13 +22,15 @@ platform (AlarmScheduler, ReminderReceiver, BootReceiver, NotificationFactory, p
 | Table | Columns |
 |---|---|
 | `meat_type` | id, name, archived |
-| `recipe` | id, meat_type_id, name, salt_g_per_kg, sugar_g_per_kg, pepper_g_per_kg, fridge_seasoning_default (nullable text), vacuum_divisor (def 2.0), vacuum_offset_days (def 1), fridge_min_days (def 14), archived |
-| `piece` | id, label, recipe_id, weight_g, diameter_cm, salt_g, sugar_g, pepper_g (snapshot), fridge_seasoning (nullable text, chosen when leaving VACUUM), status (VACUUM / FRIDGE / DONE / CANCELLED), created_at |
+| `recipe` | id, name, salt_g_per_kg, sugar_g_per_kg, pepper_g_per_kg, fridge_seasoning_default (nullable text), vacuum_divisor (def 2.0), vacuum_offset_days (def 1), fridge_min_days (def 14), archived |
+| `piece` | id, label, meat_type_id (FK, indexed), recipe_id, weight_g, diameter_cm, salt_g, sugar_g, pepper_g (snapshot), fridge_seasoning (nullable text, chosen when leaving VACUUM), status (VACUUM / FRIDGE / DONE / CANCELLED), created_at |
 | `stage_run` | id, piece_id, stage (VACUUM / FRIDGE), started_at, planned_end_at, ended_at (nullable), postponed_days (int, def 0), note (nullable text) |
 
 - Timestamps are UTC epoch millis. Weights are stored in grams as integers. Doses in g/kg are decimals.
 - Money-style rounding: use `BigDecimal` with `HALF_UP` for dose results.
 - Migrations are explicit from v1 (Room exported schemas committed, migration tests).
+- v1 → v2 (#5): `piece.meat_type_id` added and backfilled from `recipe.meat_type_id`, then `recipe.meat_type_id` dropped by rebuilding `recipe` (FK, index); the one-open-run trigger and all indices are recreated. Backup format version 2 puts `meatTypeId` on pieces; version 1 files are read by deriving it from the recipe.
+- A meat type is deletable only if no piece uses it (`MeatTypeDao` counts pieces).
 
 ## 3. Piece state machine
 
@@ -70,13 +72,13 @@ VACUUM --finish--> FRIDGE --finish--> DONE
 
 ## 5. Screens (all French)
 
-1. **Pièces** (home): permission banner, "En retard" section, then running pieces sorted by next deadline; each row = label, meat/recipe, stage, remaining time. FAB "Nouvelle pièce".
-2. **Nouvelle pièce**: recipe picker, weight, diameter → live doses and planned vacuum duration → confirm.
+1. **Pièces** (home): permission banner, "En retard" section, then running pieces sorted by next deadline; each row = label, the piece's meat/recipe, stage, remaining time. FAB "Nouvelle pièce".
+2. **Nouvelle pièce**: meat type picker (non-archived), recipe picker (names only), weight, diameter → live doses and planned vacuum duration → confirm.
 3. **Détail pièce**: stage-1 doses, stage-2 seasoning (or "aucun"), stage timeline planned vs. actual with postponements and notes, buttons "Sortir du sous-vide / du frigo", "Reporter 1 jour", "Ajouter au calendrier", edit duration, cancel. Leaving the vacuum stage opens a dialog asking for the stage-2 seasoning (prefilled, may be empty).
 4. **Calculateur**: weight + recipe → doses, no piece created. Reached from the bottom bar only: it takes no piece argument (route `calculator`, no `pieceId`) and the piece detail screen has no link to it.
-5. **Recettes**: list by meat type; edit form with doses, rule, fridge days.
+5. **Recettes**: flat list (no meat grouping); edit form with doses, rule, fridge days (R28: under the divisor and added-days fields, a `bodyMedium` / `onSurfaceVariant` label with the formula and a 6 cm example, built from `StageDurationRule` on the parsed fields; nothing while a field is invalid, a hint when divisor ≤ 0; no fixed height, one `semantics` sentence, not live; the same example string and 6 cm constant are shared with Réglages).
 6. **Statistiques**: averages per recipe/stage, finished pieces.
-7. **Réglages** (R24–R26): four blocks: *Apparence* (Clair / Sombre / OLED / Système), *Dosages au sous-vide* (recipe picker, salt/sugar/pepper g/kg with − / + steppers, note that running pieces keep their doses), *Durée du sous-vide* (divisor, added days, live example with round-up), *Frigo et rappels* (minimum fridge days, reminder hour). Also permissions status, export/import JSON, about/version.
+7. **Réglages** (R24–R26): four blocks: *Apparence* (Clair / Sombre / OLED / Système), *Dosages au sous-vide* (recipe picker, salt/sugar/pepper g/kg with − / + steppers, note that running pieces keep their doses), *Durée du sous-vide* (divisor, added days, live example with round-up), *Frigo et rappels* (minimum fridge days; reminder time as one row "Heure du rappel" showing `HH:mm`, a single touch target with the spoken label "Heure du rappel, 07:30", opening a Material 3 time picker dialog: 24 h, dial with keyboard toggle, keyboard directly at large font scale, scrollable at 200 % font, title "Choisir l'heure", buttons "Annuler" / "Valider"; "Valider" does one `settings.update` of hour and minute then one `reconcile()`, cancel or dismiss does nothing), and *Types de viande* (add, rename, delete; moved from Recettes). Also permissions status, export/import JSON, about/version.
 
 Navigation: Navigation-Compose with bottom bar (Pièces, Calculateur, Recettes, Stats); Réglages from the top bar.
 
@@ -86,18 +88,26 @@ Navigation: Navigation-Compose with bottom bar (Pièces, Calculateur, Recettes, 
 - OLED is a third Material 3 `ColorScheme` derived from the dark one: `background`/`surface` = `#000000`, containers, outlines and chips = very dark greys, same accents. Contrast (AA, N4) must be checked on the alert orange, the sous-vide/frigo chips and the primary buttons.
 - Mockups for all six screens exist in the three palettes on the design canvas.
 
+### Accent colour (R27)
+
+- Domain: `AccentColor` enum (`VIANDE_SECHEE` default, `VERT`, `BLEU`, `VIOLET`, `AMBRE`, `BRUN_GRIS`) in `domain/Stores.kt`, a new `accent` field on `AppSettings`. DataStore key `accent`, enum name as a string, tolerant parse with fallback to the default (same as `theme`). No Room change, no migration.
+- UI: `resolveColorScheme(mode, systemDark, accent)`. Each accent holds a hand-tuned palette for light and dark (primary, secondary and their containers, plus neutral tints for background, surface and outline). OLED derives from the accent's dark palette and keeps the black and grey surfaces of R24, swapping only the accent containers. `usesDarkBars` ignores the accent.
+- Tertiary roles are the alert orange (overdue cards) and are identical for every accent. The sous-vide chip uses `secondaryContainer`, the frigo chip `primaryContainer`: both chips carry a text label (colour is never the only cue) and a test checks the two containers differ for every accent and mode.
+- Settings: "Couleur principale" under "Thème", a `FlowRow` of round swatches (48 dp, check mark on the selected one, `contentDescription` = the French name). Strings in `strings.xml`.
+- Contrast (N4): a unit test computes WCAG ratios for every (accent, mode) pair: onPrimary/primary, onPrimaryContainer/primaryContainer, onSecondary/secondary, onSurface/surface ≥ 4.5; primary vs background/surface ≥ 3.
+
 ## 6. Tech choices
 
 | Area | Choice |
 |---|---|
 | Language/UI | Kotlin, Jetpack Compose, Material 3 (dynamic color off by default; own palette with Clair, Sombre and OLED schemes) |
-| Persistence | Room 3 (`androidx.room3`) + KSP; DataStore (Preferences) for settings (theme, reminder hour, global defaults) |
+| Persistence | Room 3 (`androidx.room3`) + KSP; DataStore (Preferences) for settings (theme, accent colour, reminder hour, global defaults) |
 | Concurrency | Coroutines + Flow |
 | Serialization | kotlinx.serialization (export/import) |
 | Build | Gradle Kotlin DSL, version catalog, versions per `docs/decisions/0001-toolchain-versions.md`, R8 minify on release |
 | Tests | JUnit5 or JUnit4 + Turbine (Flow), Room in-memory tests, Compose UI tests, Robolectric for receivers |
 | Static checks | ktlint, detekt, Android lint |
-| CI/CD | GitHub Actions: PR checks; tag → signed APK → GitHub Release (keystore in repo secrets) |
+| CI/CD | GitHub Actions: PR checks (`check`, `wrapper-validation`; no emulator, instrumented tests run locally with `mise run test:emulator`); tag → signed APK → GitHub Release (keystore in repo secrets) |
 
 ## 7. Test plan (maps to requirements)
 

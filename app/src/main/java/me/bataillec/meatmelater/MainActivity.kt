@@ -72,6 +72,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val settings by container.settings.observe().collectAsState(initial = null)
             val mode = (settings ?: AppSettings()).theme
+            val accent = (settings ?: AppSettings()).accent
             val darkBars = usesDarkBars(mode, isSystemInDarkTheme())
             // Bar icon colours must follow the app theme, not the phone's: Clair on a dark phone needs dark icons.
             DisposableEffect(darkBars) {
@@ -86,7 +87,7 @@ class MainActivity : ComponentActivity() {
                 enableEdgeToEdge(statusBarStyle = bars, navigationBarStyle = bars)
                 onDispose {}
             }
-            AppTheme(mode) {
+            AppTheme(mode, accent) {
                 Surface {
                     AppRoot(pendingPieceId) { pendingPieceId = null }
                     BatteryOnboardingDialog(
