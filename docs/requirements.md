@@ -89,7 +89,8 @@ Derived from intent.md v0.2. Each requirement has an ID used in tests and PRs.
   pieces keep their snapshotted doses (R6).
 - **R26** The Réglages screen also exposes the minimum fridge duration (default 14 days) and the
   reminder time of day (default 18:00). The reminder time is applied when computing a stage's planned end
-  timestamp. These are the global defaults used when creating recipes.
+  timestamp. It is shown as one `HH:mm` row (24 h, any minute) that opens a time picker dialog; confirming
+  saves hour and minute together and reconciles the reminders once, cancelling changes nothing. These are the global defaults used when creating recipes.
 
 ## Non-functional requirements
 

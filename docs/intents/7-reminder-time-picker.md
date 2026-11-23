@@ -1,6 +1,6 @@
 # intent — Sélecteur d'heure pour le rappel (issue #7)
 
-Status: draft v0.1 (2026-11-22), waiting for the owner's validation. Refines R26 (reminder time of day).
+Status: v0.2 (2026-11-23), open questions answered by the owner. Refines R26 (reminder time of day).
 
 ## 1. What I want
 
@@ -59,10 +59,10 @@ tapping it opens a Material 3 time picker.
 - Changing only the minutes now reschedules alarms immediately.
 - The picker is usable at 200 % font and with TalkBack.
 
-## 9. Open questions (each has a default, none blocking)
+## 9. Decisions (owner answers, 2026-11-23)
 
-1. 24 h always, or follow the system setting? Default: always 24 h (French locale, same display everywhere).
-2. Dial or keyboard when the dialog opens? Default: dial, with a toggle to keyboard; keyboard directly at large font scale.
-3. Should the explanatory note under the row ("reminder_time_note") stay? Default: yes, unchanged.
-4. Confirm button wording? Default: "Valider" / "Annuler", title "Choisir l'heure".
-5. Does the row also show a short "applies to new stage plans" hint? Default: no, the existing note covers it.
+1. 24 h always, whatever the system setting.
+2. Dial when the dialog opens, with a toggle to keyboard input; keyboard directly at large font scale.
+3. The note under the row ("Les rappels sonnent à cette heure le jour prévu.") stays unchanged.
+4. Buttons "Valider" / "Annuler", dialog title "Choisir l'heure".
+5. No extra hint on the row.
