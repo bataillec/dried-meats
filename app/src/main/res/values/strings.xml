@@ -36,6 +36,7 @@
     <string name="dose_rates">Sel %1$s · Sucre %2$s · Poivre %3$s g/kg</string>
     <string name="pick_recipe">Choisir une recette</string>
     <string name="pick_meat">Choisir une viande</string>
+    <string name="no_meat_type">Aucun type de viande. Ajoutez-en depuis les Réglages.</string>
 
     <!-- Durations -->
     <string name="span_days_hours">%1$d j %2$d h</string>
@@ -140,9 +141,10 @@
     <string name="fridge">Frigo</string>
     <string name="fridge_min_days">Minimum au frigo (jours)</string>
     <string name="fridge_seasoning_default">Assaisonnement frigo par défaut (facultatif)</string>
+    <string name="manage_meat_types">Gérer les types de viande</string>
     <string name="meat_types">Types de viande</string>
     <string name="new_meat_type">Nouvelle viande</string>
-    <string name="meat_in_use">Cette viande est utilisée par des recettes.</string>
+    <string name="meat_in_use">Cette viande est utilisée par des pièces.</string>
 
     <!-- Stats -->
     <string name="stats_empty">Aucune pièce terminée pour l\'instant.</string>

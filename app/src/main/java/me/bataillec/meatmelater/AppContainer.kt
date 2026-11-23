@@ -33,7 +33,16 @@ class AppContainer(
     val pieces: PieceStore by lazy { RoomPieceStore(database) }
     val alarmScheduler: AlarmScheduler by lazy { alarmFactory(context) }
     val reminderPlanner: ReminderPlanner by lazy { ReminderPlanner(pieces, alarmScheduler, clock) }
-    val pieceActions: PieceActions by lazy { PieceActions(pieces, recipes, settings, reminderPlanner, clock) }
+    val pieceActions: PieceActions by lazy {
+        PieceActions(
+            pieces,
+            recipes,
+            meatTypes,
+            settings,
+            reminderPlanner,
+            clock,
+        )
+    }
     val seeder: Seeder by lazy { Seeder(settings, meatTypes) }
     val backup: BackupService by lazy { BackupService(database) }
 }

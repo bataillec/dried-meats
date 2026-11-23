@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -72,6 +73,7 @@ fun SettingsScreen() {
     val options by remember { container.recipeOptions() }.collectAsState(initial = emptyList())
     val permissions = rememberReminderPermissions()
     var recipeId by remember { mutableStateOf<Long?>(null) }
+    var showMeats by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf<String?>(null) }
     var pendingImport by remember { mutableStateOf<android.net.Uri?>(null) }
     val option = options.firstOrNull { it.recipe.id == recipeId } ?: options.firstOrNull()
@@ -160,6 +162,11 @@ fun SettingsScreen() {
             PermissionActions.batteryExemption(context)
         }
 
+        SectionTitle(stringResource(R.string.meat_types))
+        OutlinedButton(onClick = { showMeats = true }, modifier = Modifier.fillMaxWidth()) {
+            Text(stringResource(R.string.manage_meat_types))
+        }
+
         SectionTitle(stringResource(R.string.data))
         Button(onClick = { exportLauncher.launch("meat-me-later.json") }, modifier = Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.export_json))
@@ -185,6 +192,11 @@ fun SettingsScreen() {
         Text(stringResource(R.string.about_text), style = MaterialTheme.typography.bodySmall)
     }
 
+    if (showMeats) {
+        val meatVm: MeatTypesViewModel = viewModel { MeatTypesViewModel(container) }
+        val meats by meatVm.meatTypes.collectAsState()
+        MeatTypesDialog(meats, meatVm) { showMeats = false }
+    }
     pendingImport?.let { uri ->
         ConfirmDialog(
             title = stringResource(R.string.import_json),

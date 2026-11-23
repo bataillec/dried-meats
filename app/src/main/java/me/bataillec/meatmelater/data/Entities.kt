@@ -14,14 +14,9 @@ data class MeatTypeEntity(
 )
 
 /** g/kg values and the divisor/offset are stored as exact decimal text (BigDecimal.toPlainString). */
-@Entity(
-    tableName = "recipe",
-    foreignKeys = [ForeignKey(entity = MeatTypeEntity::class, parentColumns = ["id"], childColumns = ["meat_type_id"])],
-    indices = [Index("meat_type_id")],
-)
+@Entity(tableName = "recipe")
 data class RecipeEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    @ColumnInfo(name = "meat_type_id") val meatTypeId: Long,
     val name: String,
     @ColumnInfo(name = "salt_g_per_kg") val saltGPerKg: String,
     @ColumnInfo(name = "sugar_g_per_kg") val sugarGPerKg: String,
@@ -35,13 +30,18 @@ data class RecipeEntity(
 
 @Entity(
     tableName = "piece",
-    foreignKeys = [ForeignKey(entity = RecipeEntity::class, parentColumns = ["id"], childColumns = ["recipe_id"])],
-    indices = [Index("recipe_id")],
+    foreignKeys =
+        [
+            ForeignKey(entity = RecipeEntity::class, parentColumns = ["id"], childColumns = ["recipe_id"]),
+            ForeignKey(entity = MeatTypeEntity::class, parentColumns = ["id"], childColumns = ["meat_type_id"]),
+        ],
+    indices = [Index("recipe_id"), Index("meat_type_id")],
 )
 data class PieceEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val label: String,
     @ColumnInfo(name = "recipe_id") val recipeId: Long,
+    @ColumnInfo(name = "meat_type_id") val meatTypeId: Long,
     @ColumnInfo(name = "weight_g") val weightG: Int,
     @ColumnInfo(name = "diameter_cm") val diameterCm: String,
     @ColumnInfo(name = "salt_g") val saltG: String,

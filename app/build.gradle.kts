@@ -144,3 +144,11 @@ dependencies {
     androidTestImplementation(libs.androidx.test.core)
     testImplementation(libs.androidx.sqlite.framework)
 }
+
+// Exported Room schemas feed MigrationTestHelper. Robolectric reads the debug variant's merged assets, so the
+// schemas are added to debug builds only (never to release APKs).
+androidComponents {
+    onVariants(selector().withBuildType("debug")) { variant ->
+        variant.sources.assets?.addStaticSourceDirectory("$projectDir/schemas")
+    }
+}

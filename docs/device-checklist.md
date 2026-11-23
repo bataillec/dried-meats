@@ -1,11 +1,12 @@
 # Device checklist (manual, before each release)
 
-Automated on an emulator (API 37, `mise run` + `./gradlew connectedDebugAndroidTest`): real alarm posts the notification
+Automated on an emulator (API 37, `mise run test:emulator`, run locally: not part of CI): real alarm posts the notification
 within 60 s, first-launch battery wizard, leave-vacuum dialog. Not automatable there: Doze with a real battery,
 reboot persistence on hardware, vendor battery killers, contrast/large-font review.
 
 Run on a real phone with the release APK installed over the previous version (data must survive).
 
+- [ ] Run the emulator tests locally: `mise run test:emulator` (not run in CI).
 - [ ] Create a piece with a 1-day vacuum duration set to end within a few minutes (edit the duration, or use a test recipe): the notification arrives within 60 s with the screen off and the phone idle (N5).
 - [ ] Réglages → Heure du rappel: the row shows `HH:mm`, the picker opens (dial, keyboard toggle), a time like 07:35 can be set; "Annuler" changes nothing. With TalkBack the picker is announced and dismissible; at 200 % font nothing clips. Set a reminder time a few minutes ahead on a piece ending today: it fires at the new time (R26, R12).
 - [ ] Reboot the phone: the pending reminder still fires (R14).
@@ -14,7 +15,7 @@ Run on a real phone with the release APK installed over the previous version (da
 - [ ] "Fait" and "Reporter 1 jour" buttons on the notification update the piece and reschedule.
 - [ ] Deny exact alarms: the home banner shows and links to the system screen.
 - [ ] Battery exemption banner clears after granting.
-- [ ] Export to JSON, uninstall/reinstall, import: all pieces and recipes are back and reminders are rescheduled.
+- [ ] Export to JSON, uninstall/reinstall, import: all pieces (with their meat type) and recipes are back and reminders are rescheduled.
 - [ ] Themes Clair, Sombre, Sombre OLED, Système; OLED background is pure black; check contrast of the alert orange and chips (N4).
 - [ ] Font scale 200 %: no clipped buttons.
 
