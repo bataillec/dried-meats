@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import me.bataillec.meatmelater.AppContainer
 import me.bataillec.meatmelater.R
 import me.bataillec.meatmelater.domain.DosageCalculator
@@ -51,10 +50,9 @@ data class CalculatorUiState(
     val weightInvalid: Boolean = false,
 )
 
-/** R4, R5: standalone calculator; optionally prefilled from a piece. */
+/** R4, R5: standalone calculator. */
 class CalculatorViewModel(
     private val container: AppContainer,
-    pieceId: Long?,
 ) : ViewModel() {
     private data class Input(
         val recipeId: Long?,
@@ -78,25 +76,6 @@ class CalculatorViewModel(
             )
         }.stateIn(viewModelScope, SharingStarted.Eagerly, CalculatorUiState())
 
-    init {
-        if (pieceId != null) {
-            viewModelScope.launch {
-                container.pieces.getSummary(pieceId)?.let { summary ->
-                    val p = summary.piece
-                    val text =
-                        if (p.weightG % 1000 ==
-                            0
-                        ) {
-                            (p.weightG / 1000).toString()
-                        } else {
-                            (p.weightG / 1000.0).toString()
-                        }
-                    input.value = Input(p.recipeId, text, WeightUnit.KILOGRAMS)
-                }
-            }
-        }
-    }
-
     fun selectRecipe(id: Long) = input.update { it.copy(recipeId = id) }
 
     fun setWeight(text: String) = input.update { it.copy(weightText = text) }
@@ -105,9 +84,9 @@ class CalculatorViewModel(
 }
 
 @Composable
-fun CalculatorScreen(pieceId: Long?) {
+fun CalculatorScreen() {
     val container = rememberContainer()
-    val vm: CalculatorViewModel = viewModel(key = "calc-$pieceId") { CalculatorViewModel(container, pieceId) }
+    val vm: CalculatorViewModel = viewModel { CalculatorViewModel(container) }
     val state by vm.state.collectAsState()
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),

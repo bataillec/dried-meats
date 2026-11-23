@@ -112,7 +112,6 @@
     <string name="add_note">Ajouter une note</string>
     <string name="edit_note">Modifier la note</string>
     <string name="note_hint">Ex. : ferme au toucher</string>
-    <string name="open_in_calculator">Ouvrir dans le calculateur</string>
     <string name="cancel_piece">Annuler la pièce</string>
     <string name="cancel_piece_text">La pièce est arrêtée et ses rappels sont supprimés. Son historique est conservé.</string>
     <string name="delete_piece_title">Supprimer la pièce ?</string>

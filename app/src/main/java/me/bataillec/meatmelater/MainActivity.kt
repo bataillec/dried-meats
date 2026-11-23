@@ -126,7 +126,7 @@ private object Routes {
     const val PIECES = "pieces"
     const val NEW_PIECE = "pieces/new"
     const val PIECE = "pieces/{id}"
-    const val CALCULATOR = "calculator?pieceId={pieceId}"
+    const val CALCULATOR = "calculator"
     const val RECIPES = "recipes"
     const val RECIPE_EDIT = "recipes/edit/{id}"
     const val STATS = "stats"
@@ -230,22 +230,10 @@ private fun AppRoot(
             composable(Routes.PIECE, arguments = listOf(navArgument("id") { type = NavType.LongType })) { entry ->
                 PieceDetailScreen(
                     pieceId = entry.arguments!!.getLong("id"),
-                    onOpenCalculator = { nav.navigate("calculator?pieceId=$it") },
                     onGone = { nav.popBackStack(Routes.PIECES, inclusive = false) },
                 )
             }
-            composable(
-                Routes.CALCULATOR,
-                arguments =
-                    listOf(
-                        navArgument("pieceId") {
-                            type = NavType.LongType
-                            defaultValue = -1L
-                        },
-                    ),
-            ) { entry ->
-                CalculatorScreen(entry.arguments!!.getLong("pieceId").takeIf { it >= 0 })
-            }
+            composable(Routes.CALCULATOR) { CalculatorScreen() }
             composable(Routes.RECIPES) { RecipesScreen(onEdit = { nav.navigate(Routes.recipeEdit(it)) }) }
             composable(Routes.RECIPE_EDIT, arguments = listOf(navArgument("id") { type = NavType.LongType })) { entry ->
                 RecipeEditScreen(entry.arguments!!.getLong("id"), onDone = { nav.popBackStack() })
