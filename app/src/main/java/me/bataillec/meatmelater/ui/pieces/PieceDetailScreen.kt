@@ -121,7 +121,6 @@ private enum class DetailDialog { FINISH, DURATION, CANCEL, DELETE }
 @Composable
 fun PieceDetailScreen(
     pieceId: Long,
-    onOpenCalculator: (Long) -> Unit,
     onGone: () -> Unit,
 ) {
     val container = rememberContainer()
@@ -209,9 +208,6 @@ fun PieceDetailScreen(
         SectionTitle(stringResource(R.string.history))
         detail.runs.forEach { run -> RunCard(run, onNote = { noteRun = run }) }
 
-        OutlinedButton(onClick = { onOpenCalculator(piece.id) }, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.open_in_calculator))
-        }
         if (active) {
             OutlinedButton(onClick = { dialog = DetailDialog.CANCEL }, modifier = Modifier.fillMaxWidth()) {
                 Text(stringResource(R.string.cancel_piece))

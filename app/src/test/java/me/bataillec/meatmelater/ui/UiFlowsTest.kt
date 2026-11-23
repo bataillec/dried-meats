@@ -1,6 +1,7 @@
 package me.bataillec.meatmelater.ui
 
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.v2.createComposeRule
@@ -110,11 +111,19 @@ class UiFlowsTest : AppTestBase() {
         assertTrue(run.plannedEndAt > clock.millis + 9 * 86_400_000L)
     }
 
+    @Test
+    fun `R5 piece detail has no open in calculator button`() {
+        val id = createPiece(seedRecipe())
+        show { PieceDetailScreen(id, onGone = {}) }
+        waitForText(string(R.string.leave_vacuum))
+        compose.onAllNodesWithText("Ouvrir dans le calculateur").assertCountEquals(0)
+    }
+
     @Ignore(DIALOG_IDLE)
     @Test
     fun `R8 leaving the vacuum stage asks for the seasoning prefilled from the recipe`() {
         val id = createPiece(seedRecipe())
-        show { PieceDetailScreen(id, onOpenCalculator = {}, onGone = {}) }
+        show { PieceDetailScreen(id, onGone = {}) }
         waitForText(string(R.string.leave_vacuum))
         compose.onAllNodesWithText(string(R.string.leave_vacuum)).onLast().performClick() // card button
         // The dialog's focused field blinks forever, which would never let Compose go idle.
@@ -139,7 +148,7 @@ class UiFlowsTest : AppTestBase() {
     @Test
     fun `R8 the seasoning can be emptied (no seasoning)`() {
         val id = createPiece(seedRecipe())
-        show { PieceDetailScreen(id, onOpenCalculator = {}, onGone = {}) }
+        show { PieceDetailScreen(id, onGone = {}) }
         waitForText(string(R.string.leave_vacuum))
         compose.onAllNodesWithText(string(R.string.leave_vacuum)).onLast().performClick()
         // The dialog's focused field blinks forever, which would never let Compose go idle.
@@ -169,7 +178,7 @@ class UiFlowsTest : AppTestBase() {
     @Test
     fun `R13 R23 postponing from the detail screen counts the postponement`() {
         val id = createPiece(seedRecipe())
-        show { PieceDetailScreen(id, onOpenCalculator = {}, onGone = {}) }
+        show { PieceDetailScreen(id, onGone = {}) }
         waitForText(string(R.string.postpone_one_day))
         compose.onNodeWithText(string(R.string.postpone_one_day)).performClick()
         awaitUi {
@@ -278,7 +287,7 @@ class UiFlowsTest : AppTestBase() {
     @Test
     fun `R4 R5 calculator computes doses for the selected recipe`() {
         seedRecipe()
-        show { CalculatorScreen(null) }
+        show { CalculatorScreen() }
         waitForText("Bœuf · Classique")
         compose.onNodeWithText(string(R.string.weight)).performTextInput("1,25")
         waitForText(string(R.string.grams_format, "31,3"))
@@ -288,7 +297,7 @@ class UiFlowsTest : AppTestBase() {
     @Test
     fun `R4 calculator with empty weight shows the hint and no crash`() {
         seedRecipe()
-        show { CalculatorScreen(null) }
+        show { CalculatorScreen() }
         waitForText(string(R.string.calculator_hint))
     }
 
