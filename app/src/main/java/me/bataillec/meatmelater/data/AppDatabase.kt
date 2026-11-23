@@ -10,7 +10,7 @@ import androidx.sqlite.execSQL
 
 @Database(
     entities = [MeatTypeEntity::class, RecipeEntity::class, PieceEntity::class, StageRunEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -29,6 +29,7 @@ abstract class AppDatabase : RoomDatabase() {
             Room
                 .databaseBuilder(context, AppDatabase::class.java, NAME)
                 .setDriver(BundledSQLiteDriver())
+                .addMigrations(MIGRATION_1_2)
                 .addCallback(OneOpenRunGuard)
                 .build()
     }

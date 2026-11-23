@@ -1,0 +1,323 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "8cb046eb11c9b06076ce0f8797249329",
+    "entities": [
+      {
+        "tableName": "meat_type",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `archived` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "archived",
+            "columnName": "archived",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "recipe",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `salt_g_per_kg` TEXT NOT NULL, `sugar_g_per_kg` TEXT NOT NULL, `pepper_g_per_kg` TEXT NOT NULL, `fridge_seasoning_default` TEXT, `vacuum_divisor` TEXT NOT NULL, `vacuum_offset_days` TEXT NOT NULL, `fridge_min_days` INTEGER NOT NULL, `archived` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saltGPerKg",
+            "columnName": "salt_g_per_kg",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sugarGPerKg",
+            "columnName": "sugar_g_per_kg",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pepperGPerKg",
+            "columnName": "pepper_g_per_kg",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fridgeSeasoningDefault",
+            "columnName": "fridge_seasoning_default",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "vacuumDivisor",
+            "columnName": "vacuum_divisor",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "vacuumOffsetDays",
+            "columnName": "vacuum_offset_days",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fridgeMinDays",
+            "columnName": "fridge_min_days",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "archived",
+            "columnName": "archived",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "piece",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `label` TEXT NOT NULL, `recipe_id` INTEGER NOT NULL, `meat_type_id` INTEGER NOT NULL, `weight_g` INTEGER NOT NULL, `diameter_cm` TEXT NOT NULL, `salt_g` TEXT NOT NULL, `sugar_g` TEXT NOT NULL, `pepper_g` TEXT NOT NULL, `fridge_seasoning` TEXT, `status` TEXT NOT NULL, `created_at` INTEGER NOT NULL, FOREIGN KEY(`recipe_id`) REFERENCES `recipe`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`meat_type_id`) REFERENCES `meat_type`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "label",
+            "columnName": "label",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "recipeId",
+            "columnName": "recipe_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "meatTypeId",
+            "columnName": "meat_type_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "weightG",
+            "columnName": "weight_g",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "diameterCm",
+            "columnName": "diameter_cm",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saltG",
+            "columnName": "salt_g",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sugarG",
+            "columnName": "sugar_g",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pepperG",
+            "columnName": "pepper_g",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fridgeSeasoning",
+            "columnName": "fridge_seasoning",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_piece_recipe_id",
+            "unique": false,
+            "columnNames": [
+              "recipe_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_piece_recipe_id` ON `${TABLE_NAME}` (`recipe_id`)"
+          },
+          {
+            "name": "index_piece_meat_type_id",
+            "unique": false,
+            "columnNames": [
+              "meat_type_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_piece_meat_type_id` ON `${TABLE_NAME}` (`meat_type_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "recipe",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "recipe_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "meat_type",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "meat_type_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "stage_run",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `piece_id` INTEGER NOT NULL, `stage` TEXT NOT NULL, `started_at` INTEGER NOT NULL, `planned_end_at` INTEGER NOT NULL, `ended_at` INTEGER, `postponed_days` INTEGER NOT NULL, `note` TEXT, FOREIGN KEY(`piece_id`) REFERENCES `piece`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pieceId",
+            "columnName": "piece_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "stage",
+            "columnName": "stage",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startedAt",
+            "columnName": "started_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "plannedEndAt",
+            "columnName": "planned_end_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endedAt",
+            "columnName": "ended_at",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "postponedDays",
+            "columnName": "postponed_days",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_stage_run_piece_id",
+            "unique": false,
+            "columnNames": [
+              "piece_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_stage_run_piece_id` ON `${TABLE_NAME}` (`piece_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "piece",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "piece_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8cb046eb11c9b06076ce0f8797249329')"
+    ]
+  }
+}

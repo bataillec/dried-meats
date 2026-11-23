@@ -32,9 +32,15 @@ class ReminderOnDeviceTest {
                 val meat = container.meatTypes.save(MeatType(0, "Device"))
                 val recipe =
                     container.recipes.save(
-                        Recipe(0, meat, "Rappel", BigDecimal("25"), BigDecimal("5"), BigDecimal("2")),
+                        Recipe(0, "Rappel", BigDecimal("25"), BigDecimal("5"), BigDecimal("2")),
                     )
-                container.pieceActions.createPiece("Rappel ${System.nanoTime()}", recipe, 1000, BigDecimal("10"))!!
+                container.pieceActions.createPiece(
+                    "Rappel ${System.nanoTime()}",
+                    recipe,
+                    meat,
+                    1000,
+                    BigDecimal("10"),
+                )!!
             }
         // Move the planned end a few seconds ahead, then rebuild the alarm from the database.
         val dueIn = 5_000L

@@ -61,7 +61,7 @@ class FakeSettingsStore(
 class FakeMeatTypeStore : MeatTypeStore {
     val items = MutableStateFlow<List<MeatType>>(emptyList())
     private var next = 1L
-    var recipeCounts = mutableMapOf<Long, Int>()
+    var pieceCounts = mutableMapOf<Long, Int>()
 
     override fun observeAll(): Flow<List<MeatType>> = items
 
@@ -74,7 +74,7 @@ class FakeMeatTypeStore : MeatTypeStore {
     }
 
     override suspend fun delete(id: Long): Boolean {
-        if ((recipeCounts[id] ?: 0) > 0) return false
+        if ((pieceCounts[id] ?: 0) > 0) return false
         items.value = items.value.filterNot { it.id == id }
         return true
     }
