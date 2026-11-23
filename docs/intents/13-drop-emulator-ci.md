@@ -1,6 +1,6 @@
 # intent — Drop the emulator tests from CI, run them locally (issue #13)
 
-Status: v0.1, awaiting validation by the owner. Extends `docs/intent.md` (v0.3); where the two
+Status: v0.2, validated by the owner (2026-11-23). Extends `docs/intent.md` (v0.3); where the two
 differ, this file wins for the points below once validated. Requirements and design updates follow in the next step.
 
 ## 1. What I want
@@ -29,8 +29,6 @@ Me, as the only developer, before a release. Contributors later: they must find 
 3. **The docs say plainly that these tests are not run in CI** and must be run locally before a release:
    README (Tests section), `CLAUDE.md` (commands), `docs/device-checklist.md` (pre-release step).
 4. **No mention of the `emulator-tests` CI job remains** in the repository docs.
-5. **Branch protection**: if `emulator-tests` is a required status check on `main`, it is removed; the required
-   checks are `check` and `wrapper-validation`. This is a GitHub setting, done by me, not by a commit.
 
 ## 5. Constraints
 
