@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Removed the "Calculateur" tab and the standalone calculator screen (issue #10, R5 dropped). Doses are
+  still shown live when creating a piece (R4) and kept on the piece.
 - Recipe form: the "Durée du sous-vide" section shows the formula with the typed values and a live
   6 cm example (R28). The Réglages example now uses 6 cm too (was 9 cm).
 

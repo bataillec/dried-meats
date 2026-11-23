@@ -130,7 +130,7 @@ Navigation: Navigation-Compose with bottom bar (Pièces, Recettes, Stats); Régl
 1. Repo scaffold, `CLAUDE.md`, CI, empty app builds.
 2. Domain: `DosageCalculator`, `StageDurationRule`, state machine + tests.
 3. Data layer: Room, repositories, seed meat types.
-4. Recipes screens (the standalone calculator was removed, issue #10).
+4. Recipes screens.
 5. Pieces: create, list, detail, stage transitions.
 6. Reminders: planner, alarms, receivers, boot, permissions.
 7. Statistics, export/import.

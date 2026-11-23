@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material.icons.filled.Settings
@@ -50,7 +49,6 @@ import androidx.navigation.navArgument
 import kotlinx.coroutines.launch
 import me.bataillec.meatmelater.domain.AppSettings
 import me.bataillec.meatmelater.platform.BatteryOnboardingDialog
-import me.bataillec.meatmelater.ui.calculator.CalculatorScreen
 import me.bataillec.meatmelater.ui.pieces.NewPieceScreen
 import me.bataillec.meatmelater.ui.pieces.PieceDetailScreen
 import me.bataillec.meatmelater.ui.pieces.PiecesScreen
@@ -126,7 +124,6 @@ private object Routes {
     const val PIECES = "pieces"
     const val NEW_PIECE = "pieces/new"
     const val PIECE = "pieces/{id}"
-    const val CALCULATOR = "calculator"
     const val RECIPES = "recipes"
     const val RECIPE_EDIT = "recipes/edit/{id}"
     const val STATS = "stats"
@@ -146,7 +143,6 @@ private data class TopLevel(
 private val TOP_LEVEL =
     listOf(
         TopLevel(Routes.PIECES, R.string.nav_pieces, Icons.Filled.Home),
-        TopLevel("calculator", R.string.nav_calculator, Icons.Filled.Calculate),
         TopLevel(Routes.RECIPES, R.string.nav_recipes, Icons.AutoMirrored.Filled.MenuBook),
         TopLevel(Routes.STATS, R.string.nav_stats, Icons.Filled.Insights),
     )
@@ -160,12 +156,7 @@ private fun AppRoot(
     val nav = rememberNavController()
     val backStack by nav.currentBackStackEntryAsState()
     val route = backStack?.destination?.route.orEmpty()
-    val topRoute =
-        TOP_LEVEL.firstOrNull { route.startsWith(it.route) && !route.startsWith(Routes.NEW_PIECE) }?.takeIf {
-            route ==
-                it.route ||
-                route.startsWith("calculator")
-        }
+    val topRoute = TOP_LEVEL.firstOrNull { it.route == route }
 
     LaunchedEffect(pendingPieceId) {
         if (pendingPieceId != null) {
@@ -233,7 +224,6 @@ private fun AppRoot(
                     onGone = { nav.popBackStack(Routes.PIECES, inclusive = false) },
                 )
             }
-            composable(Routes.CALCULATOR) { CalculatorScreen() }
             composable(Routes.RECIPES) { RecipesScreen(onEdit = { nav.navigate(Routes.recipeEdit(it)) }) }
             composable(Routes.RECIPE_EDIT, arguments = listOf(navArgument("id") { type = NavType.LongType })) { entry ->
                 RecipeEditScreen(entry.arguments!!.getLong("id"), onDone = { nav.popBackStack() })
@@ -259,7 +249,6 @@ private fun titleFor(route: String): Int =
     when {
         route.startsWith("pieces/new") -> R.string.new_piece
         route.startsWith("pieces/") -> R.string.piece_detail
-        route.startsWith("calculator") -> R.string.nav_calculator
         route.startsWith("recipes/edit") -> R.string.recipe_edit
         route.startsWith("recipes") -> R.string.nav_recipes
         route.startsWith("stats") -> R.string.nav_stats

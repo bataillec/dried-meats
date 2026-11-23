@@ -1,6 +1,6 @@
 # Intent — Remove the "Calculateur" tab and the standalone calculator
 
-Status: v0.1 — draft for the owner's validation. Issue: #10. Extends `docs/intent.md` (v0.3);
+Status: v0.2 — validated by the owner (2026-11-23); open-question defaults applied. Issue: #10. Extends `docs/intent.md` (v0.3);
 where the two differ, this file wins for the points below once validated. No design or code yet.
 
 ## 1. What I want
