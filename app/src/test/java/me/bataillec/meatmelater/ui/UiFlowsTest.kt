@@ -356,6 +356,7 @@ class UiFlowsTest : AppTestBase() {
         show { NewPieceScreen(onCreated = {}) }
         waitForText("Classique")
         compose.onNodeWithText(string(R.string.weight)).performTextInput("1,25")
+        compose.onNodeWithText(string(R.string.diameter)).performTextInput("12")
         waitForText(string(R.string.grams_format, "31,3"))
         compose.onNodeWithText(string(R.string.grams_format, "2,5")).assertIsDisplayed() // pepper 2 g/kg * 1.25 kg
     }
