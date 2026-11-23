@@ -98,12 +98,12 @@ Navigation: Navigation-Compose with bottom bar (Pièces, Calculateur, Recettes, 
 
 ### Support links (R29)
 
-- Platform: `platform/ExternalLinks.kt` with an `ExternalLinkOpener` interface (`open(url): Boolean`) and an Android implementation using `Intent(ACTION_VIEW, uri)` with `FLAG_ACTIVITY_NEW_TASK` from a non-activity context; it returns false on `ActivityNotFoundException`. Tests use a `FakeExternalLinkOpener` that records URLs (no mocks).
+- Platform: `platform/ExternalLinks.kt` with an `ExternalLinkOpener` interface (`open(url): Boolean`) and an Android implementation using `Intent(ACTION_VIEW, uri)` with `FLAG_ACTIVITY_NEW_TASK` from a non-activity context; it returns false on `ActivityNotFoundException`. Tests pass a lambda through the `fun interface` that records URLs (no mocks).
 - Constants: `KOFI_URL` and `GITHUB_URL` live in one Kotlin object, not in `strings.xml` (not translatable, and not inline in the UI).
-- Manifest: Android 11+ package visibility may hide browsers from `resolveActivity`; we do not call it and rely on `startActivity` throwing, so no `<queries>` entry is needed. Verified on the emulator; add one only if a device check shows otherwise. No permission added.
+- Manifest: Android 11+ package visibility may hide browsers from `resolveActivity`; we do not call it and rely on `startActivity` throwing, so no `<queries>` entry is needed. To verify on a device (device checklist); add one only if the check shows browsers are hidden. No permission added.
 - UI: in the À propos block, two `TextButton`-style rows (min height 48 dp, full width, spoken label "<libellé>, lien externe" via `contentDescription`, label wraps with no `maxLines`). On failure, a snackbar/toast "Aucun navigateur disponible". Strings: `about_kofi`, `about_github`, `about_link_desc`, `about_no_browser`. The failure message reuses the screen's existing `message` line (no snackbar).
-- Repo files: README "Soutenir" section near the end with the Ko-fi button image linking to the page; `.github/FUNDING.yml` with `ko_fi: O0P52B4FJ1`.
-- Tests: UI test in `UiFlowsTest` (both links shown, tap fires the fake opener with the right URL, failure shows the message); a unit test that the constants are `https` URLs.
+- Repo files: README "Support" section near the end with the Ko-fi button image linking to the page; `.github/FUNDING.yml` with `ko_fi: O0P52B4FJ1`.
+- Tests: UI test in `UiFlowsTest` (both links shown, tap fires the fake opener with the right URL, failure shows the message); a test that the constants are the https URLs of R29.
 
 ## 6. Tech choices
 

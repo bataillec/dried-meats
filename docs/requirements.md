@@ -113,7 +113,7 @@ Derived from intent.md v0.2. Each requirement has an ID used in tests and PRs.
     "Aucun navigateur disponible" is shown and the app does not crash.
   - Each link is a single touch target of at least 48 dp, announced by TalkBack as a link, with a label that
     wraps (never truncates) at 200 % font scale (N4). URLs are constants, labels are string resources.
-  - Outside the app: the README has a "Soutenir" section with the Ko-fi button, and `.github/FUNDING.yml`
+  - Outside the app: the README has a "Support" section with the Ko-fi button, and `.github/FUNDING.yml`
     holds `ko_fi: O0P52B4FJ1` for the repository's Sponsor button.
   - *Acceptance:* both links are visible in Réglages > À propos; tapping each fires an `ACTION_VIEW` intent on
     the right URL; with no handler, the message appears and nothing crashes.

@@ -151,7 +151,7 @@ The complete rules live in [`CLAUDE.md`](CLAUDE.md).
 | [`docs/device-checklist.md`](docs/device-checklist.md) | Manual release test and last run |
 | [`CHANGELOG.md`](CHANGELOG.md) | Release notes |
 
-## Soutenir
+## Support
 
 Meat Me Later is free. If it is useful to you, you can support its development on Ko-fi:
 
