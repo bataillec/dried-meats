@@ -43,12 +43,9 @@ Out:
 
 ## 5. Relation to #9
 
-#9 removes the "Ouvrir dans le calculateur" button on the piece detail screen and the `pieceId`
-prefill path. #10 removes the whole screen, so it supersedes the calculator cleanup listed in #9.
-Suggested order: **#9 first** (small, standalone, valid on its own), then #10 rebased on top, which
-then has less to delete. They touch the same spots in `MainActivity.kt`, `CalculatorScreen.kt` and R5,
-so expect small textual conflicts if both are open at once. Merging them into one PR is the other
-option, but two small PRs fit "one concern each".
+#9 is merged on `main` (button, `onOpenCalculator` and the `pieceId` prefill are already gone), and
+this branch is rebased on it. #10 therefore only removes what is left: the tab, the `calculator`
+route, `CalculatorScreen`/`CalculatorViewModel`, and R5 altogether. No order constraint remains.
 
 ## 6. Success looks like
 
@@ -65,4 +62,3 @@ option, but two small PRs fit "one concern each".
    Default: yes, rename.
 3. Delete the calculator screenshot and re-capture the other README screenshots that show the
    bottom bar? Default: yes, re-capture those showing the bar.
-4. Order with #9? Default: #9 first, then #10 rebased.
