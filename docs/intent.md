@@ -21,7 +21,7 @@ out on time, or lose track of which seasoning goes with which meat.
 
 ## 4. Features (v1)
 
-1. **Dosage calculator** — given a piece's weight and the recipe's dosage, show grams
+1. **Dosage** — when creating a piece, given its weight and the recipe's dosage, show grams
    of salt, sugar and pepper.
 2. **Vacuum-stage reminder** — notify me when a piece must come out of the vacuum-drying stage.
 3. **Fridge-drying reminder** — notify me when a piece must come out of the fridge-drying stage.

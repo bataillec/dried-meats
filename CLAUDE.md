@@ -1,7 +1,7 @@
 # Meat Me Later — project guide
 
 Android app (Kotlin, Jetpack Compose, Room) to manage dried-meat preparation: dosage
-calculator, stage reminders, tracking. Local only, no account, no network. French UI.
+calculation, stage reminders, tracking. Local only, no account, no network. French UI.
 Specs live in `docs/`: read `intent.md`, then `requirements.md` (R-ids) and `design.md`.
 Decisions taken while building are in `docs/assumptions.md`; the manual release test is `docs/device-checklist.md`.
 

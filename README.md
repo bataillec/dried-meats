@@ -26,16 +26,15 @@ Everything stays on the phone: no account, no network access, no analytics. The 
 <p align="center">
   <img src="docs/assets/screenshots/pieces.png" alt="Piece list with an overdue piece pinned on top" width="200">
   <img src="docs/assets/screenshots/piece-detail.png" alt="Piece detail with stage actions and snapshotted doses" width="200">
-  <img src="docs/assets/screenshots/calculator.png" alt="Dosage calculator" width="200">
   <img src="docs/assets/screenshots/pieces-dark.png" alt="Piece list in the dark theme" width="200">
 </p>
 
-_Sample data on an emulator. Left to right: piece list (overdue first), piece detail, calculator, dark theme._
+_Sample data on an emulator. Left to right: piece list (overdue first), piece detail, dark theme._
 
 ## Features
 
-- **Dosage calculator**: enter a weight (g or kg) and pick a recipe to get the grams of salt, sugar and pepper
-  (recipes are expressed in g/kg). Works standalone.
+- **Doses**: when you start a piece, enter its weight (g or kg) and pick a recipe to see the grams of salt, sugar
+  and pepper live (recipes are expressed in g/kg); they are kept on the piece.
 - **Recipes and meat types**: beef, pork and duck are pre-seeded; add your own meats (in Settings) and recipes,
   duplicate or archive the recipes. A recipe is independent of the meat: pick both when you start a piece. Fridge seasoning is free text.
 - **Pieces in parallel**: each piece has a label, recipe, weight and diameter. The vacuum duration is computed from
@@ -106,7 +105,7 @@ app/src/main/java/me/bataillec/meatmelater/
   domain/     pure Kotlin: dosage, durations, stage state machine, reminder planning
   data/       Room database, DAOs, settings store, JSON backup
   platform/   alarms, receivers, notifications, permission banner
-  ui/         Jetpack Compose screens (pieces, calculator, recipes, stats, settings, theme)
+  ui/         Jetpack Compose screens (pieces, recipes, stats, settings, theme)
 docs/         intent, requirements, design, decisions, assumptions, device checklist
 scripts/      icon generation and Claude Code hooks
 ```

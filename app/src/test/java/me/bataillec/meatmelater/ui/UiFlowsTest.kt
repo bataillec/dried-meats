@@ -1,7 +1,6 @@
 package me.bataillec.meatmelater.ui
 
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.getBoundsInRoot
@@ -26,7 +25,6 @@ import me.bataillec.meatmelater.R
 import me.bataillec.meatmelater.domain.AccentColor
 import me.bataillec.meatmelater.domain.PieceStatus
 import me.bataillec.meatmelater.domain.ThemeMode
-import me.bataillec.meatmelater.ui.calculator.CalculatorScreen
 import me.bataillec.meatmelater.ui.pieces.NewPieceScreen
 import me.bataillec.meatmelater.ui.pieces.PieceDetailScreen
 import me.bataillec.meatmelater.ui.pieces.PiecesScreen
@@ -148,14 +146,6 @@ class UiFlowsTest : AppTestBase() {
         awaitUi { created != null }
         val run = runBlocking { container.pieces.getSummary(created!!) }!!.openRun!!
         assertTrue(run.plannedEndAt > clock.millis + 9 * 86_400_000L)
-    }
-
-    @Test
-    fun `R5 piece detail has no open in calculator button`() {
-        val id = createPiece(seedRecipe())
-        show { PieceDetailScreen(id, onGone = {}) }
-        waitForText(string(R.string.leave_vacuum))
-        compose.onAllNodesWithText("Ouvrir dans le calculateur").assertCountEquals(0)
     }
 
     @Ignore(DIALOG_IDLE)
@@ -360,20 +350,23 @@ class UiFlowsTest : AppTestBase() {
     }
 
     @Test
-    fun `R4 R5 calculator computes doses for the selected recipe`() {
+    fun `R4 new piece shows the doses for the typed weight and the selected recipe`() {
+        seedMeat()
         seedRecipe()
-        show { CalculatorScreen() }
+        show { NewPieceScreen(onCreated = {}) }
         waitForText("Classique")
         compose.onNodeWithText(string(R.string.weight)).performTextInput("1,25")
+        compose.onNodeWithText(string(R.string.diameter)).performTextInput("12")
         waitForText(string(R.string.grams_format, "31,3"))
         compose.onNodeWithText(string(R.string.grams_format, "2,5")).assertIsDisplayed() // pepper 2 g/kg * 1.25 kg
     }
 
     @Test
-    fun `R4 calculator with empty weight shows the hint and no crash`() {
+    fun `R4 new piece with empty weight shows the hint and no crash`() {
+        seedMeat()
         seedRecipe()
-        show { CalculatorScreen() }
-        waitForText(string(R.string.calculator_hint))
+        show { NewPieceScreen(onCreated = {}) }
+        waitForText(string(R.string.doses_hint))
     }
 
     private companion object {
