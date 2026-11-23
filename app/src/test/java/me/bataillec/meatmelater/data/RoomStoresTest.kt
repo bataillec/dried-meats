@@ -49,9 +49,22 @@ class RoomStoresTest {
     @After
     fun tearDown() = db.close()
 
+    private var meatId = 0L
+
+    private fun actions(clock: FakeClock): PieceActions =
+        PieceActions(
+            pieces,
+            recipes,
+            meats,
+            FakeSettingsStore(),
+            ReminderPlanner(pieces, FakeAlarmScheduler(), clock),
+            clock,
+        )
+
+    /** Seeds one meat type (kept in [meatId]) and one recipe; the recipe has no meat type. */
     private suspend fun seedRecipe(): Long {
-        val meat = meats.save(MeatType(0, "Bœuf"))
-        return recipes.save(Recipe(0, meat, "Classique", BigDecimal("25"), BigDecimal("5.5"), BigDecimal("2")))
+        meatId = meats.save(MeatType(0, "Bœuf"))
+        return recipes.save(Recipe(0, "Classique", BigDecimal("25"), BigDecimal("5.5"), BigDecimal("2")))
     }
 
     @Test
@@ -68,20 +81,44 @@ class RoomStoresTest {
         runBlocking {
             val recipeId = seedRecipe()
             val clock = FakeClock(1_000_000_000_000)
-            val planner = ReminderPlanner(pieces, FakeAlarmScheduler(), clock)
-            val actions = PieceActions(pieces, recipes, FakeSettingsStore(), planner, clock)
-            actions.createPiece("Bœuf 1", recipeId, 1250, BigDecimal("12"))
+            val actions = actions(clock)
+            actions.createPiece("Bœuf 1", recipeId, meatId, 1250, BigDecimal("12"))
             assertFalse(recipes.delete(recipeId))
             recipes.setArchived(recipeId, true)
             assertTrue(recipes.get(recipeId)!!.archived)
         }
 
     @Test
-    fun `R1 meat type with recipes cannot be deleted`() =
+    fun `R1 meat type used by a piece cannot be deleted, an unused one can`() =
         runBlocking {
             val recipeId = seedRecipe()
-            val meatId = recipes.get(recipeId)!!.meatTypeId
+            val unused = meats.save(MeatType(0, "Porc"))
+            assertTrue(meats.delete(unused))
+            assertTrue(meats.delete(meats.save(MeatType(0, "Canard"))))
+            actions(FakeClock(1_000_000_000_000)).createPiece("Bœuf 1", recipeId, meatId, 1250, BigDecimal("12"))
             assertFalse(meats.delete(meatId))
+        }
+
+    @Test
+    fun `R6 a piece keeps its own meat type and the same recipe serves any meat`() =
+        runBlocking {
+            val recipeId = seedRecipe()
+            val pork = meats.save(MeatType(0, "Porc"))
+            val actions = actions(FakeClock(1_000_000_000_000))
+            val beefPiece = actions.createPiece("Bœuf 1", recipeId, meatId, 1000, BigDecimal("10"))!!
+            val porkPiece = actions.createPiece("Porc 1", recipeId, pork, 1000, BigDecimal("10"))!!
+            assertEquals("Bœuf", pieces.getSummary(beefPiece)!!.meatTypeName)
+            assertEquals("Porc", pieces.getSummary(porkPiece)!!.meatTypeName)
+            assertEquals(pork, pieces.getSummary(porkPiece)!!.piece.meatTypeId)
+            assertEquals("Classique", pieces.getSummary(porkPiece)!!.recipeName)
+        }
+
+    @Test
+    fun `R6 a piece needs an existing meat type`() =
+        runBlocking {
+            val recipeId = seedRecipe()
+            val actions = actions(FakeClock(1_000_000_000_000))
+            assertEquals(null, actions.createPiece("X", recipeId, 999, 1000, BigDecimal("10")))
         }
 
     @Test
@@ -90,9 +127,16 @@ class RoomStoresTest {
             val recipeId = seedRecipe()
             val clock = FakeClock(1_000_000_000_000)
             val scheduler = FakeAlarmScheduler()
-            val planner = ReminderPlanner(pieces, scheduler, clock)
-            val actions = PieceActions(pieces, recipes, FakeSettingsStore(), planner, clock)
-            val id = actions.createPiece("Bœuf 1", recipeId, 1250, BigDecimal("12"))!!
+            val actions =
+                PieceActions(
+                    pieces,
+                    recipes,
+                    meats,
+                    FakeSettingsStore(),
+                    ReminderPlanner(pieces, scheduler, clock),
+                    clock,
+                )
+            val id = actions.createPiece("Bœuf 1", recipeId, meatId, 1250, BigDecimal("12"))!!
             recipes.save(recipes.get(recipeId)!!.copy(saltGPerKg = BigDecimal("99")))
             val created = pieces.getSummary(id)!!
             assertEquals(BigDecimal("31.3"), created.piece.doses.saltG)
@@ -120,9 +164,8 @@ class RoomStoresTest {
         runBlocking {
             val recipeId = seedRecipe()
             val clock = FakeClock(1_000_000_000_000)
-            val planner = ReminderPlanner(pieces, FakeAlarmScheduler(), clock)
-            val actions = PieceActions(pieces, recipes, FakeSettingsStore(), planner, clock)
-            val id = actions.createPiece("Bœuf 1", recipeId, 1000, BigDecimal("10"))!!
+            val actions = actions(clock)
+            val id = actions.createPiece("Bœuf 1", recipeId, meatId, 1000, BigDecimal("10"))!!
             actions.delete(id)
             assertTrue(db.stageRunDao().all().isEmpty())
             assertEquals(0, pieces.countByRecipe(recipeId))
@@ -133,9 +176,8 @@ class RoomStoresTest {
         runBlocking {
             val recipeId = seedRecipe()
             val clock = FakeClock(1_000_000_000_000)
-            val planner = ReminderPlanner(pieces, FakeAlarmScheduler(), clock)
-            val actions = PieceActions(pieces, recipes, FakeSettingsStore(), planner, clock)
-            val id = actions.createPiece("Bœuf 1", recipeId, 1000, BigDecimal("10"))!!
+            val actions = actions(clock)
+            val id = actions.createPiece("Bœuf 1", recipeId, meatId, 1000, BigDecimal("10"))!!
             val open = db.stageRunDao().openRuns().single()
             val duplicate = open.copy(id = 0)
             val failed = runCatching { db.stageRunDao().insert(duplicate) }.isFailure
@@ -148,9 +190,8 @@ class RoomStoresTest {
         runBlocking {
             val recipeId = seedRecipe()
             val clock = FakeClock(1_000_000_000_000)
-            val planner = ReminderPlanner(pieces, FakeAlarmScheduler(), clock)
-            val actions = PieceActions(pieces, recipes, FakeSettingsStore(), planner, clock)
-            val id = actions.createPiece("Bœuf 1", recipeId, 1000, BigDecimal("10"))!!
+            val actions = actions(clock)
+            val id = actions.createPiece("Bœuf 1", recipeId, meatId, 1000, BigDecimal("10"))!!
             val run = pieces.getSummary(id)!!.openRun!!
             actions.postponeOneDay(id)
             actions.saveNote(run.id, "souple")

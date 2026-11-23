@@ -2,6 +2,7 @@ package me.bataillec.meatmelater.ui
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
@@ -72,10 +73,11 @@ class UiFlowsTest : AppTestBase() {
 
     @Test
     fun `R6 R7 new piece shows live doses and planned duration then creates the piece`() {
+        seedMeat()
         seedRecipe()
         var created: Long? = null
         show { NewPieceScreen(onCreated = { created = it }) }
-        waitForText("Bœuf · Classique")
+        waitForText("Classique")
         compose.onNodeWithText(string(R.string.weight)).performTextInput("1,25")
         compose.onNodeWithText(string(R.string.diameter)).performTextInput("12")
         waitForText(string(R.string.grams_format, "31,3"))
@@ -91,14 +93,47 @@ class UiFlowsTest : AppTestBase() {
                 .toPlainString(),
         )
         assertEquals("Bœuf 1", piece.piece.label)
+        assertEquals("Bœuf", piece.meatTypeName)
+        assertEquals("Classique", piece.recipeName)
+    }
+
+    @Test
+    fun `R6 the piece takes the meat type picked next to the recipe and suggests its label`() {
+        val beef = seedMeat("Bœuf")
+        val pork = seedMeat("Porc")
+        seedRecipe()
+        var created: Long? = null
+        show { NewPieceScreen(onCreated = { created = it }) }
+        waitForText("Classique")
+        compose.onNodeWithText("Bœuf").performClick() // opens the meat picker, first meat selected
+        compose.onNodeWithText("Porc").performClick()
+        compose.onNodeWithText(string(R.string.weight)).performTextInput("1,25")
+        compose.onNodeWithText(string(R.string.diameter)).performTextInput("12")
+        waitForText("7 jours")
+        compose.onNodeWithText(string(R.string.start_piece)).performClick()
+        awaitUi { created != null }
+        val piece = runBlocking { container.pieces.getSummary(created!!) }!!
+        assertEquals(pork, piece.piece.meatTypeId)
+        assertEquals("Porc", piece.meatTypeName)
+        assertEquals("Porc 1", piece.piece.label)
+        assertTrue(beef != pork)
+    }
+
+    @Test
+    fun `R6 creating a piece without any meat type shows a hint and cannot start`() {
+        seedRecipe()
+        show { NewPieceScreen(onCreated = {}) }
+        waitForText(string(R.string.no_meat_type))
+        compose.onNodeWithText(string(R.string.start_piece)).assertIsNotEnabled()
     }
 
     @Test
     fun `R7 a duration override replaces the computed one`() {
+        seedMeat()
         seedRecipe()
         var created: Long? = null
         show { NewPieceScreen(onCreated = { created = it }) }
-        waitForText("Bœuf · Classique")
+        waitForText("Classique")
         compose.onNodeWithText(string(R.string.weight)).performTextInput("1000")
         compose.onNodeWithText(string(R.string.unit_g)).performClick()
         compose.onNodeWithText(string(R.string.diameter)).performTextInput("9")
@@ -212,7 +247,7 @@ class UiFlowsTest : AppTestBase() {
     fun `R25 steppers change the recipe doses and show the live duration example`() {
         val recipe = seedRecipe()
         show { SettingsScreen() }
-        waitForText("Bœuf · Classique")
+        waitForText("Classique")
         compose.onAllNodesWithContentDescription(string(R.string.increase)).onFirst().performClick()
         compose.waitUntil(
             10_000,
@@ -229,12 +264,6 @@ class UiFlowsTest : AppTestBase() {
 
     @Test
     fun `R2 R3 recipes list and edit form create a recipe`() {
-        runBlocking {
-            container.meatTypes.save(
-                me.bataillec.meatmelater.domain
-                    .MeatType(0, "Porc"),
-            )
-        }
         var done = false
         show { RecipeEditScreen(0, onDone = { done = true }) }
         waitForText(string(R.string.recipe_name))
@@ -251,21 +280,16 @@ class UiFlowsTest : AppTestBase() {
     }
 
     @Test
-    fun `R2 recipes screen lists recipes grouped by meat`() {
-        seedRecipe("Canard", "Magret")
+    fun `R2 recipes screen lists recipes without any meat grouping`() {
+        seedMeat("Canard")
+        seedRecipe("Magret")
         show { RecipesScreen(onEdit = {}) }
         waitForText("Magret")
-        compose.onNodeWithText("Canard").assertIsDisplayed()
+        compose.onNodeWithText("Canard").assertDoesNotExist()
     }
 
     @Test
     fun `R2 an invalid recipe form is not saved`() {
-        runBlocking {
-            container.meatTypes.save(
-                me.bataillec.meatmelater.domain
-                    .MeatType(0, "Porc"),
-            )
-        }
         var done = false
         show { RecipeEditScreen(0, onDone = { done = true }) }
         waitForText(string(R.string.recipe_name))
@@ -279,7 +303,7 @@ class UiFlowsTest : AppTestBase() {
     fun `R4 R5 calculator computes doses for the selected recipe`() {
         seedRecipe()
         show { CalculatorScreen(null) }
-        waitForText("Bœuf · Classique")
+        waitForText("Classique")
         compose.onNodeWithText(string(R.string.weight)).performTextInput("1,25")
         waitForText(string(R.string.grams_format, "31,3"))
         compose.onNodeWithText(string(R.string.grams_format, "2,5")).assertIsDisplayed() // pepper 2 g/kg * 1.25 kg

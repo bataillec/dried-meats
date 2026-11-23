@@ -22,13 +22,15 @@ platform (AlarmScheduler, ReminderReceiver, BootReceiver, NotificationFactory, p
 | Table | Columns |
 |---|---|
 | `meat_type` | id, name, archived |
-| `recipe` | id, meat_type_id, name, salt_g_per_kg, sugar_g_per_kg, pepper_g_per_kg, fridge_seasoning_default (nullable text), vacuum_divisor (def 2.0), vacuum_offset_days (def 1), fridge_min_days (def 14), archived |
-| `piece` | id, label, recipe_id, weight_g, diameter_cm, salt_g, sugar_g, pepper_g (snapshot), fridge_seasoning (nullable text, chosen when leaving VACUUM), status (VACUUM / FRIDGE / DONE / CANCELLED), created_at |
+| `recipe` | id, name, salt_g_per_kg, sugar_g_per_kg, pepper_g_per_kg, fridge_seasoning_default (nullable text), vacuum_divisor (def 2.0), vacuum_offset_days (def 1), fridge_min_days (def 14), archived |
+| `piece` | id, label, meat_type_id (FK, indexed), recipe_id, weight_g, diameter_cm, salt_g, sugar_g, pepper_g (snapshot), fridge_seasoning (nullable text, chosen when leaving VACUUM), status (VACUUM / FRIDGE / DONE / CANCELLED), created_at |
 | `stage_run` | id, piece_id, stage (VACUUM / FRIDGE), started_at, planned_end_at, ended_at (nullable), postponed_days (int, def 0), note (nullable text) |
 
 - Timestamps are UTC epoch millis. Weights are stored in grams as integers. Doses in g/kg are decimals.
 - Money-style rounding: use `BigDecimal` with `HALF_UP` for dose results.
 - Migrations are explicit from v1 (Room exported schemas committed, migration tests).
+- v1 → v2 (#5): `piece.meat_type_id` added and backfilled from `recipe.meat_type_id`, then `recipe.meat_type_id` dropped by rebuilding `recipe` (FK, index); the one-open-run trigger and all indices are recreated. Backup format version 2 puts `meatTypeId` on pieces; version 1 files are read by deriving it from the recipe.
+- A meat type is deletable only if no piece uses it (`MeatTypeDao` counts pieces).
 
 ## 3. Piece state machine
 
@@ -70,13 +72,13 @@ VACUUM --finish--> FRIDGE --finish--> DONE
 
 ## 5. Screens (all French)
 
-1. **Pièces** (home): permission banner, "En retard" section, then running pieces sorted by next deadline; each row = label, meat/recipe, stage, remaining time. FAB "Nouvelle pièce".
-2. **Nouvelle pièce**: recipe picker, weight, diameter → live doses and planned vacuum duration → confirm.
+1. **Pièces** (home): permission banner, "En retard" section, then running pieces sorted by next deadline; each row = label, the piece's meat/recipe, stage, remaining time. FAB "Nouvelle pièce".
+2. **Nouvelle pièce**: meat type picker (non-archived), recipe picker (names only), weight, diameter → live doses and planned vacuum duration → confirm.
 3. **Détail pièce**: stage-1 doses, stage-2 seasoning (or "aucun"), stage timeline planned vs. actual with postponements and notes, buttons "Sortir du sous-vide / du frigo", "Reporter 1 jour", "Ajouter au calendrier", edit duration, cancel. Leaving the vacuum stage opens a dialog asking for the stage-2 seasoning (prefilled, may be empty).
 4. **Calculateur**: weight + recipe → doses, no piece created.
-5. **Recettes**: list by meat type; edit form with doses, rule, fridge days.
+5. **Recettes**: flat list (no meat grouping); edit form with doses, rule, fridge days.
 6. **Statistiques**: averages per recipe/stage, finished pieces.
-7. **Réglages** (R24–R26): four blocks: *Apparence* (Clair / Sombre / OLED / Système), *Dosages au sous-vide* (recipe picker, salt/sugar/pepper g/kg with − / + steppers, note that running pieces keep their doses), *Durée du sous-vide* (divisor, added days, live example with round-up), *Frigo et rappels* (minimum fridge days, reminder hour). Also permissions status, export/import JSON, about/version.
+7. **Réglages** (R24–R26): four blocks: *Apparence* (Clair / Sombre / OLED / Système), *Dosages au sous-vide* (recipe picker, salt/sugar/pepper g/kg with − / + steppers, note that running pieces keep their doses), *Durée du sous-vide* (divisor, added days, live example with round-up), *Frigo et rappels* (minimum fridge days, reminder hour), and *Types de viande* (add, rename, delete; moved from Recettes). Also permissions status, export/import JSON, about/version.
 
 Navigation: Navigation-Compose with bottom bar (Pièces, Calculateur, Recettes, Stats); Réglages from the top bar.
 

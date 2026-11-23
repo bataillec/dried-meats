@@ -31,15 +31,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import me.bataillec.meatmelater.R
+import me.bataillec.meatmelater.domain.MeatType
 import me.bataillec.meatmelater.domain.Recipe
 import me.bataillec.meatmelater.domain.WeightUnit
 
-/** A recipe with its meat type name, as shown in pickers. */
+/** A recipe as shown in pickers (the meat type belongs to the piece, not to the recipe). */
 data class RecipeOption(
     val recipe: Recipe,
-    val meatName: String,
 ) {
-    val label: String get() = "$meatName · ${recipe.name}"
+    val label: String get() = recipe.name
 }
 
 @Composable
@@ -99,6 +99,37 @@ fun RecipePicker(
                     text = { Text(option.label) },
                     onClick = {
                         onSelect(option.recipe.id)
+                        expanded = false
+                    },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun MeatTypePicker(
+    meatTypes: List<MeatType>,
+    selectedId: Long?,
+    onSelect: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val selected = meatTypes.firstOrNull { it.id == selectedId }
+    Column(modifier) {
+        OutlinedButton(
+            onClick = { expanded = true },
+            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+        ) {
+            Text(selected?.name ?: stringResource(R.string.pick_meat), modifier = Modifier.weight(1f))
+            Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            meatTypes.forEach { meat ->
+                DropdownMenuItem(
+                    text = { Text(meat.name) },
+                    onClick = {
+                        onSelect(meat.id)
                         expanded = false
                     },
                 )
