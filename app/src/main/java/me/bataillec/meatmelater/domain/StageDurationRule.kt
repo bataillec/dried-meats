@@ -16,7 +16,7 @@ data class StageDurationRule(
         require(divisor.signum() > 0) { "divisor must be positive" }
     }
 
-    /** Unrounded value, shown in the live example of the settings screen (R25). */
+    /** Unrounded value, shown in the live examples of the settings screen (R25) and the recipe form (R28). */
     fun rawDays(diameterCm: BigDecimal): BigDecimal = diameterCm.divide(divisor, MathContext.DECIMAL64).add(offsetDays)
 
     fun days(diameterCm: BigDecimal): Int =

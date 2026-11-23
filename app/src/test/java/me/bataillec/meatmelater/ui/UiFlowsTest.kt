@@ -4,6 +4,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.getBoundsInRoot
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
@@ -15,6 +16,7 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.printToString
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -275,7 +277,7 @@ class UiFlowsTest : AppTestBase() {
                     .toPlainString()
             } == "25.5"
         }
-        compose.onNodeWithText("Ø 9 cm ÷ 2 + 1 = 5,5 → 6 jours").assertExists()
+        compose.onNodeWithText("Ø 6 cm ÷ 2 + 1 = 4 → 4 jours").assertExists()
     }
 
     @Test
@@ -293,6 +295,39 @@ class UiFlowsTest : AppTestBase() {
         assertEquals("Jambon", saved.name)
         assertEquals("2.5", saved.sugarGPerKg.toPlainString())
         assertEquals(14, saved.fridgeMinDays)
+    }
+
+    @Test
+    fun `R28 recipe form shows the formula and the 6 cm example, live`() {
+        show { RecipeEditScreen(0, onDone = {}) }
+        waitForText(string(R.string.recipe_name))
+        waitForText("Exemple : Ø 6 cm ÷ 2 + 1 = 4 → 4 jours")
+        compose.onNodeWithText(string(R.string.duration_formula, "2", "1")).assertExists()
+        compose
+            .onNode(
+                hasContentDescription(string(R.string.duration_formula_spoken, "2", "1", "6", "4 jours")),
+            ).assertExists()
+        compose.onNodeWithText(string(R.string.divisor)).performTextReplacement("1,5")
+        compose.onNodeWithText(string(R.string.added_days)).performTextReplacement("0,5")
+        waitForText("Exemple : Ø 6 cm ÷ 1,5 + 0,5 = 4,5 → 5 jours")
+        compose.onNodeWithText(string(R.string.duration_formula, "1,5", "0,5")).assertExists()
+    }
+
+    @Test
+    fun `R28 recipe form hides the example for an empty field and hints for a zero divisor`() {
+        show { RecipeEditScreen(0, onDone = {}) }
+        waitForText(string(R.string.recipe_name))
+        compose.onNodeWithText(string(R.string.added_days)).performTextReplacement("")
+        compose.waitForIdle()
+        compose.onNodeWithText("Exemple", substring = true).assertDoesNotExist()
+        compose.onNodeWithText(string(R.string.duration_example_invalid)).assertDoesNotExist()
+        compose.onNodeWithText(string(R.string.added_days)).performTextReplacement("1")
+        compose.onNodeWithText(string(R.string.divisor)).performTextReplacement("0")
+        waitForText(string(R.string.duration_example_invalid))
+        compose.onNodeWithText("Exemple", substring = true).assertDoesNotExist()
+        compose.onNodeWithText(string(R.string.divisor)).performTextReplacement("")
+        compose.waitForIdle()
+        compose.onNodeWithText(string(R.string.duration_example_invalid)).assertDoesNotExist()
     }
 
     @Test

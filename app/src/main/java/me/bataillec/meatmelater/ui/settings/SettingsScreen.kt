@@ -69,10 +69,10 @@ import me.bataillec.meatmelater.ui.common.ConfirmDialog
 import me.bataillec.meatmelater.ui.common.RecipeOption
 import me.bataillec.meatmelater.ui.common.RecipePicker
 import me.bataillec.meatmelater.ui.common.SectionTitle
+import me.bataillec.meatmelater.ui.common.durationExampleText
 import me.bataillec.meatmelater.ui.common.fr
 import me.bataillec.meatmelater.ui.common.recipeOptions
 import me.bataillec.meatmelater.ui.common.rememberContainer
-import me.bataillec.meatmelater.ui.pieces.pluralDays
 import me.bataillec.meatmelater.ui.theme.accentSwatch
 import java.math.BigDecimal
 
@@ -310,18 +310,9 @@ private fun RecipeSteppers(
         { change { it.copy(vacuumOffsetDays = step(it.vacuumOffsetDays, -HALF)) } },
         { change { it.copy(vacuumOffsetDays = step(it.vacuumOffsetDays, HALF)) } },
     )
-    val example = BigDecimal(9)
-    val rule = StageDurationRule(r.vacuumDivisor, r.vacuumOffsetDays)
     Card(Modifier.fillMaxWidth()) {
         Text(
-            stringResource(
-                R.string.duration_example,
-                example.fr(),
-                r.vacuumDivisor.fr(),
-                r.vacuumOffsetDays.fr(),
-                rule.rawDays(example).fr(),
-                pluralDays(rule.days(example)),
-            ),
+            durationExampleText(StageDurationRule(r.vacuumDivisor, r.vacuumOffsetDays)),
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.padding(16.dp),
         )
