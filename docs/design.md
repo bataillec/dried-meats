@@ -78,7 +78,7 @@ VACUUM --finish--> FRIDGE --finish--> DONE
 4. **Calculateur**: weight + recipe → doses, no piece created. Reached from the bottom bar only: it takes no piece argument (route `calculator`, no `pieceId`) and the piece detail screen has no link to it.
 5. **Recettes**: flat list (no meat grouping); edit form with doses, rule, fridge days (R28: under the divisor and added-days fields, a `bodyMedium` / `onSurfaceVariant` label with the formula and a 6 cm example, built from `StageDurationRule` on the parsed fields; nothing while a field is invalid, a hint when divisor ≤ 0; no fixed height, one `semantics` sentence, not live; the same example string and 6 cm constant are shared with Réglages).
 6. **Statistiques**: averages per recipe/stage, finished pieces.
-7. **Réglages** (R24–R26): four blocks: *Apparence* (Clair / Sombre / OLED / Système), *Dosages au sous-vide* (recipe picker, salt/sugar/pepper g/kg with − / + steppers, note that running pieces keep their doses), *Durée du sous-vide* (divisor, added days, live example with round-up), *Frigo et rappels* (minimum fridge days; reminder time as one row "Heure du rappel" showing `HH:mm`, a single touch target with the spoken label "Heure du rappel, 07:30", opening a Material 3 time picker dialog: 24 h, dial with keyboard toggle, keyboard directly at large font scale, scrollable at 200 % font, title "Choisir l'heure", buttons "Annuler" / "Valider"; "Valider" does one `settings.update` of hour and minute then one `reconcile()`, cancel or dismiss does nothing), and *Types de viande* (add, rename, delete; moved from Recettes). Also permissions status, export/import JSON, about/version.
+7. **Réglages** (R24–R26): four blocks: *Apparence* (Clair / Sombre / OLED / Système), *Dosages au sous-vide* (recipe picker, salt/sugar/pepper g/kg with − / + steppers, note that running pieces keep their doses), *Durée du sous-vide* (divisor, added days, live example with round-up), *Frigo et rappels* (minimum fridge days; reminder time as one row "Heure du rappel" showing `HH:mm`, a single touch target with the spoken label "Heure du rappel, 07:30", opening a Material 3 time picker dialog: 24 h, dial with keyboard toggle, keyboard directly at large font scale, scrollable at 200 % font, title "Choisir l'heure", buttons "Annuler" / "Valider"; "Valider" does one `settings.update` of hour and minute then one `reconcile()`, cancel or dismiss does nothing), and *Types de viande* (add, rename, delete; moved from Recettes). Also permissions status, export/import JSON, and *À propos* (R29: version, "application locale" text, then the two links).
 
 Navigation: Navigation-Compose with bottom bar (Pièces, Calculateur, Recettes, Stats); Réglages from the top bar.
 
@@ -95,6 +95,15 @@ Navigation: Navigation-Compose with bottom bar (Pièces, Calculateur, Recettes, 
 - Tertiary roles are the alert orange (overdue cards) and are identical for every accent. The sous-vide chip uses `secondaryContainer`, the frigo chip `primaryContainer`: both chips carry a text label (colour is never the only cue) and a test checks the two containers differ for every accent and mode.
 - Settings: "Couleur principale" under "Thème", a `FlowRow` of round swatches (48 dp, check mark on the selected one, `contentDescription` = the French name). Strings in `strings.xml`.
 - Contrast (N4): a unit test computes WCAG ratios for every (accent, mode) pair: onPrimary/primary, onPrimaryContainer/primaryContainer, onSecondary/secondary, onSurface/surface ≥ 4.5; primary vs background/surface ≥ 3.
+
+### Support links (R29)
+
+- Platform: `platform/ExternalLinks.kt` with an `ExternalLinkOpener` interface (`open(url): Boolean`) and an Android implementation using `Intent(ACTION_VIEW, uri)` with `FLAG_ACTIVITY_NEW_TASK` from a non-activity context; it returns false on `ActivityNotFoundException`. Tests use a `FakeExternalLinkOpener` that records URLs (no mocks).
+- Constants: `KOFI_URL` and `GITHUB_URL` live in one Kotlin object, not in `strings.xml` (not translatable, and not inline in the UI).
+- Manifest: Android 11+ package visibility may hide browsers from `resolveActivity`; we do not call it and rely on `startActivity` throwing, so no `<queries>` entry is needed. Verified on the emulator; add one only if a device check shows otherwise. No permission added.
+- UI: in the À propos block, two `TextButton`-style rows (min height 48 dp, full width, `Role.Button` overridden to a link description via `semantics`, label wraps with no `maxLines`). On failure, a snackbar/toast "Aucun navigateur disponible". Strings: `about_kofi`, `about_github`, `about_no_browser`.
+- Repo files: README "Soutenir" section near the end with the Ko-fi button image linking to the page; `.github/FUNDING.yml` with `ko_fi: O0P52B4FJ1`.
+- Tests: UI test in `UiFlowsTest` (both links shown, tap fires the fake opener with the right URL, failure shows the message); a unit test that the constants are `https` URLs.
 
 ## 6. Tech choices
 

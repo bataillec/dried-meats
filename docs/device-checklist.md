@@ -38,3 +38,4 @@ OnePlus 6T (Android 15, USB/Wi-Fi adb, app package only) and an API 37 emulator.
 | Exact-alarm denial | not testable: with `USE_EXACT_ALARM` (API 33+) the permission cannot be revoked |
 | Reboot / Doze on the real phone | not done (system-wide changes on Cam's phone were deliberately avoided) |
 | Vendor battery killer (OnePlus) after days idle | still needs a human: install and leave a reminder 2-3 days out |
+| Réglages > À propos: tap "Soutenir sur Ko-fi" and "Code source sur GitHub" (also at 200 % font scale, and with no browser if testable) | to do (R29) |
