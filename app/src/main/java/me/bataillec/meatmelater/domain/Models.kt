@@ -14,7 +14,6 @@ data class MeatType(
 
 data class Recipe(
     val id: Long,
-    val meatTypeId: Long,
     val name: String,
     val saltGPerKg: BigDecimal,
     val sugarGPerKg: BigDecimal,
@@ -45,6 +44,7 @@ data class Piece(
     val id: Long,
     val label: String,
     val recipeId: Long,
+    val meatTypeId: Long,
     val weightG: Int,
     val diameterCm: BigDecimal,
     val doses: Doses,

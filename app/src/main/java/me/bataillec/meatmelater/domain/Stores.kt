@@ -28,7 +28,7 @@ interface MeatTypeStore {
 
     suspend fun save(meatType: MeatType): Long
 
-    /** R1: delete is refused (returns false) while recipes still use the meat type. */
+    /** R1: delete is refused (returns false) while pieces still use the meat type. */
     suspend fun delete(id: Long): Boolean
 
     suspend fun count(): Int

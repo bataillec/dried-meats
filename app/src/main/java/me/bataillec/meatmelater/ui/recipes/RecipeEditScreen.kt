@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -25,10 +23,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import me.bataillec.meatmelater.R
-import me.bataillec.meatmelater.domain.MeatType
 import me.bataillec.meatmelater.domain.Recipe
 import me.bataillec.meatmelater.domain.WeightParser
 import me.bataillec.meatmelater.ui.common.ConfirmDialog
@@ -46,10 +42,8 @@ fun RecipeEditScreen(
     val container = rememberContainer()
     val scope = rememberCoroutineScope()
     var loaded by remember { mutableStateOf(false) }
-    var meatTypes by remember { mutableStateOf(emptyList<MeatType>()) }
     var original by remember { mutableStateOf<Recipe?>(null) }
     var name by remember { mutableStateOf("") }
-    var meatId by remember { mutableStateOf<Long?>(null) }
     var salt by remember { mutableStateOf("") }
     var sugar by remember { mutableStateOf("") }
     var pepper by remember { mutableStateOf("") }
@@ -59,16 +53,13 @@ fun RecipeEditScreen(
     var fridgeDays by remember { mutableStateOf("") }
     var usedByPieces by remember { mutableStateOf(0) }
     var showDelete by remember { mutableStateOf(false) }
-    var meatMenu by remember { mutableStateOf(false) }
     var submitted by remember { mutableStateOf(false) }
 
     LaunchedEffect(recipeId) {
-        meatTypes = container.meatTypes.observeAll().first()
         val settings = container.settings.current()
         val recipe = if (recipeId != 0L) container.recipes.get(recipeId) else null
         original = recipe
         name = recipe?.name.orEmpty()
-        meatId = recipe?.meatTypeId ?: meatTypes.firstOrNull()?.id
         salt = recipe?.saltGPerKg?.fr().orEmpty()
         sugar = recipe?.sugarGPerKg?.fr().orEmpty()
         pepper = recipe?.pepperGPerKg?.fr().orEmpty()
@@ -89,7 +80,6 @@ fun RecipeEditScreen(
     val daysV = fridgeDays.trim().toIntOrNull()?.takeIf { it >= 1 }
     val valid =
         name.isNotBlank() &&
-            meatId != null &&
             saltV != null &&
             sugarV != null &&
             pepperV != null &&
@@ -101,7 +91,6 @@ fun RecipeEditScreen(
         if (!valid) return null
         return Recipe(
             id = id,
-            meatTypeId = meatId!!,
             name = name.trim(),
             saltGPerKg = saltV,
             sugarGPerKg = sugarV,
@@ -126,19 +115,6 @@ fun RecipeEditScreen(
             isError = submitted && name.isBlank(),
             modifier = Modifier.fillMaxWidth(),
         )
-        Column {
-            OutlinedButton(onClick = { meatMenu = true }, modifier = Modifier.fillMaxWidth()) {
-                Text(meatTypes.firstOrNull { it.id == meatId }?.name ?: stringResource(R.string.pick_meat))
-            }
-            DropdownMenu(meatMenu, { meatMenu = false }) {
-                meatTypes.forEach { meat ->
-                    DropdownMenuItem(text = { Text(meat.name) }, onClick = {
-                        meatId = meat.id
-                        meatMenu = false
-                    })
-                }
-            }
-        }
         SectionTitle(stringResource(R.string.vacuum_doses))
         DecimalField(
             salt,

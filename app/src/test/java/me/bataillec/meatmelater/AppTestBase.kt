@@ -2,6 +2,7 @@ package me.bataillec.meatmelater
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import me.bataillec.meatmelater.domain.MeatType
 import me.bataillec.meatmelater.domain.Recipe
@@ -25,17 +26,15 @@ abstract class AppTestBase {
         vararg args: Any,
     ): String = app.getString(id, *args)
 
-    /** Seeds one meat type and one recipe (salt 25, sugar 5, pepper 2 g/kg, fridge default "herbes"). */
-    protected fun seedRecipe(
-        meat: String = "Bœuf",
-        name: String = "Classique",
-    ): Long =
+    /** Seeds a meat type and returns its id. */
+    protected fun seedMeat(name: String = "Bœuf"): Long = runBlocking { container.meatTypes.save(MeatType(0, name)) }
+
+    /** Seeds one recipe (salt 25, sugar 5, pepper 2 g/kg, fridge default "herbes"). Recipes have no meat type. */
+    protected fun seedRecipe(name: String = "Classique"): Long =
         runBlocking {
-            val meatId = container.meatTypes.save(MeatType(0, meat))
             container.recipes.save(
                 Recipe(
                     0,
-                    meatId,
                     name,
                     BigDecimal("25"),
                     BigDecimal("5"),
@@ -49,7 +48,16 @@ abstract class AppTestBase {
         recipeId: Long,
         label: String = "Bœuf 1",
         days: Int? = null,
-    ): Long = runBlocking { container.pieceActions.createPiece(label, recipeId, 1250, BigDecimal("12"), days)!! }
+        meatTypeId: Long =
+            runBlocking {
+                container.meatTypes
+                    .observeAll()
+                    .first()
+                    .firstOrNull()
+                    ?.id
+            } ?: seedMeat(),
+    ): Long =
+        runBlocking { container.pieceActions.createPiece(label, recipeId, meatTypeId, 1250, BigDecimal("12"), days)!! }
 
     /** Polls [condition] for up to [timeoutMs] (receivers and Room work on background dispatchers). */
     protected fun awaitUntil(

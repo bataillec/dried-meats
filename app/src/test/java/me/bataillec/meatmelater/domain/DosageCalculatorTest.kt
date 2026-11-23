@@ -10,7 +10,7 @@ class DosageCalculatorTest {
         salt: String,
         sugar: String = "0",
         pepper: String = "0",
-    ) = Recipe(1, 1, "test", BigDecimal(salt), BigDecimal(sugar), BigDecimal(pepper))
+    ) = Recipe(1, "test", BigDecimal(salt), BigDecimal(sugar), BigDecimal(pepper))
 
     @Test
     fun `R4 1250 g with salt 25 g per kg rounds half up to 31_3`() {

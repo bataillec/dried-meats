@@ -26,8 +26,8 @@ interface MeatTypeDao {
     @Query("SELECT COUNT(*) FROM meat_type")
     suspend fun count(): Int
 
-    @Query("SELECT COUNT(*) FROM recipe WHERE meat_type_id = :id")
-    suspend fun recipeCount(id: Long): Int
+    @Query("SELECT COUNT(*) FROM piece WHERE meat_type_id = :id")
+    suspend fun pieceCount(id: Long): Int
 
     @Query("SELECT * FROM meat_type")
     suspend fun all(): List<MeatTypeEntity>
@@ -74,6 +74,7 @@ data class PieceRow(
     val id: Long,
     val label: String,
     val recipeId: Long,
+    val meatTypeId: Long,
     val weightG: Int,
     val diameterCm: String,
     val saltG: String,
@@ -87,11 +88,12 @@ data class PieceRow(
 )
 
 private const val PIECE_ROW_SELECT =
-    "SELECT p.id AS id, p.label AS label, p.recipe_id AS recipeId, p.weight_g AS weightG, " +
-        "p.diameter_cm AS diameterCm, p.salt_g AS saltG, p.sugar_g AS sugarG, p.pepper_g AS pepperG, " +
-        "p.fridge_seasoning AS fridgeSeasoning, p.status AS status, p.created_at AS createdAt, " +
-        "r.name AS recipeName, m.name AS meatTypeName " +
-        "FROM piece p JOIN recipe r ON r.id = p.recipe_id JOIN meat_type m ON m.id = r.meat_type_id "
+    "SELECT p.id AS id, p.label AS label, p.recipe_id AS recipeId, p.meat_type_id AS meatTypeId, " +
+        "p.weight_g AS weightG, p.diameter_cm AS diameterCm, p.salt_g AS saltG, p.sugar_g AS sugarG, " +
+        "p.pepper_g AS pepperG, p.fridge_seasoning AS fridgeSeasoning, p.status AS status, " +
+        "p.created_at AS createdAt, r.name AS recipeName, m.name AS meatTypeName " +
+        "FROM piece p JOIN recipe r ON r.id = p.recipe_id " +
+        "JOIN meat_type m ON m.id = p.meat_type_id "
 
 @Dao
 interface PieceDao {

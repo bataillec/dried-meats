@@ -20,11 +20,11 @@ class SeederAndLabelTest {
         }
 
     @Test
-    fun `R1 a meat type used by recipes cannot be deleted`() =
+    fun `R1 a meat type used by pieces cannot be deleted`() =
         runTest {
             val meats = FakeMeatTypeStore()
             val id = meats.save(MeatType(0, "Boeuf"))
-            meats.recipeCounts[id] = 1
+            meats.pieceCounts[id] = 1
             assertEquals(false, meats.delete(id))
         }
 
@@ -40,7 +40,7 @@ class SeederAndLabelTest {
             val recipes = FakeRecipeStore()
             val id =
                 recipes.save(
-                    Recipe(0, 1, "x", java.math.BigDecimal.ONE, java.math.BigDecimal.ONE, java.math.BigDecimal.ONE),
+                    Recipe(0, "x", java.math.BigDecimal.ONE, java.math.BigDecimal.ONE, java.math.BigDecimal.ONE),
                 )
             recipes.pieceCountOf = { 2 }
             assertEquals(false, recipes.delete(id))
