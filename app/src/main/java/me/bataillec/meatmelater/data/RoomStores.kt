@@ -36,7 +36,7 @@ class RoomMeatTypeStore(
 
     override suspend fun delete(id: Long): Boolean =
         db.withWriteTransaction {
-            if (dao.recipeCount(id) > 0) {
+            if (dao.pieceCount(id) > 0) {
                 false
             } else {
                 dao.delete(id)

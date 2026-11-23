@@ -27,16 +27,19 @@ class ReminderPlannerTest {
     private val store = FakePieceStore(recipes)
     private val scheduler = FakeAlarmScheduler()
     private val planner = ReminderPlanner(store, scheduler, clock)
-    private val actions = PieceActions(store, recipes, FakeSettingsStore(), planner, clock)
+    private val meats = FakeMeatTypeStore()
+    private val actions = PieceActions(store, recipes, meats, FakeSettingsStore(), planner, clock)
     private var recipeId = 0L
+    private var meatId = 0L
 
     @Before
     fun setUp() =
         runTest {
-            recipeId = recipes.save(Recipe(0, 1, "Boeuf", BigDecimal("25"), BigDecimal("5"), BigDecimal("2")))
+            meatId = meats.save(MeatType(0, "Bœuf"))
+            recipeId = recipes.save(Recipe(0, "Classique", BigDecimal("25"), BigDecimal("5"), BigDecimal("2")))
         }
 
-    private suspend fun newPiece(): Long = actions.createPiece("Boeuf 1", recipeId, 1250, BigDecimal("12"))!!
+    private suspend fun newPiece(): Long = actions.createPiece("Boeuf 1", recipeId, meatId, 1250, BigDecimal("12"))!!
 
     @Test
     fun `R12 creating a piece schedules one alarm at the planned end`() =

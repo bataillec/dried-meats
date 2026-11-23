@@ -7,57 +7,64 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import me.bataillec.meatmelater.domain.AccentColor
 import me.bataillec.meatmelater.domain.ThemeMode
 
-private val LightColors =
+/** R27: the alert orange is semantic (overdue cards, warnings): it never follows the accent. */
+private val AlertLight =
+    listOf(Color(0xFF9A4F00), Color(0xFFFFFFFF), Color(0xFFFFDCBE), Color(0xFF301500))
+private val AlertDark =
+    listOf(Color(0xFFFFB873), Color(0xFF4D2700), Color(0xFF6F3A00), Color(0xFFFFDCBE))
+
+private fun lightScheme(roles: AccentRoles): ColorScheme =
     lightColorScheme(
-        primary = Color(0xFF8B2E1F),
-        onPrimary = Color(0xFFFFFFFF),
-        primaryContainer = Color(0xFFFFDAD2),
-        onPrimaryContainer = Color(0xFF3A0A02),
-        secondary = Color(0xFF6B4F3A),
-        onSecondary = Color(0xFFFFFFFF),
-        secondaryContainer = Color(0xFFF3DFD0),
-        onSecondaryContainer = Color(0xFF2A1708),
-        tertiary = Color(0xFF9A4F00),
-        onTertiary = Color(0xFFFFFFFF),
-        tertiaryContainer = Color(0xFFFFDCBE),
-        onTertiaryContainer = Color(0xFF301500),
-        background = Color(0xFFFFF8F5),
-        onBackground = Color(0xFF211A18),
-        surface = Color(0xFFFFF8F5),
-        onSurface = Color(0xFF211A18),
-        surfaceVariant = Color(0xFFF5DDD7),
-        onSurfaceVariant = Color(0xFF53433F),
-        outline = Color(0xFF85736E),
+        primary = roles.primary,
+        onPrimary = roles.onPrimary,
+        primaryContainer = roles.primaryContainer,
+        onPrimaryContainer = roles.onPrimaryContainer,
+        secondary = roles.secondary,
+        onSecondary = roles.onSecondary,
+        secondaryContainer = roles.secondaryContainer,
+        onSecondaryContainer = roles.onSecondaryContainer,
+        tertiary = AlertLight[0],
+        onTertiary = AlertLight[1],
+        tertiaryContainer = AlertLight[2],
+        onTertiaryContainer = AlertLight[3],
+        background = roles.background,
+        onBackground = roles.onBackground,
+        surface = roles.surface,
+        onSurface = roles.onSurface,
+        surfaceVariant = roles.surfaceVariant,
+        onSurfaceVariant = roles.onSurfaceVariant,
+        outline = roles.outline,
     )
 
-private val DarkColors =
+private fun darkScheme(roles: AccentRoles): ColorScheme =
     darkColorScheme(
-        primary = Color(0xFFFFB4A2),
-        onPrimary = Color(0xFF561003),
-        primaryContainer = Color(0xFF722719),
-        onPrimaryContainer = Color(0xFFFFDAD2),
-        secondary = Color(0xFFE0C0A8),
-        onSecondary = Color(0xFF3F2A19),
-        secondaryContainer = Color(0xFF58402D),
-        onSecondaryContainer = Color(0xFFFDDCC4),
-        tertiary = Color(0xFFFFB873),
-        onTertiary = Color(0xFF4D2700),
-        tertiaryContainer = Color(0xFF6F3A00),
-        onTertiaryContainer = Color(0xFFFFDCBE),
-        background = Color(0xFF1A1110),
-        onBackground = Color(0xFFF1DFDB),
-        surface = Color(0xFF1A1110),
-        onSurface = Color(0xFFF1DFDB),
-        surfaceVariant = Color(0xFF53433F),
-        onSurfaceVariant = Color(0xFFD8C2BC),
-        outline = Color(0xFFA08C87),
+        primary = roles.primary,
+        onPrimary = roles.onPrimary,
+        primaryContainer = roles.primaryContainer,
+        onPrimaryContainer = roles.onPrimaryContainer,
+        secondary = roles.secondary,
+        onSecondary = roles.onSecondary,
+        secondaryContainer = roles.secondaryContainer,
+        onSecondaryContainer = roles.onSecondaryContainer,
+        tertiary = AlertDark[0],
+        onTertiary = AlertDark[1],
+        tertiaryContainer = AlertDark[2],
+        onTertiaryContainer = AlertDark[3],
+        background = roles.background,
+        onBackground = roles.onBackground,
+        surface = roles.surface,
+        onSurface = roles.onSurface,
+        surfaceVariant = roles.surfaceVariant,
+        onSurfaceVariant = roles.onSurfaceVariant,
+        outline = roles.outline,
     )
 
-/** R24: pure black background, very dark grey cards/dividers/chips, same accents as [DarkColors]. */
-private val OledColors =
-    DarkColors.copy(
+/** R24: pure black background, very dark grey cards/dividers/chips; only the accent containers differ per accent. */
+private fun oledScheme(palette: AccentPalette): ColorScheme =
+    darkScheme(palette.dark).copy(
         background = Color(0xFF000000),
         surface = Color(0xFF000000),
         surfaceVariant = Color(0xFF1A1A1A),
@@ -68,22 +75,40 @@ private val OledColors =
         surfaceContainerHighest = Color(0xFF1F1F1F),
         outline = Color(0xFF8A8A8A),
         outlineVariant = Color(0xFF2A2A2A),
-        primaryContainer = Color(0xFF3A140C),
-        secondaryContainer = Color(0xFF241A12),
+        primaryContainer = palette.oledPrimaryContainer,
+        secondaryContainer = palette.oledSecondaryContainer,
         tertiaryContainer = Color(0xFF3A1E00),
     )
 
-/** R24: SYSTEM resolves to LIGHT or DARK only, never OLED. */
+/** R24: SYSTEM resolves to LIGHT or DARK only, never OLED. R27: the accent only swaps the accent roles. */
 fun resolveColorScheme(
     mode: ThemeMode,
     systemDark: Boolean,
-): ColorScheme =
-    when (mode) {
-        ThemeMode.LIGHT -> LightColors
-        ThemeMode.DARK -> DarkColors
-        ThemeMode.OLED -> OledColors
-        ThemeMode.SYSTEM -> if (systemDark) DarkColors else LightColors
+    accent: AccentColor = AccentColor.VIANDE_SECHEE,
+): ColorScheme {
+    val kind =
+        when (mode) {
+            ThemeMode.LIGHT -> SchemeKind.LIGHT
+            ThemeMode.DARK -> SchemeKind.DARK
+            ThemeMode.OLED -> SchemeKind.OLED
+            ThemeMode.SYSTEM -> if (systemDark) SchemeKind.DARK else SchemeKind.LIGHT
+        }
+    return schemes.getValue(accent to kind)
+}
+
+private enum class SchemeKind { LIGHT, DARK, OLED }
+
+/** Built once so that equal inputs return the same instance (ColorScheme has no structural equality). */
+private val schemes: Map<Pair<AccentColor, SchemeKind>, ColorScheme> by lazy {
+    buildMap {
+        for (accent in AccentColor.entries) {
+            val palette = paletteOf(accent)
+            put(accent to SchemeKind.LIGHT, lightScheme(palette.light))
+            put(accent to SchemeKind.DARK, darkScheme(palette.dark))
+            put(accent to SchemeKind.OLED, oledScheme(palette))
+        }
     }
+}
 
 /** Whether system bar icons must be light (true) because the app background is dark. */
 fun usesDarkBars(
@@ -99,7 +124,8 @@ fun usesDarkBars(
 @Composable
 fun AppTheme(
     mode: ThemeMode,
+    accent: AccentColor = AccentColor.VIANDE_SECHEE,
     content: @Composable () -> Unit,
 ) {
-    MaterialTheme(colorScheme = resolveColorScheme(mode, isSystemInDarkTheme()), content = content)
+    MaterialTheme(colorScheme = resolveColorScheme(mode, isSystemInDarkTheme(), accent), content = content)
 }

@@ -18,6 +18,19 @@ class StageDurationRuleTest {
     }
 
     @Test
+    fun `R7 R28 6 cm example gives raw 4 and 4 days with defaults`() {
+        assertEquals(0, BigDecimal("4").compareTo(default.rawDays(BigDecimal("6"))))
+        assertEquals(4, default.days(BigDecimal("6")))
+    }
+
+    @Test
+    fun `R7 R28 6 cm example with divisor 1_5 and 0_5 days rounds 4_5 up to 5`() {
+        val rule = StageDurationRule(BigDecimal("1.5"), BigDecimal("0.5"))
+        assertEquals(0, BigDecimal("4.5").compareTo(rule.rawDays(BigDecimal("6"))))
+        assertEquals(5, rule.days(BigDecimal("6")))
+    }
+
+    @Test
     fun `R7 never rounds down`() {
         // 8.2 / 2 + 1 = 5.1 -> 6
         assertEquals(6, default.days(BigDecimal("8.2")))

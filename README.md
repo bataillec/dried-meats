@@ -35,9 +35,9 @@ _Sample data on an emulator. Left to right: piece list (overdue first), piece de
 ## Features
 
 - **Dosage calculator**: enter a weight (g or kg) and pick a recipe to get the grams of salt, sugar and pepper
-  (recipes are expressed in g/kg). Works standalone or from a piece.
-- **Recipes and meat types**: beef, pork and duck are pre-seeded; add your own meats and recipes, duplicate or
-  archive them. Fridge seasoning is free text.
+  (recipes are expressed in g/kg). Works standalone.
+- **Recipes and meat types**: beef, pork and duck are pre-seeded; add your own meats (in Settings) and recipes,
+  duplicate or archive the recipes. A recipe is independent of the meat: pick both when you start a piece. Fridge seasoning is free text.
 - **Pieces in parallel**: each piece has a label, recipe, weight and diameter. The vacuum duration is computed from
   the diameter (diameter in cm / 2 + 1 days, adjustable per piece). Doses and durations are snapshotted at
   creation, so later recipe edits never change a running piece.
@@ -127,10 +127,11 @@ The complete rules live in [`CLAUDE.md`](CLAUDE.md).
 
 - `mise run check` is the gate before any commit and runs in CI: ktlint, detekt, Android lint, JVM unit and
   Robolectric tests, and a Kover coverage threshold of 90 % on `domain`.
-- Emulator tests (real alarm, battery wizard, dialogs) need a running emulator:
+- Emulator tests (real alarm, battery wizard, dialogs) need a running emulator or device. They are **not run in
+  CI**: run them locally before a release.
 
   ```bash
-  mise exec -- ./gradlew connectedDebugAndroidTest
+  mise run test:emulator
   ```
 
 - Before a release, run the manual [device checklist](docs/device-checklist.md) on a real phone (Doze, reboot,

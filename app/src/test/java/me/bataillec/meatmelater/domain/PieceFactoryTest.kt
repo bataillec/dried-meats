@@ -6,7 +6,7 @@ import org.junit.Test
 import java.math.BigDecimal
 
 class PieceFactoryTest {
-    private val recipe = Recipe(1, 1, "Boeuf", BigDecimal("25"), BigDecimal("5"), BigDecimal("2"))
+    private val recipe = Recipe(1, "Boeuf", BigDecimal("25"), BigDecimal("5"), BigDecimal("2"))
 
     @Test
     fun `R6 R7 plan has doses and duration`() {

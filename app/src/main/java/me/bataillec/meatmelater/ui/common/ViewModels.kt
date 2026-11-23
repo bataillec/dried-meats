@@ -6,25 +6,23 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import me.bataillec.meatmelater.AppContainer
 import me.bataillec.meatmelater.MeatMeLaterApp
-import me.bataillec.meatmelater.domain.MeatType
 import me.bataillec.meatmelater.domain.Recipe
 
 @Composable
 fun rememberContainer(): AppContainer = (LocalContext.current.applicationContext as MeatMeLaterApp).container
 
-/** Recipes joined with their meat type names; archived ones only when [includeArchived]. */
+/** Recipes as picker options, sorted by name; archived ones only when [includeArchived]. */
 fun AppContainer.recipeOptions(includeArchived: Boolean = false): Flow<List<RecipeOption>> =
-    combine(recipes.observeAll(), meatTypes.observeAll()) { rs: List<Recipe>, ms: List<MeatType> ->
-        val names = ms.associate { it.id to it.name }
+    recipes.observeAll().map { rs: List<Recipe> ->
         rs
             .filter { includeArchived || !it.archived }
-            .map { RecipeOption(it, names[it.meatTypeId] ?: "?") }
-            .sortedWith(compareBy({ it.meatName.lowercase() }, { it.recipe.name.lowercase() }))
+            .map { RecipeOption(it) }
+            .sortedBy { it.recipe.name.lowercase() }
     }
 
 /** Emits the current time now and every minute (remaining-time labels, overdue detection). */

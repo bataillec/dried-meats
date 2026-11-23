@@ -5,27 +5,30 @@ Derived from intent.md v0.2. Each requirement has an ID used in tests and PRs.
 ## Glossary
 
 - **Meat type**: beef, pork, duck, user-defined others.
-- **Recipe**: a meat type + dosage (g/kg of salt, sugar, pepper) + stage rules + notes.
-- **Piece**: one physical piece of meat being processed (weight, diameter, recipe).
+- **Recipe**: a method, independent of any meat type: dosage (g/kg of salt, sugar, pepper) + stage rules + notes.
+- **Piece**: one physical piece of meat being processed (meat type, recipe, weight, diameter).
 - **Stage run**: one piece's time in one stage (VACUUM or FRIDGE).
 
 ## Functional requirements
 
 ### Recipes and meat types
-- **R1** The user can create, edit and delete meat types. Beef, pork and duck are pre-seeded.
+- **R1** The user can create, edit and delete meat types, from the settings screen. Beef, pork and duck are pre-seeded.
+  A meat type used by at least one piece cannot be deleted. Archived meat types are not offered for new pieces.
 - **R2** The user can create, edit, duplicate and archive recipes. A recipe holds: name,
-  meat type, salt/sugar/pepper in g/kg (decimals allowed), optional default fridge-seasoning note (free text),
+  salt/sugar/pepper in g/kg (decimals allowed), optional default fridge-seasoning note (free text),
   vacuum rule (divisor, default 2; offset days, default 1), minimum fridge duration in days (default 14; afterwards the piece is judged by touch).
+  A recipe has no meat type: the same recipe can be used for any meat.
 - **R3** A recipe cannot be deleted while pieces use it; it can be archived.
 
 ### Dosage calculator
 - **R4** Given a weight (g or kg input) and a recipe, show grams of salt, sugar and pepper.
   Formula: `grams = weight_kg × dose_g_per_kg`, rounded to 0.1 g.
   - *Acceptance:* 1.250 kg with salt 25 g/kg → 31.3 g (31.25 rounds half-up). 0 kg or empty → no result, no crash.
-- **R5** The calculator works standalone (no piece created) and also from a piece.
+- **R5** The calculator works standalone (no piece created). It is not opened from a piece: the piece detail screen shows the piece's own snapshotted doses (R6), without a shortcut to the calculator.
+  - *Acceptance:* the piece detail screen has no "Ouvrir dans le calculateur" button; the calculator is reached from the bottom bar only.
 
 ### Pieces and stages
-- **R6** Creating a piece requires: label (auto-suggested), recipe, weight, diameter in cm.
+- **R6** Creating a piece requires: meat type, recipe, label (auto-suggested from the chosen meat type), weight, diameter in cm.
   The doses are shown and snapshotted on the piece at creation, so later recipe edits don't alter them.
 - **R7** On creation, the piece enters VACUUM. Planned duration =
   `ceil(diameter_cm / divisor + offset)` days (always rounded up to the next whole day,
@@ -54,19 +57,20 @@ Derived from intent.md v0.2. Each requirement has an ID used in tests and PRs.
   to exempt the app from battery optimisation if needed, and shows a warning on the home screen when any is missing.
 
 ### Seasoning memo
-- **R17** The piece detail screen shows its recipe, the snapshotted stage-1 doses (salt, sugar,
+- **R17** The piece detail screen shows its meat type, its recipe, the snapshotted stage-1 doses (salt, sugar,
   pepper) and the stage-2 seasoning chosen for this piece (or "aucun").
   The piece list shows meat type and recipe name on each row.
 
 ### Tracking
 - **R18** Every stage run stores start, planned end and actual end. The piece detail shows
   planned vs. actual per stage.
-- **R19** A statistics screen shows, per meat type and recipe, the average actual duration
+- **R19** A statistics screen shows, per meat type and recipe (the meat type being the piece's own), the average actual duration
   per stage, and the list of finished pieces.
 
 ### Data
 - **R20** All data stays on the device (Room database). No network permission is requested.
 - **R21** The user can export all data to a JSON file and import it back (backup / new phone).
+  Files exported by earlier versions (where the meat type belonged to the recipe) still import: each piece takes its recipe's former meat type.
 
 ### Calendar and notes
 - **R22** (optional) From a piece, "Ajouter au calendrier" opens the phone's calendar app with
@@ -85,11 +89,22 @@ Derived from intent.md v0.2. Each requirement has an ID used in tests and PRs.
   - The choice is stored in DataStore and applies immediately.
 - **R25** The Réglages screen exposes the vacuum-stage settings: for a chosen recipe, salt, sugar and
   pepper in g/kg (− / + steppers), and the duration rule (divisor, default 2; added days, default 1)
-  with a live example ("Ø 9 cm ÷ 2 + 1 = 5,5 → 6 jours"). Changes apply to new pieces only; running
+  with a live example ("Ø 6 cm ÷ 2 + 1 = 4 → 4 jours", same diameter as R28). Changes apply to new pieces only; running
   pieces keep their snapshotted doses (R6).
 - **R26** The Réglages screen also exposes the minimum fridge duration (default 14 days) and the
   reminder time of day (default 18:00). The reminder time is applied when computing a stage's planned end
-  timestamp. These are the global defaults used when creating recipes.
+  timestamp. It is shown as one `HH:mm` row (24 h, any minute) that opens a time picker dialog; confirming
+  saves hour and minute together and reconciles the reminders once, cancelling changes nothing. These are the global defaults used when creating recipes.
+- **R27** The Réglages screen offers a "Couleur principale" choice, under "Thème": six swatches
+  (Viande séchée, the default and today's red, plus vert, bleu, violet, ambre and brun-gris).
+  - The choice applies immediately to the whole UI in Clair, Sombre, Sombre OLED and Système, and is
+    kept after a restart. OLED keeps its pure black background (R24); only the accent roles change.
+  - The accent drives the primary and secondary roles (and the neutral tints); the tertiary roles are the
+    semantic alert orange (overdue cards) and never follow it. The sous-vide and frigo chips use the
+    secondary and primary containers and always carry their text label, so they never rely on colour alone.
+  - The selected swatch is shown by a check mark and a spoken label, not by colour alone; targets are
+    48 dp and swatches wrap onto a second line when they do not fit (N4).
+  - Stored in DataStore, not exported with the data; an unknown stored value falls back to the default.
 
 ## Non-functional requirements
 
@@ -101,3 +116,15 @@ Derived from intent.md v0.2. Each requirement has an ID used in tests and PRs.
 - **N6** Domain logic (dosage, durations, state machine) is pure Kotlin with ≥ 90 % unit-test coverage.
 - **N7** CI blocks merge on: build, lint (ktlint, detekt, Android lint), unit tests.
 - **N8** Release: pushing tag `vX.Y.Z` builds a signed APK and attaches it to a GitHub Release.
+- **R28** The recipe form, under "Durée du sous-vide", shows a label under "Diviseur" and "Jours ajoutés"
+  with the rule written with the typed values and a worked example for a fixed 6 cm diameter
+  (see R7, R25).
+  - Both fields valid: "Durée = ⌈ Ø ÷ 2 + 1 ⌉ jours, arrondie au jour supérieur" and
+    "Exemple : Ø 6 cm ÷ 2 + 1 = 4 → 4 jours", updated on every keystroke, French number format.
+  - A field empty or not a number: nothing is shown. Divisor ≤ 0: "Saisissez un diviseur supérieur à 0
+    pour voir l'exemple." No crash, no « 0 » or « NaN ».
+  - The example is computed by `StageDurationRule` (raw value, then days with the 1-day floor); the UI only formats.
+  - Informational only: it never blocks saving. Wraps at 200 % font, `bodyMedium` / `onSurfaceVariant` (N4),
+    and exposes one spoken sentence to TalkBack (not a live region).
+  - *Acceptance:* defaults → "Ø 6 cm ÷ 2 + 1 = 4 → 4 jours"; divisor 1,5 and added days 0,5 →
+    "Ø 6 cm ÷ 1,5 + 0,5 = 4,5 → 5 jours".
