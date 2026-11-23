@@ -1,6 +1,6 @@
 # intent — Emulator test names must dex: camelCase in androidTest (issue #19)
 
-Status: v0.2, open questions answered by the owner (2026-11-23). Extends `docs/intent.md` (v0.3); where the two
+Status: v0.2, decisions incorporated (2026-11-23), pending the owner's final OK. Extends `docs/intent.md` (v0.3); where the two
 differ, this file wins for the points below once validated. Requirements and design updates follow in the next step
 (only the tooling guard of §4.4-4.5 may touch `design.md`).
 
@@ -40,7 +40,8 @@ Me, before a release, running `mise run test:emulator`. Contributors later: they
 ## 5. Constraints
 
 - No change to app code, test logic, dependencies, permissions or minSdk.
-- `mise run check` still passes and still does not need an emulator.
+- `mise run check` now also compiles and dexes `androidTest` (no device needed), still passes and still does not need an emulator.
+- For the guard (4.5), the implementer picks the simpler option that works: detekt `FunctionNaming` scoped to `androidTest`, or a grep step in `mise run lint`.
 - Commands go through mise.
 
 ## 6. Non-goals
