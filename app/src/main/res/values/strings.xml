@@ -171,6 +171,10 @@
     <string name="accent_selected">%1$s, sélectionnée</string>
     <string name="running_pieces_keep_doses">Les modifications ne s\'appliquent qu\'aux nouvelles pièces ; les pièces en cours gardent leurs doses.</string>
     <string name="duration_example">Ø %1$s cm ÷ %2$s + %3$s = %4$s → %5$s</string>
+    <string name="duration_example_prefixed">Exemple : %1$s</string>
+    <string name="duration_formula">Durée = ⌈ Ø ÷ %1$s + %2$s ⌉ jours, arrondie au jour supérieur</string>
+    <string name="duration_formula_spoken">Durée égale au diamètre divisé par %1$s, plus %2$s, arrondie au jour supérieur. Exemple : pour %3$s centimètres, %4$s.</string>
+    <string name="duration_example_invalid">Saisissez un diviseur supérieur à 0 pour voir l\'exemple.</string>
     <string name="fridge_and_reminders">Frigo et rappels</string>
     <string name="fridge_min_days_default">Minimum au frigo par défaut (jours)</string>
     <string name="reminder_time">Heure du rappel</string>

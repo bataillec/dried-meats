@@ -29,6 +29,7 @@ import me.bataillec.meatmelater.domain.Recipe
 import me.bataillec.meatmelater.domain.WeightParser
 import me.bataillec.meatmelater.ui.common.ConfirmDialog
 import me.bataillec.meatmelater.ui.common.DecimalField
+import me.bataillec.meatmelater.ui.common.DurationFormulaLabel
 import me.bataillec.meatmelater.ui.common.SectionTitle
 import me.bataillec.meatmelater.ui.common.fr
 import me.bataillec.meatmelater.ui.common.rememberContainer
@@ -77,6 +78,8 @@ fun RecipeEditScreen(
     val pepperV = WeightParser.parseDecimal(pepper)?.takeIf { it.signum() >= 0 }
     val divisorV = WeightParser.parseDecimal(divisor)?.takeIf { it.signum() > 0 }
     val offsetV = WeightParser.parseDecimal(offset)
+    // Unfiltered parse: the R28 label must tell "divisor <= 0" (hint) from "empty or invalid" (nothing).
+    val divisorParsed = WeightParser.parseDecimal(divisor)
     val daysV = fridgeDays.trim().toIntOrNull()?.takeIf { it >= 1 }
     val valid =
         name.isNotBlank() &&
@@ -162,6 +165,7 @@ fun RecipeEditScreen(
                     submitted && offsetV == null,
             )
         }
+        DurationFormulaLabel(divisorParsed, offsetV, Modifier.fillMaxWidth())
         SectionTitle(stringResource(R.string.fridge))
         DecimalField(
             fridgeDays,
