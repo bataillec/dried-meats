@@ -5,17 +5,19 @@ Derived from intent.md v0.2. Each requirement has an ID used in tests and PRs.
 ## Glossary
 
 - **Meat type**: beef, pork, duck, user-defined others.
-- **Recipe**: a meat type + dosage (g/kg of salt, sugar, pepper) + stage rules + notes.
-- **Piece**: one physical piece of meat being processed (weight, diameter, recipe).
+- **Recipe**: a method, independent of any meat type: dosage (g/kg of salt, sugar, pepper) + stage rules + notes.
+- **Piece**: one physical piece of meat being processed (meat type, recipe, weight, diameter).
 - **Stage run**: one piece's time in one stage (VACUUM or FRIDGE).
 
 ## Functional requirements
 
 ### Recipes and meat types
-- **R1** The user can create, edit and delete meat types. Beef, pork and duck are pre-seeded.
+- **R1** The user can create, edit and delete meat types, from the settings screen. Beef, pork and duck are pre-seeded.
+  A meat type used by at least one piece cannot be deleted. Archived meat types are not offered for new pieces.
 - **R2** The user can create, edit, duplicate and archive recipes. A recipe holds: name,
-  meat type, salt/sugar/pepper in g/kg (decimals allowed), optional default fridge-seasoning note (free text),
+  salt/sugar/pepper in g/kg (decimals allowed), optional default fridge-seasoning note (free text),
   vacuum rule (divisor, default 2; offset days, default 1), minimum fridge duration in days (default 14; afterwards the piece is judged by touch).
+  A recipe has no meat type: the same recipe can be used for any meat.
 - **R3** A recipe cannot be deleted while pieces use it; it can be archived.
 
 ### Dosage calculator
@@ -25,7 +27,7 @@ Derived from intent.md v0.2. Each requirement has an ID used in tests and PRs.
 - **R5** The calculator works standalone (no piece created) and also from a piece.
 
 ### Pieces and stages
-- **R6** Creating a piece requires: label (auto-suggested), recipe, weight, diameter in cm.
+- **R6** Creating a piece requires: meat type, recipe, label (auto-suggested from the chosen meat type), weight, diameter in cm.
   The doses are shown and snapshotted on the piece at creation, so later recipe edits don't alter them.
 - **R7** On creation, the piece enters VACUUM. Planned duration =
   `ceil(diameter_cm / divisor + offset)` days (always rounded up to the next whole day,
@@ -54,19 +56,20 @@ Derived from intent.md v0.2. Each requirement has an ID used in tests and PRs.
   to exempt the app from battery optimisation if needed, and shows a warning on the home screen when any is missing.
 
 ### Seasoning memo
-- **R17** The piece detail screen shows its recipe, the snapshotted stage-1 doses (salt, sugar,
+- **R17** The piece detail screen shows its meat type, its recipe, the snapshotted stage-1 doses (salt, sugar,
   pepper) and the stage-2 seasoning chosen for this piece (or "aucun").
   The piece list shows meat type and recipe name on each row.
 
 ### Tracking
 - **R18** Every stage run stores start, planned end and actual end. The piece detail shows
   planned vs. actual per stage.
-- **R19** A statistics screen shows, per meat type and recipe, the average actual duration
+- **R19** A statistics screen shows, per meat type and recipe (the meat type being the piece's own), the average actual duration
   per stage, and the list of finished pieces.
 
 ### Data
 - **R20** All data stays on the device (Room database). No network permission is requested.
 - **R21** The user can export all data to a JSON file and import it back (backup / new phone).
+  Files exported by earlier versions (where the meat type belonged to the recipe) still import: each piece takes its recipe's former meat type.
 
 ### Calendar and notes
 - **R22** (optional) From a piece, "Ajouter au calendrier" opens the phone's calendar app with
@@ -89,7 +92,18 @@ Derived from intent.md v0.2. Each requirement has an ID used in tests and PRs.
   pieces keep their snapshotted doses (R6).
 - **R26** The Réglages screen also exposes the minimum fridge duration (default 14 days) and the
   reminder time of day (default 18:00). The reminder time is applied when computing a stage's planned end
-  timestamp. These are the global defaults used when creating recipes.
+  timestamp. It is shown as one `HH:mm` row (24 h, any minute) that opens a time picker dialog; confirming
+  saves hour and minute together and reconciles the reminders once, cancelling changes nothing. These are the global defaults used when creating recipes.
+- **R27** The Réglages screen offers a "Couleur principale" choice, under "Thème": six swatches
+  (Viande séchée, the default and today's red, plus vert, bleu, violet, ambre and brun-gris).
+  - The choice applies immediately to the whole UI in Clair, Sombre, Sombre OLED and Système, and is
+    kept after a restart. OLED keeps its pure black background (R24); only the accent roles change.
+  - The accent drives the primary and secondary roles (and the neutral tints); the tertiary roles are the
+    semantic alert orange (overdue cards) and never follow it. The sous-vide and frigo chips use the
+    secondary and primary containers and always carry their text label, so they never rely on colour alone.
+  - The selected swatch is shown by a check mark and a spoken label, not by colour alone; targets are
+    48 dp and swatches wrap onto a second line when they do not fit (N4).
+  - Stored in DataStore, not exported with the data; an unknown stored value falls back to the default.
 
 ## Non-functional requirements
 

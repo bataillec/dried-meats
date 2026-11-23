@@ -11,6 +11,7 @@ import java.math.BigDecimal
 class PieceActions(
     private val pieces: PieceStore,
     private val recipes: RecipeStore,
+    private val meatTypes: MeatTypeStore,
     private val settings: SettingsStore,
     private val planner: ReminderPlanner,
     private val clock: Clock,
@@ -25,18 +26,21 @@ class PieceActions(
     suspend fun createPiece(
         label: String,
         recipeId: Long,
+        meatTypeId: Long,
         weightG: Int,
         diameterCm: BigDecimal,
         vacuumDaysOverride: Int? = null,
     ): Long? {
-        val recipe = recipes.get(recipeId) ?: return null
-        val plan = PieceFactory.plan(weightG, diameterCm, recipe, vacuumDaysOverride) ?: return null
+        val recipe = recipes.get(recipeId)
+        val plan = recipe?.let { PieceFactory.plan(weightG, diameterCm, it, vacuumDaysOverride) }
+        if (plan == null || meatTypes.get(meatTypeId) == null) return null
         val finalLabel = label.trim().ifEmpty { return null }
         val piece =
             Piece(
                 id = 0,
                 label = finalLabel,
                 recipeId = recipeId,
+                meatTypeId = meatTypeId,
                 weightG = weightG,
                 diameterCm = diameterCm,
                 doses = plan.doses,

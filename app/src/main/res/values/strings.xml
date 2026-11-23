@@ -15,6 +15,7 @@
     <!-- Generic -->
     <string name="save">Enregistrer</string>
     <string name="cancel">Annuler</string>
+    <string name="validate">Valider</string>
     <string name="close">Fermer</string>
     <string name="delete">Supprimer</string>
     <string name="edit">Modifier</string>
@@ -35,6 +36,7 @@
     <string name="dose_rates">Sel %1$s · Sucre %2$s · Poivre %3$s g/kg</string>
     <string name="pick_recipe">Choisir une recette</string>
     <string name="pick_meat">Choisir une viande</string>
+    <string name="no_meat_type">Aucun type de viande. Ajoutez-en depuis les Réglages.</string>
 
     <!-- Durations -->
     <string name="span_days_hours">%1$d j %2$d h</string>
@@ -139,9 +141,10 @@
     <string name="fridge">Frigo</string>
     <string name="fridge_min_days">Minimum au frigo (jours)</string>
     <string name="fridge_seasoning_default">Assaisonnement frigo par défaut (facultatif)</string>
+    <string name="manage_meat_types">Gérer les types de viande</string>
     <string name="meat_types">Types de viande</string>
     <string name="new_meat_type">Nouvelle viande</string>
-    <string name="meat_in_use">Cette viande est utilisée par des recettes.</string>
+    <string name="meat_in_use">Cette viande est utilisée par des pièces.</string>
 
     <!-- Stats -->
     <string name="stats_empty">Aucune pièce terminée pour l\'instant.</string>
@@ -158,12 +161,23 @@
     <string name="theme_oled">Sombre OLED</string>
     <string name="theme_system">Système</string>
     <string name="theme_system_note">« Système » suit le réglage clair/sombre du téléphone ; le mode OLED se choisit manuellement.</string>
+    <string name="accent_title">Couleur principale</string>
+    <string name="accent_viande_sechee">Viande séchée</string>
+    <string name="accent_vert">Vert</string>
+    <string name="accent_bleu">Bleu</string>
+    <string name="accent_violet">Violet</string>
+    <string name="accent_ambre">Ambre</string>
+    <string name="accent_brun_gris">Brun-gris</string>
+    <string name="accent_selected">%1$s, sélectionnée</string>
     <string name="running_pieces_keep_doses">Les modifications ne s\'appliquent qu\'aux nouvelles pièces ; les pièces en cours gardent leurs doses.</string>
     <string name="duration_example">Ø %1$s cm ÷ %2$s + %3$s = %4$s → %5$s</string>
     <string name="fridge_and_reminders">Frigo et rappels</string>
     <string name="fridge_min_days_default">Minimum au frigo par défaut (jours)</string>
-    <string name="reminder_hour">Heure du rappel</string>
-    <string name="reminder_minute">Minutes du rappel</string>
+    <string name="reminder_time">Heure du rappel</string>
+    <string name="reminder_time_description">Heure du rappel, %1$s</string>
+    <string name="reminder_time_title">Choisir l\'heure</string>
+    <string name="reminder_time_use_keyboard">Saisir l\'heure au clavier</string>
+    <string name="reminder_time_use_dial">Choisir l\'heure sur le cadran</string>
     <string name="reminder_time_note">Les rappels sonnent à cette heure le jour prévu.</string>
     <string name="permissions">Autorisations</string>
     <string name="perm_notifications">Notifications</string>

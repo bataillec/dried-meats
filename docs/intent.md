@@ -27,7 +27,7 @@ out on time, or lose track of which seasoning goes with which meat.
 3. **Fridge-drying reminder** — notify me when a piece must come out of the fridge-drying stage.
 4. **Seasoning memo** — remind me which recipe/seasoning matches which piece.
 5. **Stage time tracking** — record elapsed time in each stage per piece, and compare
-   across pieces of the same meat type.
+   across pieces of the same meat type (the meat of the piece, not of its recipe: see docs/intents/5-recipe-piece-meat-type.md).
 6. **Several pieces at once** — all of the above works for many pieces in parallel.
 7. **Optional calendar appointment** — from a piece, add its stage-end date to an external
    calendar app.

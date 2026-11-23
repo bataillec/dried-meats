@@ -50,7 +50,6 @@ class LeaveVacuumDialogTest {
                 container.recipes.save(
                     Recipe(
                         0,
-                        meat,
                         "Classique",
                         BigDecimal("25"),
                         BigDecimal("5"),
@@ -58,7 +57,7 @@ class LeaveVacuumDialogTest {
                         fridgeSeasoningDefault = "herbes",
                     ),
                 )
-            container.pieceActions.createPiece(label, recipe, 1250, BigDecimal("12"))!!
+            container.pieceActions.createPiece(label, recipe, meat, 1250, BigDecimal("12"))!!
         }
 
     private fun openPieceAndLeaveVacuum() {

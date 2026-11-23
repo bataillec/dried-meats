@@ -28,7 +28,7 @@ interface MeatTypeStore {
 
     suspend fun save(meatType: MeatType): Long
 
-    /** R1: delete is refused (returns false) while recipes still use the meat type. */
+    /** R1: delete is refused (returns false) while pieces still use the meat type. */
     suspend fun delete(id: Long): Boolean
 
     suspend fun count(): Int
@@ -102,9 +102,13 @@ interface PieceStore {
 
 enum class ThemeMode { LIGHT, DARK, OLED, SYSTEM }
 
+/** R27: curated accent colours; [VIANDE_SECHEE] is the original palette and the default. */
+enum class AccentColor { VIANDE_SECHEE, VERT, BLEU, VIOLET, AMBRE, BRUN_GRIS }
+
 /** R24-R26: global defaults and appearance. */
 data class AppSettings(
     val theme: ThemeMode = ThemeMode.SYSTEM,
+    val accent: AccentColor = AccentColor.VIANDE_SECHEE,
     val reminderHour: Int = 18,
     val reminderMinute: Int = 0,
     val defaultFridgeMinDays: Int = Recipe.DEFAULT_FRIDGE_MIN_DAYS,
