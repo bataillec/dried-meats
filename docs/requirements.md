@@ -94,8 +94,9 @@ Derived from intent.md v0.2. Each requirement has an ID used in tests and PRs.
   (Viande séchée, the default and today's red, plus vert, bleu, violet, ambre and brun-gris).
   - The choice applies immediately to the whole UI in Clair, Sombre, Sombre OLED and Système, and is
     kept after a restart. OLED keeps its pure black background (R24); only the accent roles change.
-  - The accent drives primary, secondary and tertiary roles; the semantic colours (alert orange,
-    sous-vide/frigo chips) do not follow it and stay distinguishable from it.
+  - The accent drives the primary and secondary roles (and the neutral tints); the tertiary roles are the
+    semantic alert orange (overdue cards) and never follow it. The sous-vide and frigo chips use the
+    secondary and primary containers and always carry their text label, so they never rely on colour alone.
   - The selected swatch is shown by a check mark and a spoken label, not by colour alone; targets are
     48 dp and swatches wrap onto a second line when they do not fit (N4).
   - Stored in DataStore, not exported with the data; an unknown stored value falls back to the default.

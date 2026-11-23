@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import me.bataillec.meatmelater.AppTestBase
 import me.bataillec.meatmelater.R
+import me.bataillec.meatmelater.domain.AccentColor
 import me.bataillec.meatmelater.domain.PieceStatus
 import me.bataillec.meatmelater.domain.ThemeMode
 import me.bataillec.meatmelater.ui.calculator.CalculatorScreen
@@ -49,7 +51,7 @@ class UiFlowsTest : AppTestBase() {
 
     private fun show(content: @androidx.compose.runtime.Composable () -> Unit) =
         compose.setContent {
-            AppTheme(ThemeMode.LIGHT, content)
+            AppTheme(ThemeMode.LIGHT, content = content)
         }
 
     private fun awaitUi(condition: () -> Boolean) =
@@ -206,6 +208,20 @@ class UiFlowsTest : AppTestBase() {
         awaitUi { runBlocking { container.settings.current().theme } == ThemeMode.OLED }
         compose.onNodeWithText(string(R.string.theme_light)).performClick()
         awaitUi { runBlocking { container.settings.current().theme } == ThemeMode.LIGHT }
+    }
+
+    @Test
+    fun `R27 choosing an accent in Réglages is stored and the selection is announced`() {
+        show { SettingsScreen() }
+        waitForText(string(R.string.accent_title))
+        compose.onNodeWithContentDescription(string(R.string.accent_bleu)).performClick()
+        awaitUi { runBlocking { container.settings.current().accent } == AccentColor.BLEU }
+        awaitUi {
+            compose
+                .onAllNodesWithContentDescription(string(R.string.accent_selected, string(R.string.accent_bleu)))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
     }
 
     @Test

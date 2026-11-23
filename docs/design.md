@@ -89,10 +89,10 @@ Navigation: Navigation-Compose with bottom bar (Pièces, Calculateur, Recettes, 
 ### Accent colour (R27)
 
 - Domain: `AccentColor` enum (`VIANDE_SECHEE` default, `VERT`, `BLEU`, `VIOLET`, `AMBRE`, `BRUN_GRIS`) in `domain/Stores.kt`, a new `accent` field on `AppSettings`. DataStore key `accent`, enum name as a string, tolerant parse with fallback to the default (same as `theme`). No Room change, no migration.
-- UI: `resolveColorScheme(mode, systemDark, accent)`. Each accent holds a hand-tuned palette for light and dark (primary, secondary, tertiary and their containers, plus neutral tints for background, surface and outline). OLED derives from the accent's dark palette and keeps the black and grey surfaces of R24, swapping only the accent containers. `usesDarkBars` ignores the accent.
-- Semantic colours (alert orange, sous-vide/frigo chips) are not derived from the accent; each accent's primary must stay visually distinct from them.
+- UI: `resolveColorScheme(mode, systemDark, accent)`. Each accent holds a hand-tuned palette for light and dark (primary, secondary and their containers, plus neutral tints for background, surface and outline). OLED derives from the accent's dark palette and keeps the black and grey surfaces of R24, swapping only the accent containers. `usesDarkBars` ignores the accent.
+- Tertiary roles are the alert orange (overdue cards) and are identical for every accent. The sous-vide chip uses `secondaryContainer`, the frigo chip `primaryContainer`: both chips carry a text label (colour is never the only cue) and a test checks the two containers differ for every accent and mode.
 - Settings: "Couleur principale" under "Thème", a `FlowRow` of round swatches (48 dp, check mark on the selected one, `contentDescription` = the French name). Strings in `strings.xml`.
-- Contrast (N4): a unit test computes WCAG ratios for every (accent, mode) pair: onPrimary/primary, onPrimaryContainer/primaryContainer, onSecondary/secondary, onTertiary/tertiary, onSurface/surface ≥ 4.5; primary vs background/surface ≥ 3.
+- Contrast (N4): a unit test computes WCAG ratios for every (accent, mode) pair: onPrimary/primary, onPrimaryContainer/primaryContainer, onSecondary/secondary, onSurface/surface ≥ 4.5; primary vs background/surface ≥ 3.
 
 ## 6. Tech choices
 
