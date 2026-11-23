@@ -151,6 +151,15 @@ The complete rules live in [`CLAUDE.md`](CLAUDE.md).
 | [`docs/device-checklist.md`](docs/device-checklist.md) | Manual release test and last run |
 | [`CHANGELOG.md`](CHANGELOG.md) | Release notes |
 
+## Soutenir
+
+Meat Me Later is free. If it is useful to you, you can support its development on Ko-fi:
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/O0P52B4FJ1)
+
+The same link is in the app, under Réglages > À propos. The app itself still makes no network request:
+the link opens your browser.
+
 ## Contributing
 
 Small pull requests, one concern each. Reference requirement ids (R4, N5, ...) in test names and PR descriptions,

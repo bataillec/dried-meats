@@ -26,6 +26,7 @@ import me.bataillec.meatmelater.R
 import me.bataillec.meatmelater.domain.AccentColor
 import me.bataillec.meatmelater.domain.PieceStatus
 import me.bataillec.meatmelater.domain.ThemeMode
+import me.bataillec.meatmelater.platform.SupportLinks
 import me.bataillec.meatmelater.ui.calculator.CalculatorScreen
 import me.bataillec.meatmelater.ui.pieces.NewPieceScreen
 import me.bataillec.meatmelater.ui.pieces.PieceDetailScreen
@@ -254,6 +255,36 @@ class UiFlowsTest : AppTestBase() {
         awaitUi { runBlocking { container.settings.current().theme } == ThemeMode.OLED }
         compose.onNodeWithText(string(R.string.theme_light)).performClick()
         awaitUi { runBlocking { container.settings.current().theme } == ThemeMode.LIGHT }
+    }
+
+    @Test
+    fun `R29 Réglages shows both links and tapping opens the right URL`() {
+        val opened = mutableListOf<String>()
+        show {
+            SettingsScreen(linkOpener = {
+                opened += it
+                true
+            })
+        }
+        waitForText(string(R.string.about_kofi))
+        compose.onNodeWithText(string(R.string.about_github)).assertIsDisplayed()
+        compose.onNodeWithText(string(R.string.about_kofi)).performClick()
+        compose.onNodeWithText(string(R.string.about_github)).performClick()
+        assertEquals(listOf(SupportLinks.KOFI_URL, SupportLinks.GITHUB_URL), opened)
+    }
+
+    @Test
+    fun `R29 with no browser a message is shown and nothing crashes`() {
+        show { SettingsScreen(linkOpener = { false }) }
+        waitForText(string(R.string.about_kofi))
+        compose.onNodeWithText(string(R.string.about_kofi)).performClick()
+        waitForText(string(R.string.about_no_browser))
+    }
+
+    @Test
+    fun `R29 support URLs are https`() {
+        assertTrue(SupportLinks.KOFI_URL.startsWith("https://ko-fi.com/"))
+        assertTrue(SupportLinks.GITHUB_URL.startsWith("https://github.com/"))
     }
 
     @Test
