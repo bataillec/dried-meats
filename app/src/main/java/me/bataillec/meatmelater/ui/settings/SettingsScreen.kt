@@ -167,22 +167,9 @@ fun SettingsScreen() {
         }, {
             scope.launch { container.settings.update { it.copy(defaultFridgeMinDays = it.defaultFridgeMinDays + 1) } }
         })
-        Stepper(stringResource(R.string.reminder_hour), "%02d".format(settings.reminderHour), {
-            scope.launch {
-                container.settings.update { it.copy(reminderHour = (it.reminderHour + 23) % 24) }
-                container.reminderPlanner.reconcile()
-            }
-        }, {
-            scope.launch {
-                container.settings.update { it.copy(reminderHour = (it.reminderHour + 1) % 24) }
-                container.reminderPlanner.reconcile()
-            }
-        })
-        Stepper(stringResource(R.string.reminder_minute), "%02d".format(settings.reminderMinute), {
-            scope.launch { container.settings.update { it.copy(reminderMinute = (it.reminderMinute + 55) % 60) } }
-        }, {
-            scope.launch { container.settings.update { it.copy(reminderMinute = (it.reminderMinute + 5) % 60) } }
-        })
+        ReminderTimeRow(settings.reminderHour, settings.reminderMinute) { hour, minute ->
+            scope.launch { saveReminderTime(container.settings, container.reminderPlanner, hour, minute) }
+        }
         Text(stringResource(R.string.reminder_time_note), style = MaterialTheme.typography.bodySmall)
 
         SectionTitle(stringResource(R.string.permissions))

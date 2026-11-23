@@ -78,7 +78,7 @@ VACUUM --finish--> FRIDGE --finish--> DONE
 4. **Calculateur**: weight + recipe → doses, no piece created.
 5. **Recettes**: flat list (no meat grouping); edit form with doses, rule, fridge days.
 6. **Statistiques**: averages per recipe/stage, finished pieces.
-7. **Réglages** (R24–R26): four blocks: *Apparence* (Clair / Sombre / OLED / Système), *Dosages au sous-vide* (recipe picker, salt/sugar/pepper g/kg with − / + steppers, note that running pieces keep their doses), *Durée du sous-vide* (divisor, added days, live example with round-up), *Frigo et rappels* (minimum fridge days, reminder hour), and *Types de viande* (add, rename, delete; moved from Recettes). Also permissions status, export/import JSON, about/version.
+7. **Réglages** (R24–R26): four blocks: *Apparence* (Clair / Sombre / OLED / Système), *Dosages au sous-vide* (recipe picker, salt/sugar/pepper g/kg with − / + steppers, note that running pieces keep their doses), *Durée du sous-vide* (divisor, added days, live example with round-up), *Frigo et rappels* (minimum fridge days; reminder time as one row "Heure du rappel" showing `HH:mm`, a single touch target with the spoken label "Heure du rappel, 07:30", opening a Material 3 time picker dialog: 24 h, dial with keyboard toggle, keyboard directly at large font scale, scrollable at 200 % font, title "Choisir l'heure", buttons "Annuler" / "Valider"; "Valider" does one `settings.update` of hour and minute then one `reconcile()`, cancel or dismiss does nothing), and *Types de viande* (add, rename, delete; moved from Recettes). Also permissions status, export/import JSON, about/version.
 
 Navigation: Navigation-Compose with bottom bar (Pièces, Calculateur, Recettes, Stats); Réglages from the top bar.
 
