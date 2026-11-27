@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1 (2026-11-27)
+
+- Leaving the vacuum stage from the notification now asks for the fridge seasoning (R8, R13).
+
 ## 0.2.0 (2026-11-23)
 
 - Ko-fi and GitHub support links (R29).
