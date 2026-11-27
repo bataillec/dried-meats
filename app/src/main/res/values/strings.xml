@@ -210,6 +210,7 @@
     <string name="channel_name">Rappels d\'étapes</string>
     <string name="channel_description">Prévient quand une pièce doit sortir du sous-vide ou du frigo.</string>
     <string name="notification_done">Fait</string>
+    <string name="notification_leave_vacuum">Sortir du sous-vide…</string>
     <string name="notification_postpone">Reporter 1 jour</string>
     <string name="notification_fridge_body">Vérifier la pièce au toucher</string>
     <string name="permissions_warning_title">Rappels non fiables</string>

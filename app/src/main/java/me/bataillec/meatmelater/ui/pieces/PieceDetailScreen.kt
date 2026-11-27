@@ -20,6 +20,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -122,6 +123,8 @@ private enum class DetailDialog { FINISH, DURATION, CANCEL, DELETE }
 fun PieceDetailScreen(
     pieceId: Long,
     onGone: () -> Unit,
+    openFinish: Boolean = false,
+    onFinishOpened: () -> Unit = {},
 ) {
     val container = rememberContainer()
     val vm: PieceDetailViewModel = viewModel(key = "piece-$pieceId") { PieceDetailViewModel(container, pieceId) }
@@ -138,6 +141,14 @@ fun PieceDetailScreen(
     val piece = summary.piece
     val openRun = summary.openRun
     val active = piece.status == PieceStatus.VACUUM || piece.status == PieceStatus.FRIDGE
+
+    // R8/R13: coming from the vacuum notification, ask for the seasoning. A stale request (stage already left) does nothing.
+    LaunchedEffect(openFinish) {
+        if (openFinish) {
+            if (piece.status == PieceStatus.VACUUM) dialog = DetailDialog.FINISH
+            onFinishOpened()
+        }
+    }
 
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),

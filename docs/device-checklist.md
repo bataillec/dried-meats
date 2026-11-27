@@ -12,7 +12,8 @@ Run on a real phone with the release APK installed over the previous version (da
 - [ ] Reboot the phone: the pending reminder still fires (R14).
 - [ ] Change the time zone and the clock: the reminder still fires at the same absolute time (R14).
 - [ ] Revoke the notification permission, let a reminder come due, grant it again, reopen the app: the piece is pinned in "En retard" and no duplicate loop occurs (R15, R16).
-- [ ] "Fait" and "Reporter 1 jour" buttons on the notification update the piece and reschedule.
+- [ ] Vacuum notification: "Sortir du sous-vide…" opens the app on the piece with the seasoning prompt prefilled from the recipe; Annuler leaves the piece in vacuum with the reminder pending; confirming (also with an empty field) moves it to the fridge (R8, R13).
+- [ ] Fridge notification: "Fait" finishes the piece in one tap; "Reporter 1 jour" postpones and reschedules (R13).
 - [ ] Deny exact alarms: the home banner shows and links to the system screen.
 - [ ] Battery exemption banner clears after granting.
 - [ ] Export to JSON, uninstall/reinstall, import: all pieces (with their meat type) and recipes are back and reminders are rescheduled.
@@ -31,7 +32,7 @@ OnePlus 6T (Android 15, USB/Wi-Fi adb, app package only) and an API 37 emulator.
 | Reboot with a pending reminder | pass on emulator: arrived 2 s after due |
 | Time zone change (Europe/Paris -> Asia/Tokyo) | pass on emulator: same absolute instant, arrived 2 s after due |
 | Notification permission revoked then granted | pass on phone: banner appears/disappears |
-| "Fait" / "Reporter 1 jour" buttons on the notification | buttons shown on the phone; behaviour covered by `ReceiversTest` (not tapped by hand) |
+| Notification buttons ("Sortir du sous-vide…" prompt, fridge "Fait", "Reporter 1 jour") | to tap by hand; behaviour covered by `ReceiversTest` and `NotificationFinishVacuumTest` |
 | Themes Clair / Sombre / OLED / Système | screenshots reviewed on phone; one bug fixed (status-bar icons in Clair on a dark phone) |
 | Font scale 200 % | emulator: bottom navigation labels split mid-word, fixed by capping the bar's text scale |
 | Battery wizard | pass on phone and emulator |

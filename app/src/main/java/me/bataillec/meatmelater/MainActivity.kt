@@ -49,6 +49,8 @@ import androidx.navigation.navArgument
 import kotlinx.coroutines.launch
 import me.bataillec.meatmelater.domain.AppSettings
 import me.bataillec.meatmelater.platform.BatteryOnboardingDialog
+import me.bataillec.meatmelater.platform.NotificationFactory
+import me.bataillec.meatmelater.platform.ReminderReceiver
 import me.bataillec.meatmelater.ui.pieces.NewPieceScreen
 import me.bataillec.meatmelater.ui.pieces.PieceDetailScreen
 import me.bataillec.meatmelater.ui.pieces.PiecesScreen
@@ -61,11 +63,13 @@ import me.bataillec.meatmelater.ui.theme.usesDarkBars
 
 class MainActivity : ComponentActivity() {
     private var pendingPieceId by mutableStateOf<Long?>(null)
+    private var finishVacuumPieceId by mutableStateOf<Long?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         pendingPieceId = pieceIdOf(intent)
+        consumeFinishRequest(intent)
         val container = (application as MeatMeLaterApp).container
         setContent {
             val settings by container.settings.observe().collectAsState(initial = null)
@@ -87,7 +91,12 @@ class MainActivity : ComponentActivity() {
             }
             AppTheme(mode, accent) {
                 Surface {
-                    AppRoot(pendingPieceId) { pendingPieceId = null }
+                    AppRoot(
+                        pendingPieceId = pendingPieceId,
+                        finishVacuumPieceId = finishVacuumPieceId,
+                        onPendingConsumed = { pendingPieceId = null },
+                        onFinishConsumed = { finishVacuumPieceId = null },
+                    )
                     BatteryOnboardingDialog(
                         shouldShow = settings?.batteryHintShown == false,
                         onFinished = {
@@ -109,12 +118,24 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         pieceIdOf(intent)?.let { pendingPieceId = it }
+        consumeFinishRequest(intent)
+    }
+
+    /** R8/R13: the vacuum notification button opens the seasoning prompt in the app, it never finishes the stage itself. */
+    private fun consumeFinishRequest(intent: Intent?) {
+        if (intent?.getBooleanExtra(EXTRA_FINISH_VACUUM, false) != true) return
+        pieceIdOf(intent)?.let { finishVacuumPieceId = it }
+        val runId = intent.getLongExtra(ReminderReceiver.EXTRA_RUN_ID, -1L)
+        if (runId >= 0) NotificationFactory(this).dismiss(runId)
+        // Handled once: a recreation of the activity must not reopen the prompt.
+        intent.removeExtra(EXTRA_FINISH_VACUUM)
     }
 
     private fun pieceIdOf(intent: Intent?): Long? = intent?.getLongExtra(EXTRA_PIECE_ID, -1L)?.takeIf { it >= 0 }
 
     companion object {
         const val EXTRA_PIECE_ID = "piece_id"
+        const val EXTRA_FINISH_VACUUM = "finish_vacuum"
     }
 }
 
@@ -151,7 +172,9 @@ private val TOP_LEVEL =
 @Composable
 private fun AppRoot(
     pendingPieceId: Long?,
+    finishVacuumPieceId: Long?,
     onPendingConsumed: () -> Unit,
+    onFinishConsumed: () -> Unit,
 ) {
     val nav = rememberNavController()
     val backStack by nav.currentBackStackEntryAsState()
@@ -221,6 +244,8 @@ private fun AppRoot(
             composable(Routes.PIECE, arguments = listOf(navArgument("id") { type = NavType.LongType })) { entry ->
                 PieceDetailScreen(
                     pieceId = entry.arguments!!.getLong("id"),
+                    openFinish = finishVacuumPieceId == entry.arguments!!.getLong("id"),
+                    onFinishOpened = onFinishConsumed,
                     onGone = { nav.popBackStack(Routes.PIECES, inclusive = false) },
                 )
             }

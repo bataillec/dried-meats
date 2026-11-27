@@ -6,8 +6,9 @@ import android.content.Intent
 import kotlinx.coroutines.launch
 import me.bataillec.meatmelater.MainActivity
 import me.bataillec.meatmelater.MeatMeLaterApp
+import me.bataillec.meatmelater.domain.Stage
 
-/** Notification buttons "Fait" and "Reporter 1 jour" run the same use cases as the UI (R13). */
+/** Notification buttons "Fait" (fridge stage) and "Reporter 1 jour" run the same use cases as the UI (R13). */
 class ReminderActionReceiver : BroadcastReceiver() {
     override fun onReceive(
         context: Context,
@@ -25,10 +26,13 @@ class ReminderActionReceiver : BroadcastReceiver() {
                 val summary = container.pieces.getSummary(pieceId)
                 if (summary?.openRun?.id == runId) {
                     when (intent.action) {
-                        ACTION_DONE -> {
-                            val seasoning = container.recipes.get(summary.piece.recipeId)?.fridgeSeasoningDefault
-                            container.pieceActions.finishStage(pieceId, seasoning)
-                        }
+                        // R8: leaving VACUUM needs the seasoning prompt, which lives in the app; only FRIDGE is one tap.
+                        ACTION_DONE ->
+                            if (summary.openRun.stage ==
+                                Stage.FRIDGE
+                            ) {
+                                container.pieceActions.finishStage(pieceId, null)
+                            }
                         ACTION_POSTPONE -> container.pieceActions.postponeOneDay(pieceId)
                     }
                 }
