@@ -147,11 +147,15 @@ class ReceiversTest : AppTestBase() {
 
     @Test
     fun `R8 R13 the vacuum Fait action never moves the piece from the receiver`() {
-        val id = createPiece(seedRecipe())
+        grantNotifications(true)
+        val id = createPiece(seedRecipe(), days = 1)
         val run = openRun(id)
+        clock.millis = run.plannedEndAt + 1_000
+        broadcast(ReminderReceiver::class.java, null, runId = run.id)
+        awaitUntil { shadowOf(notifications).allNotifications.isNotEmpty() }
         broadcast(ReminderActionReceiver::class.java, ReminderActionReceiver.ACTION_DONE, run.id, id)
-        Thread.sleep(500)
-        shadowOf(android.os.Looper.getMainLooper()).idle()
+        // the receiver dismisses the notification last, so its disappearance means the action was handled
+        awaitUntil { shadowOf(notifications).allNotifications.isEmpty() }
         val summary = runBlocking { container.pieces.getSummary(id)!! }
         assertEquals(PieceStatus.VACUUM, summary.piece.status)
         assertEquals(run.id, summary.openRun!!.id)
@@ -173,7 +177,6 @@ class ReceiversTest : AppTestBase() {
         assertEquals(MainActivity::class.java.name, vacuumIntent.savedIntent.component!!.className)
         assertTrue(vacuumIntent.savedIntent.getBooleanExtra(MainActivity.EXTRA_FINISH_VACUUM, false))
         assertEquals(id, vacuumIntent.savedIntent.getLongExtra(MainActivity.EXTRA_PIECE_ID, -1))
-        assertEquals(run.id, vacuumIntent.savedIntent.getLongExtra(ReminderReceiver.EXTRA_RUN_ID, -1))
 
         runBlocking { container.pieceActions.finishStage(id) }
         val fridgeRun = openRun(id)

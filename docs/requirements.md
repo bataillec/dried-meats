@@ -46,9 +46,10 @@ Derived from intent.md v0.2. Each requirement has an ID used in tests and PRs.
 ### Reminders
 - **R12** One reminder is scheduled for each running stage at its planned end, as an absolute timestamp.
 - **R13** The notification names the piece, recipe and the action ("Sortir du sous-vide"
-  / "Sortir du frigo"), and offers actions "Fait" and "Reporter 1 jour" (postpones the planned end by 24 h and
+  / "Sortir du frigo"), and offers two actions: "Fait" and "Reporter 1 jour" (postpones the planned end by 24 h and
   reschedules). For the vacuum stage the first button reads "Sortir du sous-vide…" and opens the app on the piece
-  with the seasoning prompt of R8; the stage only ends once it is confirmed. For the fridge stage "Fait" finishes the piece in one tap. For the fridge stage the text is a check ("Vérifier la pièce au toucher"),
+  with the seasoning prompt of R8; the stage only ends once it is confirmed. The notification stays until the stage is finished, so cancelling the prompt keeps the reminder visible.
+  For the fridge stage "Fait" finishes the piece in one tap and the text is a check ("Vérifier la pièce au toucher"),
   since the minimum is 14 days and the real end is decided by feel. There is no advance warning.
 - **R14** Reminders fire after device reboot, app update, time-zone change and clock change
   (reschedule on boot / package replaced / time changed).

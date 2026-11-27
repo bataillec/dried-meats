@@ -57,8 +57,9 @@ VACUUM --finish--> FRIDGE --finish--> DONE
   sideloaded, `USE_EXACT_ALARM` (granted automatically on Android 13+) can be declared; Google Play
   restricts it to alarm/calendar apps, so revisit this if the app ever goes to the Play Store.
   On Android 12 the app uses `SCHEDULE_EXACT_ALARM` with a `canScheduleExactAlarms()` check.
-- Notification channel `stage_reminders` at high importance. Actions "Fait" and "Reporter 1 jour" (adds 24 h to `planned_end_at`, increments `postponed_days`, reschedules)
-  go through a `BroadcastReceiver` that calls the same use cases as the UI.
+- Notification channel `stage_reminders` at high importance. Actions "Fait" (fridge stage) and "Reporter 1 jour" (adds 24 h to `planned_end_at`, increments `postponed_days`, reschedules)
+  go through a `BroadcastReceiver` that calls the same use cases as the UI. For the vacuum stage the first button is an activity
+  intent ("Sortir du sous-vide…", `EXTRA_FINISH_VACUUM`) that opens the piece with the seasoning prompt (R8): the receiver never finishes VACUUM.
 - Overdue safety net (R15): the home screen queries `planned_end_at <= now` and pins them on top.
 - Optional later: a daily `WorkManager` check as a second line of defence.
 - Battery: on first launch, explain and deep-link to the battery-optimisation settings. Show a persistent banner if exemptions are missing.

@@ -15,7 +15,6 @@ import kotlinx.coroutines.runBlocking
 import me.bataillec.meatmelater.domain.MeatType
 import me.bataillec.meatmelater.domain.PieceStatus
 import me.bataillec.meatmelater.domain.Recipe
-import me.bataillec.meatmelater.platform.ReminderReceiver
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Rule
@@ -62,17 +61,9 @@ class NotificationFinishVacuumTest {
         }
 
     private fun launchFromNotification(id: Long): ActivityScenario<MainActivity> {
-        val runId =
-            runBlocking {
-                container.pieces
-                    .getSummary(id)!!
-                    .openRun!!
-                    .id
-            }
         val intent =
             Intent(context, MainActivity::class.java)
                 .putExtra(MainActivity.EXTRA_PIECE_ID, id)
-                .putExtra(ReminderReceiver.EXTRA_RUN_ID, runId)
                 .putExtra(MainActivity.EXTRA_FINISH_VACUUM, true)
         runBlocking { container.settings.update { it.copy(batteryHintShown = true) } }
         return ActivityScenario.launch(intent)
@@ -81,21 +72,16 @@ class NotificationFinishVacuumTest {
     @Test
     fun r8NotificationActionPromptsPrefilledAndCancelLeavesPieceInVacuum() {
         val id = createPiece()
+        val before = runBlocking { container.pieces.getSummary(id)!!.openRun!! }
         launchFromNotification(id).use {
             waitForText(str(R.string.finish_vacuum_text))
             compose.onNodeWithText("herbes").assertExists()
             compose.onNodeWithText(str(R.string.cancel)).performClick()
             compose.waitForIdle()
             assertEquals(PieceStatus.VACUUM, status(id))
-            assertEquals(
-                PieceStatus.VACUUM,
-                runBlocking {
-                    container.pieces
-                        .getSummary(id)!!
-                        .openRun!!
-                        .let { PieceStatus.VACUUM }
-                },
-            )
+            val after = runBlocking { container.pieces.getSummary(id)!!.openRun!! }
+            assertEquals(before.id, after.id)
+            assertEquals(before.plannedEndAt, after.plannedEndAt)
         }
     }
 

@@ -124,7 +124,6 @@ class NotificationFactory(
             run.id.toInt() * 10 + 1,
             Intent(context, MainActivity::class.java)
                 .putExtra(MainActivity.EXTRA_PIECE_ID, summary.piece.id)
-                .putExtra(ReminderReceiver.EXTRA_RUN_ID, run.id)
                 .putExtra(MainActivity.EXTRA_FINISH_VACUUM, true)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,

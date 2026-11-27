@@ -28,8 +28,9 @@ class ReminderActionReceiver : BroadcastReceiver() {
                     when (intent.action) {
                         // R8: leaving VACUUM needs the seasoning prompt, which lives in the app; only FRIDGE is one tap.
                         ACTION_DONE ->
-                            if (summary.openRun.stage ==
-                                Stage.FRIDGE
+                            if (isFridge(
+                                    summary.openRun.stage,
+                                )
                             ) {
                                 container.pieceActions.finishStage(pieceId, null)
                             }
@@ -42,6 +43,8 @@ class ReminderActionReceiver : BroadcastReceiver() {
             }
         }
     }
+
+    private fun isFridge(stage: Stage) = stage == Stage.FRIDGE
 
     companion object {
         const val ACTION_DONE = "me.bataillec.meatmelater.ACTION_DONE"

@@ -49,8 +49,6 @@ import androidx.navigation.navArgument
 import kotlinx.coroutines.launch
 import me.bataillec.meatmelater.domain.AppSettings
 import me.bataillec.meatmelater.platform.BatteryOnboardingDialog
-import me.bataillec.meatmelater.platform.NotificationFactory
-import me.bataillec.meatmelater.platform.ReminderReceiver
 import me.bataillec.meatmelater.ui.pieces.NewPieceScreen
 import me.bataillec.meatmelater.ui.pieces.PieceDetailScreen
 import me.bataillec.meatmelater.ui.pieces.PiecesScreen
@@ -125,8 +123,6 @@ class MainActivity : ComponentActivity() {
     private fun consumeFinishRequest(intent: Intent?) {
         if (intent?.getBooleanExtra(EXTRA_FINISH_VACUUM, false) != true) return
         pieceIdOf(intent)?.let { finishVacuumPieceId = it }
-        val runId = intent.getLongExtra(ReminderReceiver.EXTRA_RUN_ID, -1L)
-        if (runId >= 0) NotificationFactory(this).dismiss(runId)
         // Handled once: a recreation of the activity must not reopen the prompt.
         intent.removeExtra(EXTRA_FINISH_VACUUM)
     }
