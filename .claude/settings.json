@@ -11,8 +11,7 @@
       "Read(./**/*.jks)",
       "Read(./**/*.keystore)",
       "Read(./.env*)",
-      "Edit(./app/schemas/**)",
-      "Write(./app/schemas/**)"
+      "Edit(./app/schemas/**)"
     ]
   },
   "hooks": {
