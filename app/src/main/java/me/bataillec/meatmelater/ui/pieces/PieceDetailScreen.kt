@@ -20,6 +20,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +49,7 @@ import me.bataillec.meatmelater.domain.Stage
 import me.bataillec.meatmelater.domain.StageRun
 import me.bataillec.meatmelater.domain.Statistics
 import me.bataillec.meatmelater.platform.CalendarIntent
+import me.bataillec.meatmelater.platform.NotificationFactory
 import me.bataillec.meatmelater.ui.common.ConfirmDialog
 import me.bataillec.meatmelater.ui.common.DoseLine
 import me.bataillec.meatmelater.ui.common.SectionTitle
@@ -122,6 +124,8 @@ private enum class DetailDialog { FINISH, DURATION, CANCEL, DELETE }
 fun PieceDetailScreen(
     pieceId: Long,
     onGone: () -> Unit,
+    openFinish: Boolean = false,
+    onFinishOpened: () -> Unit = {},
 ) {
     val container = rememberContainer()
     val vm: PieceDetailViewModel = viewModel(key = "piece-$pieceId") { PieceDetailViewModel(container, pieceId) }
@@ -131,13 +135,25 @@ fun PieceDetailScreen(
     var noteRun by remember { mutableStateOf<StageRun?>(null) }
     val detail = state.detail
     if (detail == null) {
-        if (state.loaded) Text(stringResource(R.string.piece_not_found), Modifier.padding(16.dp))
+        // A finish request for a piece that no longer exists must not linger and reopen later.
+        if (state.loaded) {
+            LaunchedEffect(openFinish) { if (openFinish) onFinishOpened() }
+            Text(stringResource(R.string.piece_not_found), Modifier.padding(16.dp))
+        }
         return
     }
     val summary = detail.summary
     val piece = summary.piece
     val openRun = summary.openRun
     val active = piece.status == PieceStatus.VACUUM || piece.status == PieceStatus.FRIDGE
+
+    // R8/R13: coming from the vacuum notification, ask for the seasoning. A stale request (stage already left) does nothing.
+    LaunchedEffect(openFinish) {
+        if (openFinish) {
+            if (piece.status == PieceStatus.VACUUM) dialog = DetailDialog.FINISH
+            onFinishOpened()
+        }
+    }
 
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
@@ -223,6 +239,8 @@ fun PieceDetailScreen(
             if (piece.status == PieceStatus.VACUUM) {
                 FinishVacuumDialog(state.recipe, onConfirm = { seasoning, days ->
                     vm.finish(seasoning, days)
+                    // The notification stays until the stage is really finished, so a cancel keeps the reminder visible.
+                    openRun?.let { NotificationFactory(context).dismiss(it.id) }
                     dialog = null
                 }, onDismiss = { dialog = null })
             } else {

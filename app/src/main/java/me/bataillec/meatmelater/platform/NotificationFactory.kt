@@ -83,11 +83,8 @@ class NotificationFactory(
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
                 .setContentIntent(open)
                 .setAutoCancel(true)
+                .addDoneAction(run, summary)
                 .addAction(
-                    0,
-                    context.getString(R.string.notification_done),
-                    actionIntent(ReminderActionReceiver.ACTION_DONE, run, summary),
-                ).addAction(
                     0,
                     context.getString(R.string.notification_postpone),
                     actionIntent(ReminderActionReceiver.ACTION_POSTPONE, run, summary),
@@ -102,6 +99,35 @@ class NotificationFactory(
     }
 
     fun dismiss(runId: Long) = NotificationManagerCompat.from(context).cancel(runId.toInt())
+
+    /** R8: leaving VACUUM asks for the seasoning, so the button opens the app on the piece instead of acting. */
+    private fun NotificationCompat.Builder.addDoneAction(
+        run: StageRun,
+        summary: PieceSummary,
+    ): NotificationCompat.Builder =
+        if (run.stage == Stage.VACUUM) {
+            addAction(0, context.getString(R.string.notification_leave_vacuum), finishVacuumIntent(run, summary))
+        } else {
+            addAction(
+                0,
+                context.getString(R.string.notification_done),
+                actionIntent(ReminderActionReceiver.ACTION_DONE, run, summary),
+            )
+        }
+
+    private fun finishVacuumIntent(
+        run: StageRun,
+        summary: PieceSummary,
+    ): PendingIntent =
+        PendingIntent.getActivity(
+            context,
+            run.id.toInt() * 10 + 1,
+            Intent(context, MainActivity::class.java)
+                .putExtra(MainActivity.EXTRA_PIECE_ID, summary.piece.id)
+                .putExtra(MainActivity.EXTRA_FINISH_VACUUM, true)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
 
     private fun actionIntent(
         action: String,

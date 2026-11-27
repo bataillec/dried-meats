@@ -146,20 +146,45 @@ class ReceiversTest : AppTestBase() {
     }
 
     @Test
-    fun `R13 Fait on a vacuum notification moves the piece to the fridge with the recipe seasoning`() {
-        val id = createPiece(seedRecipe())
+    fun `R8 R13 the vacuum Fait action never moves the piece from the receiver`() {
+        grantNotifications(true)
+        val id = createPiece(seedRecipe(), days = 1)
         val run = openRun(id)
+        clock.millis = run.plannedEndAt + 1_000
+        broadcast(ReminderReceiver::class.java, null, runId = run.id)
+        awaitUntil { shadowOf(notifications).allNotifications.isNotEmpty() }
         broadcast(ReminderActionReceiver::class.java, ReminderActionReceiver.ACTION_DONE, run.id, id)
-        awaitUntil {
-            runBlocking {
-                container.pieces
-                    .getSummary(id)!!
-                    .piece.status
-            } == PieceStatus.FRIDGE
-        }
-        val piece = runBlocking { container.pieces.getSummary(id)!!.piece }
-        assertEquals("herbes", piece.fridgeSeasoning)
-        awaitUntil { scheduledCount() == 1 } // the new fridge run is scheduled right after the transition
+        // the receiver dismisses the notification last, so its disappearance means the action was handled
+        awaitUntil { shadowOf(notifications).allNotifications.isEmpty() }
+        val summary = runBlocking { container.pieces.getSummary(id)!! }
+        assertEquals(PieceStatus.VACUUM, summary.piece.status)
+        assertEquals(run.id, summary.openRun!!.id)
+        assertNull(summary.piece.fridgeSeasoning)
+        assertEquals(1, scheduledCount()) // the vacuum reminder is still pending
+    }
+
+    @Test
+    fun `R8 R13 the vacuum notification button opens the app on the piece and the fridge one is a broadcast`() {
+        grantNotifications(true)
+        val id = createPiece(seedRecipe(), days = 1)
+        val run = openRun(id)
+        clock.millis = run.plannedEndAt + 1_000
+        broadcast(ReminderReceiver::class.java, null, runId = run.id)
+        awaitUntil { shadowOf(notifications).allNotifications.isNotEmpty() }
+        val vacuumDone = shadowOf(notifications).allNotifications.single().actions[0]
+        val vacuumIntent = shadowOf(vacuumDone.actionIntent)
+        assertTrue(vacuumIntent.isActivityIntent)
+        assertEquals(MainActivity::class.java.name, vacuumIntent.savedIntent.component!!.className)
+        assertTrue(vacuumIntent.savedIntent.getBooleanExtra(MainActivity.EXTRA_FINISH_VACUUM, false))
+        assertEquals(id, vacuumIntent.savedIntent.getLongExtra(MainActivity.EXTRA_PIECE_ID, -1))
+
+        runBlocking { container.pieceActions.finishStage(id) }
+        val fridgeRun = openRun(id)
+        clock.millis = fridgeRun.plannedEndAt + 1_000
+        broadcast(ReminderReceiver::class.java, null, runId = fridgeRun.id)
+        awaitUntil { shadowOf(notifications).allNotifications.size == 2 }
+        val fridgeDone = shadowOf(notifications).allNotifications.last().actions[0]
+        assertTrue(shadowOf(fridgeDone.actionIntent).isBroadcastIntent)
     }
 
     @Test
